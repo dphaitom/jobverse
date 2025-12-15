@@ -1,0 +1,78 @@
+spring:
+  application:
+    name: jobverse-backend
+  
+  # H2 In-Memory Database (không cần cài đặt)
+  datasource:
+    url: jdbc:h2:mem:jobverse;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+  
+  # H2 Console để xem database
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+  
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  
+  # TẮT Flyway hoàn toàn
+  flyway:
+    enabled: false
+  
+  # TẮT Redis
+  data:
+    redis:
+      repositories:
+        enabled: false
+  
+  # TẮT Elasticsearch  
+  elasticsearch:
+    uris: http://localhost:9200
+  
+  # TẮT Kafka
+  kafka:
+    bootstrap-servers: localhost:9092
+
+  # TẮT autoconfigure cho các service không cần
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
+
+# Server Configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+# JWT Configuration  
+jwt:
+  secret: dGhpcy1pcy1hLXZlcnktbG9uZy1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbi0yNTYtYml0cw==
+  expiration: 86400000
+  refresh-expiration: 604800000
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.jobverse: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
