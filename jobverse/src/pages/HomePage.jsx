@@ -1,6 +1,7 @@
 // src/pages/HomePage.jsx
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   Briefcase, Sparkles,
   Users, TrendingUp, Star, Building2, ArrowRight, CheckCircle2,
@@ -9,6 +10,7 @@ import {
 import { jobsAPI, categoriesAPI, skillsAPI } from '../services/api';
 import { Navbar, Footer, JobCard, SearchBar } from '../components';
 import AIChat from '../components/AIChat';
+import { fadeInUp, staggerContainer, staggerItem, scaleIn } from '../utils/animations';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -89,23 +91,35 @@ const HomePage = () => {
 
         <div className="relative z-10 mx-auto max-w-7xl">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full glass-card">
+            <motion.div
+              className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full glass-card"
+              {...fadeInUp}
+              transition={{ duration: 0.5 }}
+            >
               <Sparkles className="w-4 h-4 text-violet-400" />
               <span className="text-sm text-gray-300">Powered by AI Matching</span>
-            </div>
+            </motion.div>
 
-            <h1 className="mb-6 text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
+            <motion.h1
+              className="mb-6 text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl"
+              {...fadeInUp}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
               <span className="text-white">Tìm công việc </span>
               <span className="gradient-text">mơ ước</span>
               <br />
               <span className="text-white">trong </span>
               <span className="gradient-text">vài giây</span>
-            </h1>
+            </motion.h1>
 
-            <p className="max-w-2xl mx-auto mb-10 text-lg text-gray-400">
+            <motion.p
+              className="max-w-2xl mx-auto mb-10 text-lg text-gray-400"
+              {...fadeInUp}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
               AI phân tích hồ sơ và đề xuất việc làm phù hợp nhất với bạn.
               Hơn <span className="font-semibold text-violet-400">50,000+</span> cơ hội đang chờ đợi.
-            </p>
+            </motion.p>
 
             {/* Search Bar */}
             <SearchBar onSearch={handleSearch} />
@@ -126,22 +140,31 @@ const HomePage = () => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 gap-4 mt-16 md:grid-cols-4">
+          <motion.div
+            className="grid grid-cols-2 gap-4 mt-16 md:grid-cols-4"
+            {...staggerContainer}
+          >
             {[
               { label: 'Việc làm', value: '50,000+', icon: Briefcase },
               { label: 'Công ty', value: '2,500+', icon: Building2 },
               { label: 'Ứng viên', value: '500,000+', icon: Users },
               { label: 'Đã tuyển', value: '98%', icon: CheckCircle2 },
-            ].map((stat) => (
-              <div key={stat.label} className="p-5 text-center transition-colors glass-card rounded-2xl group hover:bg-gray-800/30">
+            ].map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                className="p-5 text-center transition-colors glass-card rounded-2xl group hover:bg-gray-800/30"
+                {...staggerItem}
+                transition={{ delay: 0.3 + index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+              >
                 <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-violet-500/20 to-indigo-500/20">
                   <stat.icon className="w-6 h-6 text-violet-400" />
                 </div>
                 <div className="mb-1 text-2xl font-bold text-white">{stat.value}</div>
                 <div className="text-sm text-gray-500">{stat.label}</div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 

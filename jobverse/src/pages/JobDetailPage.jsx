@@ -1,6 +1,7 @@
 // src/pages/JobDetailPage.jsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   MapPin, DollarSign, Briefcase, Clock, Globe, Users, Building2,
   Heart, Share2, ArrowLeft, CheckCircle, Star, Zap, Calendar,
@@ -10,6 +11,7 @@ import toast from 'react-hot-toast';
 import { jobsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Navbar, Footer, LoadingSpinner, JobCard } from '../components';
+import { fadeInUp, slideInRight, staggerContainer, staggerItem, scaleIn } from '../utils/animations';
 
 const JobDetailPage = () => {
   const { id } = useParams();
@@ -124,18 +126,25 @@ const JobDetailPage = () => {
       <main className="pt-24 pb-16 px-4">
         <div className="max-w-6xl mx-auto">
           {/* Back Button */}
-          <button
+          <motion.button
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
+            {...fadeInUp}
+            transition={{ duration: 0.3 }}
+            whileHover={{ x: -4 }}
           >
             <ArrowLeft className="w-5 h-5" /> Quay lại
-          </button>
+          </motion.button>
 
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
               {/* Job Header */}
-              <div className="glass-card rounded-2xl p-6">
+              <motion.div
+                className="glass-card rounded-2xl p-6"
+                {...fadeInUp}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-4xl flex-shrink-0">
                     {job.company?.logoUrl ? (
@@ -207,10 +216,14 @@ const JobDetailPage = () => {
                     <Share2 className="w-5 h-5" />
                   </button>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Job Details */}
-              <div className="glass-card rounded-2xl p-6">
+              <motion.div
+                className="glass-card rounded-2xl p-6"
+                {...fadeInUp}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
                 <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-violet-400" /> Mô tả công việc
                 </h2>
@@ -219,11 +232,15 @@ const JobDetailPage = () => {
                     <p key={i} className="mb-3">{line}</p>
                   ))}
                 </div>
-              </div>
+              </motion.div>
 
               {/* Requirements */}
               {job.requirements && (
-                <div className="glass-card rounded-2xl p-6">
+                <motion.div
+                  className="glass-card rounded-2xl p-6"
+                  {...fadeInUp}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                >
                   <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
                     <CheckCircle className="w-5 h-5 text-violet-400" /> Yêu cầu
                   </h2>
@@ -234,12 +251,16 @@ const JobDetailPage = () => {
                       </p>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               )}
 
               {/* Responsibilities */}
               {job.responsibilities && (
-                <div className="glass-card rounded-2xl p-6">
+                <motion.div
+                  className="glass-card rounded-2xl p-6"
+                  {...fadeInUp}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                >
                   <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
                     <Award className="w-5 h-5 text-violet-400" /> Trách nhiệm
                   </h2>
@@ -250,26 +271,38 @@ const JobDetailPage = () => {
                       </p>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               )}
 
               {/* Skills */}
               {job.skills && job.skills.length > 0 && (
-                <div className="glass-card rounded-2xl p-6">
+                <motion.div
+                  className="glass-card rounded-2xl p-6"
+                  {...fadeInUp}
+                  transition={{ duration: 0.5, delay: 0.5 }}
+                >
                   <h2 className="text-xl font-semibold text-white mb-4">Kỹ năng yêu cầu</h2>
                   <div className="flex flex-wrap gap-2">
                     {job.skills.map((skill, idx) => (
                       <span key={idx} className="skill-pill">{skill.name || skill}</span>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               )}
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-6">
+            <motion.div
+              className="space-y-6"
+              {...slideInRight}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               {/* Job Info Card */}
-              <div className="glass-card rounded-2xl p-6">
+              <motion.div
+                className="glass-card rounded-2xl p-6"
+                {...scaleIn}
+                transition={{ duration: 0.4, delay: 0.3 }}
+              >
                 <h3 className="font-semibold text-white mb-4">Thông tin chung</h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -307,10 +340,14 @@ const JobDetailPage = () => {
                     </span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Company Card */}
-              <div className="glass-card rounded-2xl p-6">
+              <motion.div
+                className="glass-card rounded-2xl p-6"
+                {...scaleIn}
+                transition={{ duration: 0.4, delay: 0.4 }}
+              >
                 <h3 className="font-semibold text-white mb-4">Về công ty</h3>
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-2xl">
@@ -334,11 +371,15 @@ const JobDetailPage = () => {
                 >
                   Xem công ty <ChevronRight className="w-4 h-4" />
                 </Link>
-              </div>
+              </motion.div>
 
               {/* Related Jobs */}
               {relatedJobs.length > 0 && (
-                <div className="glass-card rounded-2xl p-6">
+                <motion.div
+                  className="glass-card rounded-2xl p-6"
+                  {...scaleIn}
+                  transition={{ duration: 0.4, delay: 0.5 }}
+                >
                   <h3 className="font-semibold text-white mb-4">Việc làm liên quan</h3>
                   <div className="space-y-3">
                     {relatedJobs.map(rJob => (
@@ -356,9 +397,9 @@ const JobDetailPage = () => {
                       </Link>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               )}
-            </div>
+            </motion.div>
           </div>
         </div>
       </main>

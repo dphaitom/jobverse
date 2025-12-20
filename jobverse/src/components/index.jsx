@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import {
@@ -224,11 +225,19 @@ export const Footer = () => (
 // ==================== JOB CARD ====================
 export const JobCard = ({ job, onSave, isSaved }) => {
   const navigate = useNavigate();
-  
+
   return (
-    <div 
+    <motion.div
       onClick={() => navigate(`/jobs/${job.id}`)}
       className="job-card glass-card rounded-2xl p-5 hover:bg-gray-800/40 cursor-pointer group"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{
+        scale: 1.02,
+        boxShadow: "0 20px 40px rgba(139, 92, 246, 0.15)",
+        transition: { duration: 0.2 }
+      }}
+      transition={{ duration: 0.3 }}
     >
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-2xl flex-shrink-0">
@@ -309,7 +318,7 @@ export const JobCard = ({ job, onSave, isSaved }) => {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
