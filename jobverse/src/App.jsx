@@ -19,6 +19,7 @@ import MyApplicationsPage from './pages/MyApplicationsPage';
 import SettingsPage from './pages/SettingsPage';
 import ResumeAnalysisPage from './pages/ResumeAnalysisPage';
 import InterviewPrepPage from './pages/InterviewPrepPage';
+import AdminDashboard from './pages/AdminDashboard';
 import { LoginPage, RegisterPage } from './pages/AuthPages';
 
 // CSS
@@ -65,7 +66,14 @@ function AnimatedRoutes() {
               <SettingsPage />
             </ProtectedRoute>
           } />
-          
+
+          {/* Admin Routes */}
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+
           {/* 404 */}
           <Route path="*" element={<NotFoundPage />} />
       </Routes>

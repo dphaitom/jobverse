@@ -170,6 +170,6 @@ public class Job {
     }
     
     public enum JobStatus {
-        DRAFT, ACTIVE, PAUSED, CLOSED, EXPIRED
+        DRAFT, PENDING, APPROVED, REJECTED, ACTIVE, PAUSED, CLOSED, EXPIRED
     }
 }
