@@ -85,6 +85,12 @@ export const authAPI = {
     
   logout: () =>
     apiRequest('/v1/auth/logout', { method: 'POST' }),
+
+  googleLogin: (credential) =>
+    apiRequest('/v1/auth/oauth/google', {
+      method: 'POST',
+      body: JSON.stringify({ credential }),
+    }),
 };
 
 // ==================== JOBS API ====================

@@ -163,7 +163,7 @@ const InterviewPrepPage = () => {
             <div>
               <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
                 <MessageSquare className="w-4 h-4 text-ai-purple" />
-                Your Answer:
+                Câu trả lời của bạn:
               </h4>
               <textarea
                 value={userAnswers[questionKey] || ''}
@@ -196,7 +196,7 @@ const InterviewPrepPage = () => {
               <div className="bg-gradient-to-br from-ai-purple/10 to-ai-blue/10 border border-ai-purple/20 rounded-lg p-4">
                 <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
                   <Award className="w-4 h-4 text-ai-purple" />
-                  AI Evaluation:
+                  Đánh giá của AI:
                 </h4>
                 <div className="space-y-3 text-sm">
                   <div>
@@ -229,7 +229,7 @@ const InterviewPrepPage = () => {
               <div className="bg-nike-black border border-gray-700 rounded-lg p-4">
                 <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
                   <BookOpen className="w-4 h-4 text-green-500" />
-                  Sample Answer:
+                  Câu trả lời mẫu:
                 </h4>
                 <p className="text-sm text-gray-400 whitespace-pre-line">{question.sampleAnswer}</p>
               </div>

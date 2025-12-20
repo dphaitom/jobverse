@@ -1,30 +1,34 @@
 package com.jobverse.service;
 
 import com.jobverse.entity.Job;
+import com.jobverse.util.VietnameseTextNormalizer;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 
 public class JobSpecification {
-    
+
     public static Specification<Job> hasStatus(Job.JobStatus status) {
         return (root, query, cb) -> cb.equal(root.get("status"), status);
     }
-    
+
     public static Specification<Job> containsKeyword(String keyword) {
         return (root, query, cb) -> {
-            String pattern = "%" + keyword.toLowerCase() + "%";
+            // Use normalized fields for Vietnamese accent-insensitive search
+            String normalizedKeyword = "%" + VietnameseTextNormalizer.normalize(keyword) + "%";
             return cb.or(
-                    cb.like(cb.lower(root.get("title")), pattern),
-                    cb.like(cb.lower(root.get("description")), pattern),
-                    cb.like(cb.lower(root.get("company").get("name")), pattern)
+                    cb.like(root.get("titleNormalized"), normalizedKeyword),
+                    cb.like(root.get("descriptionNormalized"), normalizedKeyword),
+                    cb.like(cb.lower(root.get("company").get("name")), "%" + keyword.toLowerCase() + "%")
             );
         };
     }
-    
+
     public static Specification<Job> hasLocation(String location) {
-        return (root, query, cb) -> 
-                cb.like(cb.lower(root.get("location")), "%" + location.toLowerCase() + "%");
+        // Use normalized field for Vietnamese accent-insensitive location search
+        String normalizedLocation = "%" + VietnameseTextNormalizer.normalize(location) + "%";
+        return (root, query, cb) ->
+                cb.like(root.get("locationNormalized"), normalizedLocation);
     }
     
     public static Specification<Job> hasCategory(Long categoryId) {
