@@ -1,5 +1,6 @@
 // src/App.jsx
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -22,29 +23,13 @@ import { LoginPage, RegisterPage } from './pages/AuthPages';
 // CSS
 import './index.css';
 
-function App() {
+// Animated Routes Component
+function AnimatedRoutes() {
+  const location = useLocation();
+
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: '#1a1a1b',
-              color: '#fff',
-              border: '1px solid #333',
-            },
-            success: {
-              iconTheme: {
-                primary: '#8b5cf6',
-                secondary: '#fff',
-              },
-            },
-          }}
-        />
-        <BrowserRouter>
-        <Routes>
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/jobs" element={<JobListPage />} />
@@ -82,7 +67,34 @@ function App() {
           
           {/* 404 */}
           <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+      </Routes>
+    </AnimatePresence>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: '#1a1a1b',
+              color: '#fff',
+              border: '1px solid #333',
+            },
+            success: {
+              iconTheme: {
+                primary: '#8b5cf6',
+                secondary: '#fff',
+              },
+            },
+          }}
+        />
+        <BrowserRouter>
+          <AnimatedRoutes />
         </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>

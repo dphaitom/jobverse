@@ -1,12 +1,14 @@
 // src/pages/JobListPage.jsx
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { 
-  Filter, ChevronDown, X, Briefcase, MapPin, DollarSign, 
+import { motion } from 'framer-motion';
+import {
+  Filter, ChevronDown, X, Briefcase, MapPin, DollarSign,
   Clock, Building2, Sparkles
 } from 'lucide-react';
 import { jobsAPI, categoriesAPI, skillsAPI } from '../services/api';
 import { Navbar, Footer, JobCard, SearchBar, LoadingSpinner, EmptyState } from '../components';
+import { fadeInUp, staggerContainer, staggerItem, slideInLeft } from '../utils/animations';
 
 const JobListPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -119,14 +121,26 @@ const JobListPage = () => {
       <main className="pt-24 pb-16 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-10">
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <motion.div
+            className="text-center mb-10"
+            {...fadeInUp}
+            transition={{ duration: 0.5 }}
+          >
+            <motion.h1
+              className="text-3xl md:text-4xl font-bold text-white mb-4"
+              {...fadeInUp}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
               Tìm kiếm <span className="gradient-text">việc làm IT</span>
-            </h1>
-            <p className="text-gray-400 max-w-2xl mx-auto">
+            </motion.h1>
+            <motion.p
+              className="text-gray-400 max-w-2xl mx-auto"
+              {...fadeInUp}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
               Hơn 10,000+ cơ hội việc làm công nghệ đang chờ bạn
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
 
           {/* Search Bar */}
           <div className="mb-8">
@@ -139,7 +153,11 @@ const JobListPage = () => {
 
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Filters Sidebar */}
-            <div className={`lg:w-72 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+            <motion.div
+              className={`lg:w-72 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}
+              {...slideInLeft}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
               <div className="glass-card rounded-2xl p-5 sticky top-24">
                 <div className="flex items-center justify-between mb-5">
                   <h3 className="font-semibold text-white flex items-center gap-2">
@@ -236,7 +254,7 @@ const JobListPage = () => {
                   </select>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Job List */}
             <div className="flex-1">
@@ -282,16 +300,24 @@ const JobListPage = () => {
               {loading ? (
                 <LoadingSpinner size="lg" />
               ) : jobs.length > 0 ? (
-                <div className="space-y-4">
-                  {jobs.map(job => (
-                    <JobCard 
-                      key={job.id} 
-                      job={job} 
-                      onSave={toggleSaveJob}
-                      isSaved={savedJobs.has(job.id)}
-                    />
+                <motion.div
+                  className="space-y-4"
+                  {...staggerContainer}
+                >
+                  {jobs.map((job, index) => (
+                    <motion.div
+                      key={job.id}
+                      {...staggerItem}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <JobCard
+                        job={job}
+                        onSave={toggleSaveJob}
+                        isSaved={savedJobs.has(job.id)}
+                      />
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               ) : (
                 <EmptyState
                   icon={Briefcase}

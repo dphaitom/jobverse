@@ -19,7 +19,8 @@
       "Bash(findstr:*)",
       "Bash(timeout /t 10 /nobreak)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nFix all backend issues and add missing controllers\n\n- Added CompanyController, CategoryController, SkillController with full CRUD\n- Added UserController with profile update endpoint\n- Fixed LazyInitializationException in CompanyService and JobService\n- Added @Transactional annotations to service methods\n- Created CompanyService, CategoryService, SkillService\n- Updated JobRepository with countByCompanyIdAndStatus method\n- Fixed enum mismatches for Company.CompanySize and Job.ExperienceLevel\n- Updated application.yml to use environment variables for secrets\n- Fixed frontend API endpoint from /v1/jobs/search to /v1/jobs\n- Added Python seed scripts with proper UTF-8 encoding\n- Cleaned up unnecessary documentation and batch files\n- Removed target directory from git tracking\n- Updated .gitignore to exclude logs, temp files, and secrets\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(git add:*)"
     ]
   }
 }
