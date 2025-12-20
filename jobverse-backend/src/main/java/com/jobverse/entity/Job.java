@@ -1,5 +1,6 @@
 package com.jobverse.entity;
 
+import com.jobverse.util.VietnameseTextNormalizer;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -119,7 +120,26 @@ public class Job {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    
+
+    // Normalized fields for Vietnamese accent-insensitive search
+    @Column(name = "title_normalized")
+    private String titleNormalized;
+
+    @Column(name = "description_normalized", columnDefinition = "TEXT")
+    private String descriptionNormalized;
+
+    @Column(name = "location_normalized")
+    private String locationNormalized;
+
+    // Auto-populate normalized fields before persist/update
+    @PrePersist
+    @PreUpdate
+    private void normalizeSearchFields() {
+        this.titleNormalized = VietnameseTextNormalizer.normalize(this.title);
+        this.descriptionNormalized = VietnameseTextNormalizer.normalize(this.description);
+        this.locationNormalized = VietnameseTextNormalizer.normalize(this.location);
+    }
+
     // Relationships
     @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
