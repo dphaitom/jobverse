@@ -1,110 +1,73 @@
 // src/pages/SavedJobsPage.jsx
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import {
-  Bookmark, Filter, Search, MapPin, DollarSign, X, Trash2, ExternalLink
+  Heart, X, MapPin, DollarSign, Briefcase, List, Layers, Undo2
 } from 'lucide-react';
+import { Navbar, Footer, LoadingSpinner, JobCard } from '../components';
+import { authAPI } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import { swipeVariants } from '../utils/animations';
 import toast from 'react-hot-toast';
-import { jobsAPI } from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import { Navbar, Footer, LoadingSpinner, EmptyState, JobCard } from '../components';
 
 const SavedJobsPage = () => {
-  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState('list');
   const [savedJobs, setSavedJobs] = useState([]);
-  const [filteredJobs, setFilteredJobs] = useState([]);
-  const [showFilters, setShowFilters] = useState(false);
-
-  // Filter states
-  const [filters, setFilters] = useState({
-    searchQuery: '',
-    location: '',
-    salaryMin: '',
-    jobType: '',
-  });
+  const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [swipeHistory, setSwipeHistory] = useState([]);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
     fetchSavedJobs();
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    applyFilters();
-  }, [savedJobs, filters]);
+  }, []);
 
   const fetchSavedJobs = async () => {
-    setLoading(true);
     try {
-      const response = await jobsAPI.getSavedJobs();
-      setSavedJobs(response.data || []);
+      setLoading(true);
+      const response = await authAPI.get('/v1/saved-jobs');
+      setSavedJobs(response.data?.content || response.data || []);
     } catch (error) {
       console.error('Error fetching saved jobs:', error);
-      toast.error('Không thể tải danh sách việc đã lưu');
     } finally {
       setLoading(false);
     }
   };
 
-  const applyFilters = () => {
-    let filtered = [...savedJobs];
-
-    // Search query filter
-    if (filters.searchQuery) {
-      const query = filters.searchQuery.toLowerCase();
-      filtered = filtered.filter(job =>
-        job.title.toLowerCase().includes(query) ||
-        job.company?.name.toLowerCase().includes(query)
-      );
-    }
-
-    // Location filter
-    if (filters.location) {
-      filtered = filtered.filter(job =>
-        job.location.toLowerCase().includes(filters.location.toLowerCase())
-      );
-    }
-
-    // Salary filter
-    if (filters.salaryMin) {
-      const minSalary = parseInt(filters.salaryMin) * 1000000;
-      filtered = filtered.filter(job =>
-        job.salaryMin >= minSalary || job.salaryMax >= minSalary
-      );
-    }
-
-    // Job type filter
-    if (filters.jobType) {
-      filtered = filtered.filter(job => job.jobType === filters.jobType);
-    }
-
-    setFilteredJobs(filtered);
-  };
-
-  const handleUnsaveJob = async (jobId) => {
+  const handleUnsave = async (jobId) => {
     try {
-      await jobsAPI.unsaveJob(jobId);
+      await authAPI.delete(`/v1/saved-jobs/${jobId}`);
       setSavedJobs(prev => prev.filter(job => job.id !== jobId));
-      toast.success('Đã xóa khỏi danh sách lưu');
+      toast.success('Đã bỏ lưu việc làm');
     } catch (error) {
-      toast.error('Có lỗi xảy ra khi xóa việc làm');
+      console.error('Error unsaving job:', error);
     }
   };
 
-  const handleClearAllFilters = () => {
-    setFilters({
-      searchQuery: '',
-      location: '',
-      salaryMin: '',
-      jobType: '',
-    });
+  const handleSwipe = (direction, jobId) => {
+    setSwipeHistory(prev => [...prev, { index: currentIndex, job: savedJobs[currentIndex] }]);
+
+    if (direction === 'left') {
+      handleUnsave(jobId);
+    } else if (direction === 'right') {
+      navigate(`/jobs/${jobId}`);
+    }
+
+    if (currentIndex < savedJobs.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+    }
   };
 
-  const hasActiveFilters = Object.values(filters).some(value => value !== '');
+  const handleUndo = () => {
+    if (swipeHistory.length === 0) return;
+    const lastAction = swipeHistory[swipeHistory.length - 1];
+    setSwipeHistory(prev => prev.slice(0, -1));
+    if (!savedJobs.find(j => j.id === lastAction.job.id)) {
+      setSavedJobs(prev => [...prev, lastAction.job]);
+    }
+    setCurrentIndex(lastAction.index);
+    toast.success('Đã hoàn tác');
+  };
 
   if (loading) {
     return (
@@ -115,197 +78,142 @@ const SavedJobsPage = () => {
     );
   }
 
+  const currentJob = savedJobs[currentIndex];
+
   return (
     <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
       <Navbar />
-
       <main className="pt-24 pb-16 px-4">
         <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <Bookmark className="w-8 h-8 text-violet-400" />
-              <h1 className="text-3xl font-bold text-white">Việc làm đã lưu</h1>
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Việc làm đã lưu</h1>
+              <p className="text-gray-400">{savedJobs.length} việc làm trong danh sách</p>
             </div>
-            <p className="text-gray-400">
-              {savedJobs.length} việc làm đã được lưu
-            </p>
+            <div className="flex gap-2 glass-card rounded-xl p-1">
+              <button onClick={() => setViewMode('list')} className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${viewMode === 'list' ? 'bg-violet-500 text-white' : 'text-gray-400 hover:text-white'}`}>
+                <List className="w-4 h-4" />Danh sách
+              </button>
+              <button onClick={() => setViewMode('swipe')} className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${viewMode === 'swipe' ? 'bg-violet-500 text-white' : 'text-gray-400 hover:text-white'}`}>
+                <Layers className="w-4 h-4" />Swipe
+              </button>
+            </div>
           </div>
 
           {savedJobs.length === 0 ? (
-            <EmptyState
-              icon={Bookmark}
-              title="Chưa có việc làm nào được lưu"
-              description="Hãy khám phá và lưu những công việc yêu thích của bạn để dễ dàng theo dõi và ứng tuyển sau này."
-              action={
-                <button
-                  onClick={() => navigate('/jobs')}
-                  className="btn-primary inline-flex items-center gap-2"
-                >
-                  <Search className="w-5 h-5" />
-                  Khám phá việc làm
-                </button>
-              }
-            />
+            <div className="text-center py-16">
+              <Heart className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+              <h2 className="text-xl font-semibold text-white mb-2">Chưa có việc làm nào được lưu</h2>
+              <p className="text-gray-400 mb-6">Hãy khám phá và lưu những việc làm bạn quan tâm</p>
+              <button onClick={() => navigate('/jobs')} className="btn-primary">Khám phá việc làm</button>
+            </div>
+          ) : viewMode === 'list' ? (
+            <ListView jobs={savedJobs} onUnsave={handleUnsave} />
           ) : (
-            <>
-              {/* Filters Bar */}
-              <div className="glass-card rounded-2xl p-4 mb-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-4 flex-1">
-                    {/* Search Input */}
-                    <div className="flex-1 max-w-md flex items-center gap-2 px-4 py-2 bg-gray-900/50 rounded-xl">
-                      <Search className="w-5 h-5 text-gray-500" />
-                      <input
-                        type="text"
-                        placeholder="Tìm kiếm..."
-                        value={filters.searchQuery}
-                        onChange={(e) => setFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
-                        className="flex-1 bg-transparent text-white placeholder-gray-500 focus:outline-none"
-                      />
-                    </div>
-
-                    <button
-                      onClick={() => setShowFilters(!showFilters)}
-                      className={`btn-secondary flex items-center gap-2 ${showFilters ? 'bg-violet-500/20 text-violet-400' : ''}`}
-                    >
-                      <Filter className="w-5 h-5" />
-                      Bộ lọc
-                      {hasActiveFilters && (
-                        <span className="w-2 h-2 bg-violet-500 rounded-full" />
-                      )}
-                    </button>
-                  </div>
-
-                  {hasActiveFilters && (
-                    <button
-                      onClick={handleClearAllFilters}
-                      className="text-sm text-gray-400 hover:text-white flex items-center gap-1"
-                    >
-                      <X className="w-4 h-4" />
-                      Xóa bộ lọc
-                    </button>
-                  )}
-                </div>
-
-                {/* Filter Options */}
-                {showFilters && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-700">
-                    <div>
-                      <label className="block text-sm text-gray-400 mb-2">Địa điểm</label>
-                      <div className="flex items-center gap-2 px-4 py-2 bg-gray-900/50 rounded-xl">
-                        <MapPin className="w-4 h-4 text-gray-500" />
-                        <select
-                          value={filters.location}
-                          onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
-                          className="flex-1 bg-transparent text-white focus:outline-none"
-                        >
-                          <option value="">Tất cả</option>
-                          <option value="Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                          <option value="Hà Nội">Hà Nội</option>
-                          <option value="Đà Nẵng">Đà Nẵng</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm text-gray-400 mb-2">Mức lương tối thiểu</label>
-                      <div className="flex items-center gap-2 px-4 py-2 bg-gray-900/50 rounded-xl">
-                        <DollarSign className="w-4 h-4 text-gray-500" />
-                        <input
-                          type="number"
-                          placeholder="VD: 15"
-                          value={filters.salaryMin}
-                          onChange={(e) => setFilters(prev => ({ ...prev, salaryMin: e.target.value }))}
-                          className="flex-1 bg-transparent text-white placeholder-gray-500 focus:outline-none"
-                        />
-                        <span className="text-gray-500 text-sm">triệu</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm text-gray-400 mb-2">Loại hình</label>
-                      <select
-                        value={filters.jobType}
-                        onChange={(e) => setFilters(prev => ({ ...prev, jobType: e.target.value }))}
-                        className="w-full px-4 py-2 bg-gray-900/50 rounded-xl text-white focus:outline-none"
-                      >
-                        <option value="">Tất cả</option>
-                        <option value="FULL_TIME">Full-time</option>
-                        <option value="PART_TIME">Part-time</option>
-                        <option value="CONTRACT">Contract</option>
-                        <option value="INTERN">Intern</option>
-                      </select>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Results Count */}
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-gray-400">
-                  Hiển thị <span className="text-white font-semibold">{filteredJobs.length}</span> / {savedJobs.length} việc làm
-                </p>
-              </div>
-
-              {/* Jobs List */}
-              {filteredJobs.length === 0 ? (
-                <EmptyState
-                  icon={Search}
-                  title="Không tìm thấy việc làm"
-                  description="Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm"
-                  action={
-                    <button
-                      onClick={handleClearAllFilters}
-                      className="btn-secondary"
-                    >
-                      Xóa bộ lọc
-                    </button>
-                  }
-                />
-              ) : (
-                <div className="space-y-4">
-                  {filteredJobs.map((job) => (
-                    <div key={job.id} className="relative group">
-                      <JobCard
-                        job={job}
-                        isSaved={true}
-                        onSave={() => handleUnsaveJob(job.id)}
-                      />
-
-                      {/* Quick Action Buttons */}
-                      <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/jobs/${job.id}`);
-                          }}
-                          className="p-2 bg-gray-800/90 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
-                          title="Xem chi tiết"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleUnsaveJob(job.id);
-                          }}
-                          className="p-2 bg-red-500/20 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/30 transition-colors"
-                          title="Xóa khỏi danh sách"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
+            <SwipeView currentJob={currentJob} currentIndex={currentIndex} total={savedJobs.length} onSwipe={handleSwipe} onUndo={handleUndo} canUndo={swipeHistory.length > 0} />
           )}
         </div>
       </main>
-
       <Footer />
+    </div>
+  );
+};
+
+const ListView = ({ jobs, onUnsave }) => (
+  <div className="grid gap-4">
+    {jobs.map((job) => (<JobCard key={job.id} job={job} isSaved={true} onSave={() => onUnsave(job.id)} />))}
+  </div>
+);
+
+const SwipeView = ({ currentJob, currentIndex, total, onSwipe, onUndo, canUndo }) => {
+  const [exitDirection, setExitDirection] = useState(0);
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [-200, 200], [-30, 30]);
+  const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
+
+  const handleDragEnd = (event, info) => {
+    const threshold = 100;
+    if (info.offset.x > threshold) {
+      setExitDirection(1);
+      setTimeout(() => onSwipe('right', currentJob.id), 100);
+    } else if (info.offset.x < -threshold) {
+      setExitDirection(-1);
+      setTimeout(() => onSwipe('left', currentJob.id), 100);
+    }
+  };
+
+  if (!currentJob) {
+    return (
+      <div className="text-center py-16">
+        <Heart className="w-16 h-16 mx-auto mb-4 text-violet-500" />
+        <h2 className="text-xl font-semibold text-white mb-2">Đã xem hết tất cả!</h2>
+        <p className="text-gray-400 mb-6">Bạn đã xem hết {total} việc làm đã lưu</p>
+        <button onClick={onUndo} className="btn-primary" disabled={!canUndo}><Undo2 className="w-4 h-4 mr-2" />Hoàn tác</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <div className="flex items-center justify-center gap-2 mb-6">
+        <span className="text-gray-400">{currentIndex + 1} / {total}</span>
+        <div className="w-48 h-2 bg-gray-800 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-violet-500 to-indigo-600 transition-all" style={{ width: `${((currentIndex + 1) / total) * 100}%` }} />
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center gap-8 mb-6 text-sm text-gray-400">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center"><X className="w-4 h-4 text-red-400" /></div>
+          <span>Vuốt trái để bỏ lưu</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center"><Heart className="w-4 h-4 text-green-400" /></div>
+          <span>Vuốt phải để ứng tuyển</span>
+        </div>
+      </div>
+
+      <div className="relative h-[600px] flex items-center justify-center">
+        <AnimatePresence custom={exitDirection}>
+          <motion.div key={currentJob.id} style={{ x, rotate, opacity }} drag="x" dragConstraints={{ left: 0, right: 0 }} onDragEnd={handleDragEnd} custom={exitDirection} variants={swipeVariants} initial="enter" animate="center" exit="exit" className="absolute w-full max-w-2xl cursor-grab active:cursor-grabbing">
+            <div className="glass-card rounded-2xl p-8 shadow-2xl">
+              <div className="flex items-start gap-6 mb-6">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-4xl flex-shrink-0">
+                  {currentJob.company?.logoUrl ? (<img src={currentJob.company.logoUrl} alt={currentJob.company.name} className="w-16 h-16 object-contain" />) : ('🏢')}
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold text-white mb-2">{currentJob.title}</h2>
+                  <p className="text-lg text-violet-400 mb-4">{currentJob.company?.name}</p>
+                  <div className="flex flex-wrap gap-3 text-gray-400">
+                    <span className="flex items-center gap-2"><MapPin className="w-4 h-4" />{currentJob.location}</span>
+                    <span className="flex items-center gap-2"><Briefcase className="w-4 h-4" />{currentJob.jobType?.replace('_', ' ')}</span>
+                    <span className="flex items-center gap-2"><DollarSign className="w-4 h-4" />{currentJob.salaryMin && currentJob.salaryMax ? `${(currentJob.salaryMin / 1000000).toFixed(0)}-${(currentJob.salaryMax / 1000000).toFixed(0)} triệu` : 'Thỏa thuận'}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-white mb-3">Mô tả công việc</h3>
+                <p className="text-gray-300 line-clamp-6">{currentJob.description}</p>
+              </div>
+              {currentJob.skills && currentJob.skills.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3">Kỹ năng yêu cầu</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {currentJob.skills.slice(0, 6).map((skill, idx) => (<span key={idx} className="skill-pill">{skill.name || skill}</span>))}
+                    {currentJob.skills.length > 6 && (<span className="skill-pill">+{currentJob.skills.length - 6}</span>)}
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <div className="flex items-center justify-center gap-6 mt-8">
+        <motion.button onClick={() => handleDragEnd({}, { offset: { x: -200 } })} className="w-16 h-16 rounded-full bg-red-500/20 hover:bg-red-500/30 flex items-center justify-center transition-colors" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}><X className="w-8 h-8 text-red-400" /></motion.button>
+        {canUndo && (<motion.button onClick={onUndo} className="w-12 h-12 rounded-full glass-card hover:bg-gray-800/40 flex items-center justify-center transition-colors" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}><Undo2 className="w-5 h-5 text-gray-400" /></motion.button>)}
+        <motion.button onClick={() => handleDragEnd({}, { offset: { x: 200 } })} className="w-16 h-16 rounded-full bg-green-500/20 hover:bg-green-500/30 flex items-center justify-center transition-colors" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}><Heart className="w-8 h-8 text-green-400" /></motion.button>
+      </div>
     </div>
   );
 };
