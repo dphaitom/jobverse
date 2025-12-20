@@ -5,6 +5,7 @@ import com.jobverse.entity.Notification;
 import com.jobverse.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +13,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationService {
-    
+
     private final NotificationRepository notificationRepository;
     private final EmailService emailService;
+    private final SimpMessagingTemplate messagingTemplate;
     
     @Async
     public void sendApplicationNotification(Application application) {
@@ -68,7 +70,24 @@ public class NotificationService {
                 .actionUrl("/applications/" + application.getId())
                 .build();
         notificationRepository.save(notification);
-        
+        // Send real-time notification via WebSocket
+        sendRealTimeNotification(notification);
+
         log.info("Status update notification sent for application: {}", application.getId());
+    }
+
+    /**
+     * Send real-time notification to user via WebSocket
+     * Uses /queue/notifications/{userId} for user-specific delivery
+     */
+    private void sendRealTimeNotification(Notification notification) {
+        try {
+            String destination = "/queue/notifications/" + notification.getUser().getId();
+            messagingTemplate.convertAndSend(destination, notification);
+            log.info("🔔 Real-time notification sent to user {} via WebSocket", notification.getUser().getId());
+        } catch (Exception e) {
+            log.error("❌ Failed to send real-time notification via WebSocket: {}", e.getMessage());
+            // Don't throw exception - notification is already saved in DB
+        }
     }
 }
