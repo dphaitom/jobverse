@@ -67,7 +67,15 @@ public class Application {
     
     @Column(name = "viewed_at")
     private LocalDateTime viewedAt;
-    
+
+    @Column(name = "is_quick_apply")
+    @Builder.Default
+    private Boolean isQuickApply = false;
+
+    @Column(name = "is_anonymous")
+    @Builder.Default
+    private Boolean isAnonymous = false;
+
     public enum ApplicationStatus {
         PENDING,        // Chờ xem xét
         REVIEWING,      // Đang xem xét

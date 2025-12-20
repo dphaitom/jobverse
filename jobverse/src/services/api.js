@@ -126,13 +126,18 @@ export const jobsAPI = {
     apiRequest('/v1/users/me/saved-jobs'),
   
   applyJob: (jobId, applicationData) =>
-    apiRequest(`/v1/jobs/${jobId}/apply`, {
+    apiRequest(`/v1/applications`, {
       method: 'POST',
-      body: JSON.stringify(applicationData),
+      body: JSON.stringify({ jobId, ...applicationData }),
     }),
-  
+
+  quickApply: (jobId) =>
+    apiRequest(`/v1/applications/quick-apply/${jobId}`, {
+      method: 'POST',
+    }),
+
   getMyApplications: () =>
-    apiRequest('/v1/users/me/applications'),
+    apiRequest('/v1/applications/my-applications'),
 };
 
 // ==================== COMPANIES API ====================

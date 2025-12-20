@@ -24,7 +24,10 @@ const JobDetailPage = () => {
   const [isSaved, setIsSaved] = useState(false);
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [applyLoading, setApplyLoading] = useState(false);
+  const [quickApplyLoading, setQuickApplyLoading] = useState(false);
   const [coverLetter, setCoverLetter] = useState('');
+  const [hasApplied, setHasApplied] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(false);
 
   useEffect(() => {
     fetchJobDetail();
@@ -73,13 +76,32 @@ const JobDetailPage = () => {
 
     setApplyLoading(true);
     try {
-      await jobsAPI.applyJob(id, { coverLetter });
+      await jobsAPI.applyJob(id, { coverLetter, isAnonymous });
       setShowApplyModal(false);
+      setHasApplied(true);
       toast.success('Ứng tuyển thành công! 🎉 Chúc bạn may mắn!');
     } catch (error) {
       toast.error('Lỗi: ' + error.message);
     } finally {
       setApplyLoading(false);
+    }
+  };
+
+  const handleQuickApply = async () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    setQuickApplyLoading(true);
+    try {
+      await jobsAPI.quickApply(id);
+      setHasApplied(true);
+      toast.success('⚡ Ứng tuyển nhanh thành công! Chúc bạn may mắn!');
+    } catch (error) {
+      toast.error('Lỗi: ' + error.message);
+    } finally {
+      setQuickApplyLoading(false);
     }
   };
 
@@ -198,12 +220,29 @@ const JobDetailPage = () => {
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-3 mt-6 pt-6 border-t border-gray-800">
-                  <button
-                    onClick={() => setShowApplyModal(true)}
-                    className="btn-primary flex-1 md:flex-none py-3 px-8"
-                  >
-                    <Send className="w-5 h-5 mr-2" /> Ứng tuyển ngay
-                  </button>
+                  {!hasApplied ? (
+                    <>
+                      <button
+                        onClick={() => setShowApplyModal(true)}
+                        disabled={applyLoading || quickApplyLoading}
+                        className="btn-primary flex-1 md:flex-none py-3 px-6 disabled:opacity-50"
+                      >
+                        <Send className="w-5 h-5 mr-2" /> Ứng tuyển ngay
+                      </button>
+                      <button
+                        onClick={handleQuickApply}
+                        disabled={quickApplyLoading || applyLoading}
+                        className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white py-3 px-6 rounded-xl font-medium transition-all disabled:opacity-50 flex items-center gap-2"
+                      >
+                        <Zap className="w-5 h-5" />
+                        {quickApplyLoading ? 'Đang gửi...' : 'Ứng tuyển nhanh'}
+                      </button>
+                    </>
+                  ) : (
+                    <div className="flex-1 md:flex-none py-3 px-6 bg-green-500/20 text-green-400 rounded-xl font-medium flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5" /> Đã ứng tuyển
+                    </div>
+                  )}
                   <button
                     onClick={handleSaveJob}
                     className={`p-3 rounded-xl transition-all ${
@@ -426,7 +465,21 @@ const JobDetailPage = () => {
                     className="input-field w-full h-32 resize-none"
                   />
                 </div>
-                
+
+                <div className="mb-4 flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    id="anonymous"
+                    checked={isAnonymous}
+                    onChange={(e) => setIsAnonymous(e.target.checked)}
+                    className="mt-1 w-4 h-4 rounded border-gray-600 bg-gray-800 text-violet-500 focus:ring-violet-500"
+                  />
+                  <label htmlFor="anonymous" className="text-sm text-gray-400 cursor-pointer">
+                    <span className="text-white font-medium">Ứng tuyển ẩn danh</span>
+                    <p className="text-xs mt-1">Thông tin cá nhân của bạn sẽ được ẩn khỏi nhà tuyển dụng cho đến khi bạn chấp nhận phỏng vấn</p>
+                  </label>
+                </div>
+
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowApplyModal(false)}

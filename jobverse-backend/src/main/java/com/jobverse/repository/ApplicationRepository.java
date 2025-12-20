@@ -45,4 +45,8 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     
     @Query("SELECT a FROM Application a WHERE a.user.id = :userId AND a.status IN :statuses")
     List<Application> findByUserIdAndStatusIn(Long userId, List<Application.ApplicationStatus> statuses);
+
+    Page<Application> findByUserIdOrderByAppliedAtDesc(Long userId, Pageable pageable);
+
+    Page<Application> findByJobIdOrderByAppliedAtDesc(Long jobId, Pageable pageable);
 }
