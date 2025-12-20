@@ -20,6 +20,7 @@ import SettingsPage from './pages/SettingsPage';
 import ResumeAnalysisPage from './pages/ResumeAnalysisPage';
 import InterviewPrepPage from './pages/InterviewPrepPage';
 import AdminDashboard from './pages/AdminDashboard';
+import CompanyReviewsPage from './pages/CompanyReviewsPage';
 import { LoginPage, RegisterPage } from './pages/AuthPages';
 
 // CSS
@@ -38,6 +39,7 @@ function AnimatedRoutes() {
           <Route path="/jobs/:id" element={<JobDetailPage />} />
           <Route path="/companies" element={<CompanyListPage />} />
           <Route path="/companies/:id" element={<CompanyDetailPage />} />
+          <Route path="/companies/:companyId/reviews" element={<CompanyReviewsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
