@@ -15,10 +15,19 @@ import java.util.Optional;
 
 @Repository
 public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificationExecutor<Job> {
-    
+
     Optional<Job> findBySlug(String slug);
-    
+
     boolean existsBySlug(String slug);
+
+    @Query("SELECT DISTINCT j FROM Job j " +
+           "LEFT JOIN FETCH j.company " +
+           "LEFT JOIN FETCH j.category " +
+           "WHERE j.status = 'ACTIVE'")
+    List<Job> findAllActiveWithDetails(Pageable pageable);
+
+    @Query("SELECT COUNT(j) FROM Job j WHERE j.status = 'ACTIVE'")
+    long countActiveJobsForPage();
     
     @Query("SELECT j FROM Job j " +
            "LEFT JOIN FETCH j.company " +
@@ -32,7 +41,10 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     
     @Query("SELECT j FROM Job j WHERE j.company.id = :companyId AND j.status = :status")
     Page<Job> findByCompanyIdAndStatus(Long companyId, Job.JobStatus status, Pageable pageable);
-    
+
+    @Query("SELECT COUNT(j) FROM Job j WHERE j.company.id = :companyId AND j.status = :status")
+    Integer countByCompanyIdAndStatus(Long companyId, Job.JobStatus status);
+
     @Query("SELECT j FROM Job j WHERE j.isFeatured = true AND j.status = 'ACTIVE' ORDER BY j.createdAt DESC")
     List<Job> findFeaturedJobs(Pageable pageable);
     

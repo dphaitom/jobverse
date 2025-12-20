@@ -1,0 +1,70 @@
+# IDE and Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Backend (Java/Maven)
+jobverse-backend/target/
+jobverse-backend/.mvn/
+jobverse-backend/mvnw
+jobverse-backend/mvnw.cmd
+jobverse-backend/logs/*.log
+jobverse-backend/logs/*.gz
+*.class
+*.jar
+*.war
+*.ear
+!jobverse-backend/target/*.jar
+
+# Frontend (Node/React)
+jobverse/node_modules/
+jobverse/dist/
+jobverse/build/
+jobverse/.env.local
+jobverse/.env.*.local
+jobverse/src/.evn
+
+# Python
+scripts/__pycache__/
+scripts/*.pyc
+scripts/.python-version
+scripts/venv/
+scripts/env/
+
+# Generated Data
+scripts/jobs_data_*.json
+!scripts/jobs_data_20251219_213855.json
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# OS
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+jobverse-backend/logs/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+nul
+
+# Claude
+.claude/settings.local.json

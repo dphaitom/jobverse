@@ -1,0 +1,420 @@
+// src/pages/InterviewPrepPage.jsx
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  MessageSquare, Code, Users, Briefcase, Award,
+  ChevronDown, ChevronUp, Send, Lightbulb, Target,
+  CheckCircle2, BookOpen
+} from 'lucide-react';
+import { Navbar, Footer } from '../components';
+import { aiAPI } from '../services/api';
+import toast from 'react-hot-toast';
+
+const InterviewPrepPage = () => {
+  const navigate = useNavigate();
+  const [role, setRole] = useState('');
+  const [experienceLevel, setExperienceLevel] = useState('JUNIOR');
+  const [loading, setLoading] = useState(false);
+  const [questions, setQuestions] = useState(null);
+  const [expandedQuestion, setExpandedQuestion] = useState(null);
+  const [userAnswers, setUserAnswers] = useState({});
+  const [evaluations, setEvaluations] = useState({});
+  const [evaluating, setEvaluating] = useState({});
+
+  const roles = [
+    'Frontend Developer',
+    'Backend Developer',
+    'Full-Stack Developer',
+    'Mobile Developer',
+    'DevOps Engineer',
+    'Data Engineer',
+    'AI/ML Engineer',
+    'QA Engineer',
+    'UI/UX Designer',
+    'Product Manager'
+  ];
+
+  const levels = [
+    { value: 'INTERNSHIP', label: 'Internship' },
+    { value: 'JUNIOR', label: 'Junior (0-2 years)' },
+    { value: 'MID', label: 'Mid-Level (2-5 years)' },
+    { value: 'SENIOR', label: 'Senior (5+ years)' }
+  ];
+
+  const handleGenerate = async () => {
+    if (!role.trim()) {
+      toast.error('Vui lòng chọn hoặc nhập role');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await aiAPI.generateInterviewQuestions({
+        role,
+        experienceLevel,
+        skills: []
+      });
+      setQuestions(response.data);
+      setUserAnswers({});
+      setEvaluations({});
+      toast.success('Đã tạo câu hỏi phỏng vấn!');
+    } catch (error) {
+      console.error('Error generating questions:', error);
+      toast.error(error.response?.data?.error?.message || 'Có lỗi xảy ra');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEvaluate = async (question, category, index) => {
+    const questionKey = `${category}-${index}`;
+    const answer = userAnswers[questionKey];
+
+    if (!answer || !answer.trim()) {
+      toast.error('Vui lòng nhập câu trả lời');
+      return;
+    }
+
+    setEvaluating({ ...evaluating, [questionKey]: true });
+    try {
+      const response = await aiAPI.evaluateAnswer({
+        question: question.question,
+        userAnswer: answer
+      });
+      setEvaluations({ ...evaluations, [questionKey]: response.data });
+      toast.success('Đã đánh giá câu trả lời!');
+    } catch (error) {
+      console.error('Error evaluating answer:', error);
+      toast.error(error.response?.data?.error?.message || 'Có lỗi xảy ra');
+    } finally {
+      setEvaluating({ ...evaluating, [questionKey]: false });
+    }
+  };
+
+  const toggleQuestion = (category, index) => {
+    const key = `${category}-${index}`;
+    setExpandedQuestion(expandedQuestion === key ? null : key);
+  };
+
+  const QuestionCard = ({ question, category, index }) => {
+    const questionKey = `${category}-${index}`;
+    const isExpanded = expandedQuestion === questionKey;
+    const evaluation = evaluations[questionKey];
+
+    const getDifficultyColor = (difficulty) => {
+      switch (difficulty?.toLowerCase()) {
+        case 'easy': return 'text-green-500 bg-green-500/10 border-green-500/20';
+        case 'medium': return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20';
+        case 'hard': return 'text-red-500 bg-red-500/10 border-red-500/20';
+        default: return 'text-gray-500 bg-gray-500/10 border-gray-500/20';
+      }
+    };
+
+    const getTypeIcon = (type) => {
+      switch (type?.toLowerCase()) {
+        case 'hr': return <Users className="w-4 h-4" />;
+        case 'technical': return <Code className="w-4 h-4" />;
+        case 'coding': return <Code className="w-4 h-4" />;
+        case 'behavioral': return <MessageSquare className="w-4 h-4" />;
+        case 'system design': return <Briefcase className="w-4 h-4" />;
+        default: return <MessageSquare className="w-4 h-4" />;
+      }
+    };
+
+    return (
+      <div className="bg-nike-black-light border border-gray-800 rounded-xl overflow-hidden hover:border-ai-purple/30 transition-all duration-300">
+        <button
+          onClick={() => toggleQuestion(category, index)}
+          className="w-full px-6 py-4 flex items-start justify-between text-left hover:bg-white/5 transition-colors"
+        >
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <span className={`px-2 py-1 rounded text-xs font-medium border ${getDifficultyColor(question.difficulty)}`}>
+                {question.difficulty}
+              </span>
+              <span className="flex items-center gap-1 text-xs text-gray-400">
+                {getTypeIcon(question.type)}
+                {question.type}
+              </span>
+            </div>
+            <p className="text-white font-medium pr-4">{question.question}</p>
+          </div>
+          {isExpanded ? (
+            <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
+          )}
+        </button>
+
+        {isExpanded && (
+          <div className="px-6 pb-6 space-y-4 border-t border-gray-800">
+            {/* Tips */}
+            {question.tips && (
+              <div className="pt-4">
+                <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                  <Lightbulb className="w-4 h-4 text-yellow-500" />
+                  Tips:
+                </h4>
+                <p className="text-sm text-gray-400">{question.tips}</p>
+              </div>
+            )}
+
+            {/* Your Answer */}
+            <div>
+              <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-ai-purple" />
+                Your Answer:
+              </h4>
+              <textarea
+                value={userAnswers[questionKey] || ''}
+                onChange={(e) => setUserAnswers({ ...userAnswers, [questionKey]: e.target.value })}
+                placeholder="Nhập câu trả lời của bạn..."
+                className="w-full px-4 py-3 bg-nike-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-ai-purple/50 focus:border-ai-purple/50 transition-all resize-none"
+                rows={4}
+              />
+              <button
+                onClick={() => handleEvaluate(question, category, index)}
+                disabled={evaluating[questionKey]}
+                className="mt-3 px-4 py-2 bg-gradient-to-r from-ai-purple to-ai-blue hover:from-ai-purple/90 hover:to-ai-blue/90 disabled:from-gray-700 disabled:to-gray-700 text-white rounded-lg font-medium text-sm transition-all duration-300 flex items-center gap-2"
+              >
+                {evaluating[questionKey] ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Đang đánh giá...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    Đánh Giá
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Evaluation */}
+            {evaluation && (
+              <div className="bg-gradient-to-br from-ai-purple/10 to-ai-blue/10 border border-ai-purple/20 rounded-lg p-4">
+                <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                  <Award className="w-4 h-4 text-ai-purple" />
+                  AI Evaluation:
+                </h4>
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <span className="text-gray-400">Score: </span>
+                    <span className="text-ai-purple font-bold">{evaluation.score}/100</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Feedback: </span>
+                    <p className="text-white mt-1">{evaluation.feedback}</p>
+                  </div>
+                  {evaluation.suggestions && evaluation.suggestions.length > 0 && (
+                    <div>
+                      <span className="text-gray-400 block mb-2">Suggestions:</span>
+                      <ul className="space-y-1">
+                        {evaluation.suggestions.map((suggestion, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-gray-300">
+                            <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                            <span>{suggestion}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Sample Answer */}
+            {question.sampleAnswer && (
+              <div className="bg-nike-black border border-gray-700 rounded-lg p-4">
+                <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-green-500" />
+                  Sample Answer:
+                </h4>
+                <p className="text-sm text-gray-400 whitespace-pre-line">{question.sampleAnswer}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const QuestionSection = ({ title, questions, category, icon: Icon, color }) => {
+    if (!questions || questions.length === 0) return null;
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 ${color} rounded-lg`}>
+            <Icon className="w-5 h-5" />
+          </div>
+          <h3 className="text-xl font-bold text-white">
+            {title} ({questions.length})
+          </h3>
+        </div>
+        <div className="space-y-3">
+          {questions.map((question, index) => (
+            <QuestionCard
+              key={index}
+              question={question}
+              category={category}
+              index={index}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-nike-black">
+      <Navbar />
+
+      {/* Hero Section */}
+      <section className="relative py-20 bg-gradient-to-br from-nike-black via-nike-black-light to-nike-black">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center animate-fade-in-up">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-ai-purple/10 border border-ai-purple/20 rounded-full mb-6">
+              <Target className="w-4 h-4 text-ai-purple" />
+              <span className="text-sm text-ai-purple font-medium">AI Interview Practice</span>
+            </div>
+            <h1 className="text-display-lg font-black text-white mb-6 tracking-tight">
+              Luyện Tập
+              <span className="block text-ai-purple">Phỏng Vấn</span>
+            </h1>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
+              Chuẩn bị cho cuộc phỏng vấn với 100+ câu hỏi chuyên sâu và đánh giá bằng AI. Tự tin hơn trong mỗi buổi phỏng vấn.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Setup Section */}
+      <section className="py-16">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-nike-black-light border border-gray-800 rounded-2xl p-8 mb-8">
+            <h2 className="text-2xl font-bold text-white mb-6">Thiết Lập Phỏng Vấn</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Role Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">
+                  Role / Position
+                </label>
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="w-full px-4 py-3 bg-nike-black border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-ai-purple/50 focus:border-ai-purple/50 transition-all"
+                >
+                  <option value="">-- Chọn role --</option>
+                  {roles.map((r) => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Experience Level */}
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">
+                  Experience Level
+                </label>
+                <select
+                  value={experienceLevel}
+                  onChange={(e) => setExperienceLevel(e.target.value)}
+                  className="w-full px-4 py-3 bg-nike-black border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-ai-purple/50 focus:border-ai-purple/50 transition-all"
+                >
+                  {levels.map((level) => (
+                    <option key={level.value} value={level.value}>
+                      {level.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <button
+              onClick={handleGenerate}
+              disabled={loading || !role}
+              className="w-full mt-6 px-6 py-4 bg-gradient-to-r from-ai-purple to-ai-blue hover:from-ai-purple/90 hover:to-ai-blue/90 disabled:from-gray-700 disabled:to-gray-700 text-white rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3"
+            >
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Đang tạo câu hỏi...
+                </>
+              ) : (
+                <>
+                  <MessageSquare className="w-5 h-5" />
+                  Tạo Câu Hỏi Phỏng Vấn
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Questions Display */}
+          {questions && (
+            <div className="space-y-8">
+              <QuestionSection
+                title="HR Questions"
+                questions={questions.hrQuestions}
+                category="hr"
+                icon={Users}
+                color="bg-blue-500/10 text-blue-500"
+              />
+
+              <QuestionSection
+                title="Technical Questions"
+                questions={questions.technicalQuestions}
+                category="technical"
+                icon={Code}
+                color="bg-purple-500/10 text-purple-500"
+              />
+
+              <QuestionSection
+                title="Coding Challenges"
+                questions={questions.codingChallenges}
+                category="coding"
+                icon={Code}
+                color="bg-green-500/10 text-green-500"
+              />
+
+              <QuestionSection
+                title="Behavioral Questions"
+                questions={questions.behavioralQuestions}
+                category="behavioral"
+                icon={MessageSquare}
+                color="bg-yellow-500/10 text-yellow-500"
+              />
+
+              <QuestionSection
+                title="System Design"
+                questions={questions.systemDesignQuestions}
+                category="system-design"
+                icon={Briefcase}
+                color="bg-red-500/10 text-red-500"
+              />
+            </div>
+          )}
+
+          {!questions && (
+            <div className="bg-nike-black-light border border-gray-800 rounded-2xl p-12 text-center">
+              <div className="w-20 h-20 mx-auto mb-6 bg-ai-purple/10 rounded-full flex items-center justify-center">
+                <MessageSquare className="w-10 h-10 text-ai-purple" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">
+                Chưa có câu hỏi
+              </h3>
+              <p className="text-gray-400">
+                Chọn role và level, sau đó nhấn "Tạo Câu Hỏi Phỏng Vấn"
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default InterviewPrepPage;

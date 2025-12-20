@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(tasklist:*)",
+      "Bash(xargs ls:*)",
+      "Bash(git -C \"c:\\\\Users\\\\admin\\\\OneDrive\\\\Desktop\\\\QuangThang_Workplace\\\\Code\\\\doan1\" log --oneline -10)",
+      "Bash(python job_crawler.py:*)",
+      "Bash(pip install:*)",
+      "Bash(ls:*)",
+      "Bash(chmod:*)",
+      "Bash(mvn clean compile:*)",
+      "Bash(mvn clean package:*)",
+      "Bash(python seed_database.py:*)",
+      "Bash(powershell -Command \"Get-NetTCPConnection | Where-Object {$_LocalPort -match ''543'' -and $_State -eq ''Listen''} | Select-Object LocalAddress, LocalPort, State | Format-Table\")",
+      "Bash(python:*)",
+      "Bash(mvn compile:*)",
+      "Bash(taskkill:*)",
+      "Bash(findstr:*)",
+      "Bash(timeout /t 10 /nobreak)"
+    ]
+  }
+}

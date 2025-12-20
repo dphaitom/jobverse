@@ -1,0 +1,9 @@
+# Frontend (.env)
+VITE_API_URL=http://localhost:8080/api
+VITE_GOOGLE_CLIENT_ID=1055207261984-24qodv34lf3cpdcuhvr69ukmlkcgf3a5.apps.googleusercontent.com
+VITE_MAPBOX_TOKEN=your_mapbox_token
+
+# Backend (application.yml)
+# Set these as environment variables:
+# OPENAI_API_KEY=your_openai_api_key_here
+# GOOGLE_CLIENT_ID=your_google_client_id_here

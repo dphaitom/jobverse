@@ -5,6 +5,7 @@ import {
   User, Mail, Phone, MapPin, Briefcase, Calendar, Edit2,
   Save, X, Camera, Github, Linkedin, Globe, Award
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { userAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Navbar, Footer, LoadingSpinner } from '../components';
@@ -77,8 +78,9 @@ const ProfilePage = () => {
       await userAPI.updateProfile(formData);
       setEditing(false);
       fetchProfile();
+      toast.success('Cập nhật profile thành công! ✨');
     } catch (error) {
-      alert('Lỗi cập nhật: ' + error.message);
+      toast.error('Lỗi cập nhật: ' + error.message);
     } finally {
       setSaving(false);
     }

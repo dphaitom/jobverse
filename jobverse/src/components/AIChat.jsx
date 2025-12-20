@@ -29,6 +29,9 @@ const AIChat = ({ isOpen, onClose }) => {
       const token = localStorage.getItem('accessToken');
       const endpoint = token ? `${API_BASE_URL}/v1/ai/chat` : `${API_BASE_URL}/v1/ai/chat/guest`;
 
+      console.log('[AIChat] Sending request to:', endpoint);
+      console.log('[AIChat] Message:', userMessage);
+
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -38,14 +41,19 @@ const AIChat = ({ isOpen, onClose }) => {
         body: JSON.stringify({ message: userMessage })
       });
 
+      console.log('[AIChat] Response status:', res.status);
+      console.log('[AIChat] Response ok:', res.ok);
+
       const data = await res.json();
-      
+      console.log('[AIChat] Response data:', data);
+
       if (data.success) {
         setMessages(prev => [...prev, { role: 'assistant', content: data.data.reply }]);
       } else {
         setMessages(prev => [...prev, { role: 'assistant', content: 'Xin lỗi, có lỗi xảy ra. Vui lòng thử lại.' }]);
       }
     } catch (error) {
+      console.error('[AIChat] Error:', error);
       setMessages(prev => [...prev, { role: 'assistant', content: 'Không thể kết nối. Vui lòng thử lại sau.' }]);
     } finally {
       setLoading(false);

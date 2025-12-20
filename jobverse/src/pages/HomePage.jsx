@@ -1,10 +1,10 @@
 // src/pages/HomePage.jsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Search, MapPin, Briefcase, DollarSign, Heart, Sparkles, Zap,
+  Briefcase, Sparkles,
   Users, TrendingUp, Star, Building2, ArrowRight, CheckCircle2,
-  Globe, Code, Palette, BarChart3, MessageSquare, Send, X
+  Globe, Code, Palette, BarChart3
 } from 'lucide-react';
 import { jobsAPI, categoriesAPI, skillsAPI } from '../services/api';
 import { Navbar, Footer, JobCard, SearchBar } from '../components';
@@ -17,7 +17,6 @@ const HomePage = () => {
   const [trendingSkills, setTrendingSkills] = useState([]);
   const [savedJobs, setSavedJobs] = useState(new Set());
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showAI, setShowAI] = useState(false);
 
