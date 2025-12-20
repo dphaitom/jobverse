@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import { ProtectedRoute } from './components';
 
 // Pages
@@ -76,26 +77,28 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: '#1a1a1b',
-              color: '#fff',
-              border: '1px solid #333',
-            },
-            success: {
-              iconTheme: {
-                primary: '#8b5cf6',
-                secondary: '#fff',
+        <NotificationProvider>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+              style: {
+                background: '#1a1a1b',
+                color: '#fff',
+                border: '1px solid #333',
               },
-            },
-          }}
-        />
-        <BrowserRouter>
-          <AnimatedRoutes />
-        </BrowserRouter>
+              success: {
+                iconTheme: {
+                  primary: '#8b5cf6',
+                  secondary: '#fff',
+                },
+              },
+            }}
+          />
+          <BrowserRouter>
+            <AnimatedRoutes />
+          </BrowserRouter>
+        </NotificationProvider>
       </AuthProvider>
     </ThemeProvider>
   );
