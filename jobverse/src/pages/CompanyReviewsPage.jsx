@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { Star, ThumbsUp, ThumbsDown, User, Briefcase, Calendar } from 'lucide-react';
 import { fadeInUp, staggerContainer, staggerItem } from '../utils/animations';
 import { LoadingSpinner, EmptyState } from '../components';
-import { format } from 'date-fns';
 
 const CompanyReviewsPage = () => {
   const { companyId } = useParams();

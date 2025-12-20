@@ -935,3 +935,472 @@ Caused by: org.springframework.data.mapping.PropertyReferenceException: No prope
 	at org.springframework.data.repository.query.parser.PartTree.<init>(PartTree.java:103)
 	at org.springframework.data.jpa.repository.query.PartTreeJpaQuery.<init>(PartTreeJpaQuery.java:100)
 	... 63 common frames omitted
+2025-12-21 01:04:41 [restartedMain] INFO  com.jobverse.JobverseApplication - Starting JobverseApplication using Java 21.0.6 with PID 48872 (C:\Users\admin\OneDrive\Desktop\QuangThang_Workplace\Code\doan1\jobverse-backend\target\classes started by dphaitom in C:\Users\admin\OneDrive\Desktop\QuangThang_Workplace\Code\doan1\jobverse-backend)
+2025-12-21 01:04:41 [restartedMain] DEBUG com.jobverse.JobverseApplication - Running with Spring Boot v3.2.1, Spring v6.1.2
+2025-12-21 01:04:41 [restartedMain] INFO  com.jobverse.JobverseApplication - The following 1 profile is active: "dev"
+2025-12-21 01:04:41 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-12-21 01:04:41 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-12-21 01:04:42 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-12-21 01:04:42 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 69 ms. Found 11 JPA repository interfaces.
+2025-12-21 01:04:43 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-12-21 01:04:43 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-12-21 01:04:43 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.17]
+2025-12-21 01:04:43 [restartedMain] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring embedded WebApplicationContext
+2025-12-21 01:04:43 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1893 ms
+2025-12-21 01:04:43 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-12-21 01:04:44 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:jobverse user=SA
+2025-12-21 01:04:44 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-12-21 01:04:44 [restartedMain] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:jobverse'
+2025-12-21 01:04:44 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-12-21 01:04:44 [restartedMain] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.1.Final
+2025-12-21 01:04:44 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-12-21 01:04:44 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-12-21 01:04:44 [restartedMain] WARN  org.hibernate.dialect.Dialect - HHH000511: The 2.2.0 version for [org.hibernate.dialect.PostgreSQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 12.0.0. Check the community dialects project for available legacy versions.
+2025-12-21 01:04:44 [restartedMain] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-12-21 01:04:45 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.applications 
+       drop constraint if exists FK65weib1lru9dkrbto5pv389vi
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.applications 
+       drop constraint if exists FKbhnfs5wwy14wdm2f1wam8qkhf
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.applications 
+       drop constraint if exists FKfsfqljedcla632u568jl5qf3w
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.categories 
+       drop constraint if exists FKsaok720gsu4u2wrgbk10b5n8d
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.companies 
+       drop constraint if exists FKikhsc7na5r394c8jghny8b6t4
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.company_images 
+       drop constraint if exists FK39pfp30xxpbsukcnv39a8wo7p
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.company_reviews 
+       drop constraint if exists FKkpjxpw5kl37cad0twqje6cq63
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.company_reviews 
+       drop constraint if exists FKjlwevafsv6wcpvt0jg5tfs1f0
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.job_benefits 
+       drop constraint if exists FKdqntmlq6o4himh9uva0u3fcl9
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.job_skills 
+       drop constraint if exists FK1gb74tysr9vkypwivvvovxq1f
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.job_skills 
+       drop constraint if exists FKe10ho7um0atjm67b9dgokmfyx
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.jobs 
+       drop constraint if exists FKlunrv9ems34544ff26wyfa89v
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.jobs 
+       drop constraint if exists FKrtmqcrktb6s7xq8djbs2a2war
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.jobs 
+       drop constraint if exists FKq4v0nwosiuabukh6vlo7414wd
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.notifications 
+       drop constraint if exists FK9y21adhxn0ayjhfocscqox7bh
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.resumes 
+       drop constraint if exists FK340nuaivxiy99hslr3sdydfvv
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.saved_jobs 
+       drop constraint if exists FKawvc9t3d3efu6ta6h30tb984t
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.saved_jobs 
+       drop constraint if exists FK5fc45yi5nwtm3y93nt4fcpln6
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.skills 
+       drop constraint if exists FKlyobx4bwdv7k6im48ru4pod1u
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.user_profiles 
+       drop constraint if exists FKjcad5nfve11khsnpwj1mv8frj
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.user_skills 
+       drop constraint if exists FKh223y61gwijpgqt6nlsuti07g
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.user_skills 
+       drop constraint if exists FKro13if9r7fwkr5115715127ai
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    drop table if exists public.applications cascade
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    drop table if exists public.categories cascade
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    drop table if exists public.companies cascade
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    drop table if exists public.company_images cascade
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    drop table if exists public.company_reviews cascade
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    drop table if exists public.job_benefits cascade
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    drop table if exists public.job_skills cascade
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    drop table if exists public.jobs cascade
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    drop table if exists public.notifications cascade
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    drop table if exists public.resumes cascade
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    drop table if exists public.saved_jobs cascade
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    drop table if exists public.skills cascade
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    drop table if exists public.user_profiles cascade
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    drop table if exists public.user_skills cascade
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    drop table if exists public.users cascade
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    create table public.applications (
+        ai_match_score integer,
+        expected_salary numeric(15,2),
+        is_anonymous boolean,
+        is_quick_apply boolean,
+        applied_at timestamp(6),
+        id bigserial not null,
+        job_id bigint not null,
+        resume_id bigint,
+        updated_at timestamp(6),
+        user_id bigint not null,
+        viewed_at timestamp(6),
+        cover_letter TEXT,
+        rejection_reason varchar(255),
+        status varchar(255) check (status in ('PENDING','REVIEWING','SHORTLISTED','INTERVIEW','OFFERED','HIRED','REJECTED','WITHDRAWN')),
+        ai_analysis jsonb,
+        primary key (id),
+        unique (job_id, user_id)
+    )
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    create table public.categories (
+        is_active boolean,
+        job_count integer,
+        id bigserial not null,
+        parent_id bigint,
+        description varchar(255),
+        icon varchar(255),
+        name varchar(255) not null unique,
+        slug varchar(255) not null unique,
+        primary key (id)
+    )
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    create table public.companies (
+        employee_count integer,
+        founded_year integer,
+        is_featured boolean,
+        rating_avg numeric(3,2),
+        review_count integer,
+        created_at timestamp(6),
+        id bigserial not null,
+        owner_id bigint not null,
+        updated_at timestamp(6),
+        company_size varchar(255) check (company_size in ('STARTUP_1_10','SMALL_11_50','MEDIUM_51_200','LARGE_201_500','ENTERPRISE_501_1000','CORPORATION_1000_PLUS')),
+        cover_url varchar(255),
+        description TEXT,
+        headquarters varchar(255),
+        industry varchar(255),
+        logo_url varchar(255),
+        name varchar(255) not null unique,
+        slug varchar(255) not null unique,
+        tax_code varchar(255) unique,
+        verification_status varchar(255) check (verification_status in ('PENDING','VERIFIED','REJECTED')),
+        website varchar(255),
+        primary key (id)
+    )
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    create table public.company_images (
+        display_order integer,
+        company_id bigint not null,
+        id bigserial not null,
+        caption varchar(255),
+        image_url varchar(255) not null,
+        primary key (id)
+    )
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    create table public.company_reviews (
+        is_current_employee boolean,
+        rating integer not null,
+        company_id bigint not null,
+        created_at timestamp(6),
+        id bigserial not null,
+        user_id bigint not null,
+        cons TEXT,
+        job_title varchar(255),
+        pros TEXT,
+        status varchar(255) check (status in ('PENDING','APPROVED','REJECTED')),
+        title varchar(255),
+        primary key (id)
+    )
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    create table public.job_benefits (
+        id bigserial not null,
+        job_id bigint not null,
+        benefit_name varchar(255) not null,
+        description TEXT,
+        icon varchar(255),
+        primary key (id)
+    )
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    create table public.job_skills (
+        is_required boolean,
+        id bigserial not null,
+        job_id bigint not null,
+        skill_id bigint not null,
+        proficiency varchar(255) check (proficiency in ('BEGINNER','INTERMEDIATE','ADVANCED','EXPERT')),
+        primary key (id)
+    )
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    create table public.jobs (
+        application_count integer,
+        deadline date,
+        is_featured boolean,
+        is_remote boolean,
+        is_urgent boolean,
+        positions_count integer,
+        salary_max numeric(15,2),
+        salary_min numeric(15,2),
+        salary_negotiable boolean,
+        view_count integer,
+        category_id bigint,
+        company_id bigint not null,
+        created_at timestamp(6),
+        id bigserial not null,
+        posted_by bigint not null,
+        updated_at timestamp(6),
+        currency varchar(255),
+        description TEXT not null,
+        description_normalized TEXT,
+        experience_level varchar(255) not null check (experience_level in ('ENTRY','JUNIOR','MID','SENIOR','LEAD','MANAGER','DIRECTOR')),
+        job_type varchar(255) not null check (job_type in ('FULL_TIME','PART_TIME','CONTRACT','INTERNSHIP','FREELANCE')),
+        location varchar(255) not null,
+        location_normalized varchar(255),
+        remote_type varchar(255) check (remote_type in ('FULL_REMOTE','HYBRID','ONSITE')),
+        requirements TEXT,
+        responsibilities TEXT,
+        slug varchar(255) not null unique,
+        status varchar(255) check (status in ('DRAFT','PENDING','APPROVED','REJECTED','ACTIVE','PAUSED','CLOSED','EXPIRED')),
+        title varchar(255) not null,
+        title_normalized varchar(255),
+        video_intro_url varchar(255),
+        primary key (id)
+    )
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    create table public.notifications (
+        is_read boolean,
+        created_at timestamp(6),
+        id bigserial not null,
+        user_id bigint not null,
+        action_url varchar(255),
+        content TEXT,
+        title varchar(255) not null,
+        type varchar(255) not null check (type in ('APPLICATION','MESSAGE','JOB_MATCH','INTERVIEW','STATUS_UPDATE','SYSTEM')),
+        metadata jsonb,
+        primary key (id)
+    )
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    create table public.resumes (
+        is_primary boolean,
+        view_count integer,
+        created_at timestamp(6),
+        id bigserial not null,
+        user_id bigint not null,
+        file_type varchar(255),
+        file_url varchar(255) not null,
+        parsed_content TEXT,
+        title varchar(255) not null,
+        ai_analysis jsonb,
+        primary key (id)
+    )
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    create table public.saved_jobs (
+        id bigserial not null,
+        job_id bigint not null,
+        saved_at timestamp(6),
+        user_id bigint not null,
+        primary key (id),
+        unique (user_id, job_id)
+    )
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    create table public.skills (
+        candidate_count integer,
+        is_trending boolean,
+        job_count integer,
+        category_id bigint,
+        id bigserial not null,
+        name varchar(255) not null unique,
+        slug varchar(255) not null unique,
+        primary key (id)
+    )
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    create table public.user_profiles (
+        date_of_birth date,
+        expected_salary_max numeric(15,2),
+        expected_salary_min numeric(15,2),
+        experience_years integer,
+        open_to_remote boolean,
+        open_to_work boolean,
+        id bigserial not null,
+        updated_at timestamp(6),
+        user_id bigint not null unique,
+        address varchar(255),
+        avatar_url varchar(255),
+        bio TEXT,
+        city varchar(255),
+        current_position varchar(255),
+        full_name varchar(255),
+        gender varchar(255) check (gender in ('MALE','FEMALE','OTHER','PREFER_NOT_TO_SAY')),
+        github_url varchar(255),
+        linkedin_url varchar(255),
+        portfolio_url varchar(255),
+        primary key (id)
+    )
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    create table public.user_skills (
+        is_verified boolean,
+        years_experience integer,
+        id bigserial not null,
+        skill_id bigint not null,
+        user_id bigint not null,
+        certificate_url varchar(255),
+        proficiency varchar(255) check (proficiency in ('BEGINNER','INTERMEDIATE','ADVANCED','EXPERT')),
+        primary key (id)
+    )
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    create table public.users (
+        email_verified boolean,
+        created_at timestamp(6),
+        id bigserial not null,
+        updated_at timestamp(6),
+        email varchar(255) not null unique,
+        oauth_id varchar(255),
+        oauth_provider varchar(255),
+        password_hash varchar(255),
+        phone varchar(255) unique,
+        role varchar(255) not null check (role in ('CANDIDATE','EMPLOYER','ADMIN')),
+        status varchar(255) not null check (status in ('ACTIVE','INACTIVE','BANNED')),
+        primary key (id)
+    )
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.applications 
+       add constraint FK65weib1lru9dkrbto5pv389vi 
+       foreign key (job_id) 
+       references public.jobs
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.applications 
+       add constraint FKbhnfs5wwy14wdm2f1wam8qkhf 
+       foreign key (resume_id) 
+       references public.resumes
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.applications 
+       add constraint FKfsfqljedcla632u568jl5qf3w 
+       foreign key (user_id) 
+       references public.users
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.categories 
+       add constraint FKsaok720gsu4u2wrgbk10b5n8d 
+       foreign key (parent_id) 
+       references public.categories
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.companies 
+       add constraint FKikhsc7na5r394c8jghny8b6t4 
+       foreign key (owner_id) 
+       references public.users
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.company_images 
+       add constraint FK39pfp30xxpbsukcnv39a8wo7p 
+       foreign key (company_id) 
+       references public.companies
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.company_reviews 
+       add constraint FKkpjxpw5kl37cad0twqje6cq63 
+       foreign key (company_id) 
+       references public.companies
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.company_reviews 
+       add constraint FKjlwevafsv6wcpvt0jg5tfs1f0 
+       foreign key (user_id) 
+       references public.users
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.job_benefits 
+       add constraint FKdqntmlq6o4himh9uva0u3fcl9 
+       foreign key (job_id) 
+       references public.jobs
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.job_skills 
+       add constraint FK1gb74tysr9vkypwivvvovxq1f 
+       foreign key (job_id) 
+       references public.jobs
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.job_skills 
+       add constraint FKe10ho7um0atjm67b9dgokmfyx 
+       foreign key (skill_id) 
+       references public.skills
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.jobs 
+       add constraint FKlunrv9ems34544ff26wyfa89v 
+       foreign key (category_id) 
+       references public.categories
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.jobs 
+       add constraint FKrtmqcrktb6s7xq8djbs2a2war 
+       foreign key (company_id) 
+       references public.companies
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.jobs 
+       add constraint FKq4v0nwosiuabukh6vlo7414wd 
+       foreign key (posted_by) 
+       references public.users
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.notifications 
+       add constraint FK9y21adhxn0ayjhfocscqox7bh 
+       foreign key (user_id) 
+       references public.users
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.resumes 
+       add constraint FK340nuaivxiy99hslr3sdydfvv 
+       foreign key (user_id) 
+       references public.users
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.saved_jobs 
+       add constraint FKawvc9t3d3efu6ta6h30tb984t 
+       foreign key (job_id) 
+       references public.jobs
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.saved_jobs 
+       add constraint FK5fc45yi5nwtm3y93nt4fcpln6 
+       foreign key (user_id) 
+       references public.users
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.skills 
+       add constraint FKlyobx4bwdv7k6im48ru4pod1u 
+       foreign key (category_id) 
+       references public.categories
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.user_profiles 
+       add constraint FKjcad5nfve11khsnpwj1mv8frj 
+       foreign key (user_id) 
+       references public.users
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.user_skills 
+       add constraint FKh223y61gwijpgqt6nlsuti07g 
+       foreign key (skill_id) 
+       references public.skills
+2025-12-21 01:04:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table if exists public.user_skills 
+       add constraint FKro13if9r7fwkr5115715127ai 
+       foreign key (user_id) 
+       references public.users
+2025-12-21 01:04:45 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-12-21 01:04:45 [restartedMain] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-12-21 01:04:46 [restartedMain] DEBUG c.j.security.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2025-12-21 01:04:47 [restartedMain] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoint(s) beneath base path '/actuator'
+2025-12-21 01:04:47 [restartedMain] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@2f0c24ee, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@5da4fcb, org.springframework.security.web.context.SecurityContextHolderFilter@42df1d7f, org.springframework.security.web.header.HeaderWriterFilter@38f84c7f, org.springframework.web.filter.CorsFilter@5a8ffd3e, org.springframework.security.web.authentication.logout.LogoutFilter@efa8c1e, com.jobverse.security.JwtAuthenticationFilter@118a28c6, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@244f372, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@7b85ea82, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@79110067, org.springframework.security.web.session.SessionManagementFilter@7e8a361e, org.springframework.security.web.access.ExceptionTranslationFilter@2a73f7b1, org.springframework.security.web.access.intercept.AuthorizationFilter@3b7af6a3]
+2025-12-21 01:04:48 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-12-21 01:04:48 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/api'
+2025-12-21 01:04:48 [restartedMain] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Starting...
+2025-12-21 01:04:48 [restartedMain] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@3ed65290]]
+2025-12-21 01:04:48 [restartedMain] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Started.
+2025-12-21 01:04:48 [restartedMain] INFO  com.jobverse.JobverseApplication - Started JobverseApplication in 6.869 seconds (process running for 7.211)
