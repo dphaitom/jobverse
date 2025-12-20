@@ -38,7 +38,12 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     
     @Query("SELECT j FROM Job j WHERE j.status = :status ORDER BY j.createdAt DESC")
     Page<Job> findByStatus(Job.JobStatus status, Pageable pageable);
-    
+
+    @Query("SELECT COUNT(j) FROM Job j WHERE j.status = :status")
+    long countByStatus(Job.JobStatus status);
+
+    Page<Job> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
     @Query("SELECT j FROM Job j WHERE j.company.id = :companyId AND j.status = :status")
     Page<Job> findByCompanyIdAndStatus(Long companyId, Job.JobStatus status, Pageable pageable);
 
