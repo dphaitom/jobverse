@@ -1,6 +1,8 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { ProtectedRoute } from './components';
 
 // Pages
@@ -10,6 +12,11 @@ import JobDetailPage from './pages/JobDetailPage';
 import CompanyListPage from './pages/CompanyListPage';
 import CompanyDetailPage from './pages/CompanyDetailPage';
 import ProfilePage from './pages/ProfilePage';
+import SavedJobsPage from './pages/SavedJobsPage';
+import MyApplicationsPage from './pages/MyApplicationsPage';
+import SettingsPage from './pages/SettingsPage';
+import ResumeAnalysisPage from './pages/ResumeAnalysisPage';
+import InterviewPrepPage from './pages/InterviewPrepPage';
 import { LoginPage, RegisterPage } from './pages/AuthPages';
 
 // CSS
@@ -17,8 +24,26 @@ import './index.css';
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <ThemeProvider>
+      <AuthProvider>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: '#1a1a1b',
+              color: '#fff',
+              border: '1px solid #333',
+            },
+            success: {
+              iconTheme: {
+                primary: '#8b5cf6',
+                secondary: '#fff',
+              },
+            },
+          }}
+        />
+        <BrowserRouter>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
@@ -28,6 +53,10 @@ function App() {
           <Route path="/companies/:id" element={<CompanyDetailPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+
+          {/* AI Features - Public access */}
+          <Route path="/resume-analysis" element={<ResumeAnalysisPage />} />
+          <Route path="/interview-prep" element={<InterviewPrepPage />} />
           
           {/* Protected Routes */}
           <Route path="/profile" element={
@@ -54,24 +83,13 @@ function App() {
           {/* 404 */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
 // Simple placeholder pages
-const SavedJobsPage = () => (
-  <PlaceholderPage title="Việc làm đã lưu" icon="❤️" />
-);
-
-const MyApplicationsPage = () => (
-  <PlaceholderPage title="Đơn ứng tuyển" icon="📄" />
-);
-
-const SettingsPage = () => (
-  <PlaceholderPage title="Cài đặt" icon="⚙️" />
-);
-
 const NotFoundPage = () => (
   <div className="min-h-screen bg-[#0a0a0b] flex items-center justify-center text-center px-4">
     <div>

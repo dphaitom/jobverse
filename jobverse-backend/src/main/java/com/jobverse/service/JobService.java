@@ -39,7 +39,8 @@ public class JobService {
     private final NotificationService notificationService;
     
     private final Slugify slugify = Slugify.builder().build();
-    
+
+    @Transactional(readOnly = true)
     public Page<JobResponse> searchJobs(
             String keyword, String location, Long categoryId,
             Job.JobType jobType, Job.ExperienceLevel experienceLevel,
@@ -78,11 +79,12 @@ public class JobService {
         return jobs.map(job -> mapToJobResponse(job, userId));
     }
     
+    @Transactional(readOnly = true)
     public Page<JobResponse> fullTextSearch(String query, Pageable pageable, Long userId) {
         // In production, this would use Elasticsearch
         Specification<Job> spec = Specification.where(JobSpecification.hasStatus(Job.JobStatus.ACTIVE))
                 .and(JobSpecification.containsKeyword(query));
-        
+
         Page<Job> jobs = jobRepository.findAll(spec, pageable);
         return jobs.map(job -> mapToJobResponse(job, userId));
     }

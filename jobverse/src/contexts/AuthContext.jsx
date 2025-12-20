@@ -1,6 +1,7 @@
 // src/contexts/AuthContext.jsx
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authAPI, userAPI } from '../services/api';
+import toast from 'react-hot-toast';
 
 const AuthContext = createContext(null);
 
@@ -46,21 +47,24 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await authAPI.register(data);
-      
+
       if (response.success) {
         // Lưu tokens
         localStorage.setItem('accessToken', response.data.accessToken);
         localStorage.setItem('refreshToken', response.data.refreshToken);
-        
+
         // Set user info
         setUser(response.data.user);
-        
+
+        toast.success(`Chào mừng ${response.data.user.fullName}! Đăng ký thành công 🎉`);
         return { success: true };
       }
-      
+
+      toast.error(response.message || 'Đăng ký thất bại');
       return { success: false, error: response.message };
     } catch (err) {
       setError(err.message);
+      toast.error(err.message || 'Có lỗi xảy ra khi đăng ký');
       return { success: false, error: err.message };
     }
   }, []);
@@ -70,21 +74,24 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await authAPI.login(email, password);
-      
+
       if (response.success) {
         // Lưu tokens
         localStorage.setItem('accessToken', response.data.accessToken);
         localStorage.setItem('refreshToken', response.data.refreshToken);
-        
+
         // Set user info
         setUser(response.data.user);
-        
+
+        toast.success(`Xin chào ${response.data.user.fullName}! Đăng nhập thành công 👋`);
         return { success: true };
       }
-      
+
+      toast.error(response.message || 'Đăng nhập thất bại');
       return { success: false, error: response.message };
     } catch (err) {
       setError(err.message);
+      toast.error(err.message || 'Sai email hoặc mật khẩu');
       return { success: false, error: err.message };
     }
   }, []);
@@ -100,6 +107,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       setUser(null);
+      toast.success('Đã đăng xuất thành công. Hẹn gặp lại! 👋');
     }
   }, []);
 

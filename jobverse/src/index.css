@@ -3,12 +3,32 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==================== NIKE-INSPIRED DESIGN SYSTEM ==================== */
+
+/* Import Inter font for Nike-style clean typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 /* ==================== ROOT VARIABLES ==================== */
 :root {
-  --color-primary: #8b5cf6;
-  --color-secondary: #6366f1;
-  --color-bg: #0a0a0b;
-  --color-card: rgba(17, 17, 17, 0.8);
+  /* Nike Black Theme Colors */
+  --color-nike-black: #111111;
+  --color-nike-black-light: #1a1a1a;
+  --color-nike-black-lighter: #2d2d2d;
+  --color-nike-white: #ffffff;
+  --color-nike-orange: #fa5400;
+
+  /* AI Accent Colors */
+  --color-ai-purple: #8b5cf6;
+  --color-ai-purple-light: #a78bfa;
+  --color-ai-blue: #3b82f6;
+
+  /* Dynamic Theme Variables */
+  --color-bg: #111111;
+  --color-bg-secondary: #1a1a1a;
+  --color-card: #1a1a1a;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a3a3a3;
+  --color-border: #2d2d2d;
 }
 
 /* ==================== BASE STYLES ==================== */
@@ -18,11 +38,19 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--color-bg);
-  color: #e5e7eb;
+  color: var(--color-text-primary);
   line-height: 1.6;
+  font-weight: 400;
+  letter-spacing: -0.01em;
 }
 
 /* ==================== SCROLLBAR ==================== */
@@ -122,6 +150,24 @@ body {
   font-size: 0.75rem;
   font-weight: 500;
   border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.btn-secondary {
+  background: rgba(55, 65, 81, 0.5);
+  color: #e5e7eb;
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: rgba(75, 85, 99, 0.6);
 }
 
 /* ==================== ANIMATIONS ==================== */
@@ -260,4 +306,147 @@ input[type="checkbox"]:checked {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* ==================== LIGHT MODE ==================== */
+:root:not(.dark) {
+  --color-bg: #f8fafc;
+  --color-card: #ffffff;
+}
+
+/* Navbar trong light mode - gradient xám chuyên nghiệp */
+:root:not(.dark) nav.glass-card {
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.98) 0%, rgba(241, 245, 249, 0.95) 100%);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Text màu trong navbar light mode */
+:root:not(.dark) nav.glass-card .text-gray-400 {
+  color: #64748b !important;
+}
+
+:root:not(.dark) nav.glass-card .text-gray-400:hover {
+  color: #1e293b !important;
+}
+
+:root:not(.dark) nav.glass-card .text-white {
+  color: #0f172a !important;
+}
+
+/* Content cards trong light mode - trắng tinh khiết */
+:root:not(.dark) .glass-card {
+  background: #ffffff;
+  backdrop-filter: blur(20px);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+:root:not(.dark) .input-field {
+  background: rgba(243, 244, 246, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #1f2937;
+}
+
+:root:not(.dark) .input-field::placeholder {
+  color: #9ca3af;
+}
+
+:root:not(.dark) select option {
+  background: #f9fafb;
+  color: #1f2937;
+}
+
+:root:not(.dark) input[type="checkbox"] {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+:root:not(.dark) ::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+:root:not(.dark) ::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+}
+
+:root:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+:root:not(.dark) .btn-secondary {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+}
+
+:root:not(.dark) .btn-secondary:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+/* Skill pills trong light mode */
+:root:not(.dark) .skill-pill {
+  background: rgba(139, 92, 246, 0.08);
+  color: #7c3aed;
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+/* Job cards hover trong light mode */
+:root:not(.dark) .job-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+/* Text colors trong light mode */
+:root:not(.dark) .text-white {
+  color: #0f172a !important;
+}
+
+:root:not(.dark) .text-gray-100 {
+  color: #1e293b !important;
+}
+
+:root:not(.dark) .text-gray-200 {
+  color: #334155 !important;
+}
+
+:root:not(.dark) .text-gray-300 {
+  color: #475569 !important;
+}
+
+:root:not(.dark) .text-gray-400 {
+  color: #64748b !important;
+}
+
+:root:not(.dark) .text-gray-500 {
+  color: #94a3b8 !important;
+}
+
+/* Background colors trong light mode */
+:root:not(.dark) .bg-gray-800 {
+  background-color: #f1f5f9 !important;
+}
+
+:root:not(.dark) .bg-gray-800\/50 {
+  background-color: rgba(241, 245, 249, 0.5) !important;
+}
+
+:root:not(.dark) .bg-gray-900 {
+  background-color: #e2e8f0 !important;
+}
+
+:root:not(.dark) .bg-gray-900\/50 {
+  background-color: rgba(226, 232, 240, 0.5) !important;
+}
+
+/* Border colors trong light mode */
+:root:not(.dark) .border-gray-700 {
+  border-color: #e2e8f0 !important;
+}
+
+:root:not(.dark) .border-gray-800 {
+  border-color: #cbd5e1 !important;
 }

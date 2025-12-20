@@ -94,13 +94,14 @@ export const jobsAPI = {
     const queryString = new URLSearchParams(params).toString();
     return apiRequest(`/v1/jobs${queryString ? `?${queryString}` : ''}`);
   },
-  
-  getJobById: (id) => 
+
+  getJobById: (id) =>
     apiRequest(`/v1/jobs/${id}`),
-  
+
   searchJobs: (params = {}) => {
+    // Use the main /v1/jobs endpoint which supports all filters
     const queryString = new URLSearchParams(params).toString();
-    return apiRequest(`/v1/jobs/search?${queryString}`);
+    return apiRequest(`/v1/jobs${queryString ? `?${queryString}` : ''}`);
   },
   
   getTrendingJobs: () =>
@@ -168,11 +169,78 @@ export const skillsAPI = {
 export const userAPI = {
   getProfile: () =>
     apiRequest('/v1/users/me'),
-  
+
   updateProfile: (profileData) =>
     apiRequest('/v1/users/me', {
       method: 'PUT',
       body: JSON.stringify(profileData),
+    }),
+};
+
+// ==================== AI API ====================
+
+export const aiAPI = {
+  // AI Chat
+  chat: (message, context) =>
+    apiRequest('/v1/ai/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message, context }),
+    }),
+
+  chatGuest: (message) =>
+    apiRequest('/v1/ai/chat/guest', {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+      headers: {}, // No auth required
+    }),
+
+  // Resume Analysis
+  analyzeResume: (resumeData) =>
+    apiRequest('/v1/resume/analyze', {
+      method: 'POST',
+      body: JSON.stringify(resumeData),
+    }),
+
+  matchResumeToJob: (data) =>
+    apiRequest('/v1/resume/match', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getResumeTips: () =>
+    apiRequest('/v1/resume/tips'),
+
+  analyzeResumeGuest: (resumeData) =>
+    apiRequest('/v1/resume/analyze/guest', {
+      method: 'POST',
+      body: JSON.stringify(resumeData),
+      headers: {}, // No auth required
+    }),
+
+  // Interview Preparation
+  generateInterviewQuestions: (data) =>
+    apiRequest('/v1/interview/questions', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  evaluateAnswer: (data) =>
+    apiRequest('/v1/interview/evaluate', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getInterviewTips: (type = 'TECHNICAL') =>
+    apiRequest(`/v1/interview/tips?type=${type}`),
+
+  getTipCategories: () =>
+    apiRequest('/v1/interview/tips/categories'),
+
+  generateInterviewQuestionsGuest: (data) =>
+    apiRequest('/v1/interview/questions/guest', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {}, // No auth required
     }),
 };
 
@@ -183,4 +251,5 @@ export default {
   categories: categoriesAPI,
   skills: skillsAPI,
   user: userAPI,
+  ai: aiAPI,
 };

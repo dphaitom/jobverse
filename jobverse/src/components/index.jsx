@@ -4,16 +4,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import {
   Search, MapPin, Briefcase, Clock, DollarSign, Heart, ChevronDown,
   Bell, User, Menu, X, Rocket, Building2, LogOut, Settings,
   FileText, Bookmark, Star, Globe, Zap, Users, Filter, ChevronRight,
-  ArrowRight, Sparkles
+  ArrowRight, Sparkles, Sun, Moon
 } from 'lucide-react';
 
 // ==================== NAVBAR ====================
 export const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -49,16 +51,30 @@ export const Navbar = () => {
           <div className="hidden md:flex items-center gap-8">
             <Link to="/jobs" className="text-gray-400 hover:text-white transition-colors">Việc làm</Link>
             <Link to="/companies" className="text-gray-400 hover:text-white transition-colors">Công ty</Link>
-            <Link to="/salary" className="text-gray-400 hover:text-white transition-colors">Lương</Link>
-            <Link to="/blog" className="text-gray-400 hover:text-white transition-colors">Blog</Link>
+            <Link to="/resume-analysis" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+              <Sparkles className="w-4 h-4" />
+              AI Resume
+            </Link>
+            <Link to="/interview-prep" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+              <Sparkles className="w-4 h-4" />
+              AI Interview
+            </Link>
           </div>
 
           <div className="flex items-center gap-4">
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-gray-400 hover:text-white transition-all hover:rotate-180 duration-500"
+              title={isDark ? 'Chuyển sang Light mode' : 'Chuyển sang Dark mode'}
+            >
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+
             <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-violet-500 rounded-full animate-pulse" />
             </button>
-            
+
             {isAuthenticated ? (
               <div className="relative" ref={menuRef}>
                 <button
@@ -135,8 +151,14 @@ export const Navbar = () => {
           <div className="px-4 py-4 space-y-2">
             <Link to="/jobs" className="block w-full text-left px-4 py-3 text-gray-400 hover:text-white hover:bg-gray-800/50 rounded-lg">Việc làm</Link>
             <Link to="/companies" className="block w-full text-left px-4 py-3 text-gray-400 hover:text-white hover:bg-gray-800/50 rounded-lg">Công ty</Link>
-            <Link to="/salary" className="block w-full text-left px-4 py-3 text-gray-400 hover:text-white hover:bg-gray-800/50 rounded-lg">Lương</Link>
-            <Link to="/blog" className="block w-full text-left px-4 py-3 text-gray-400 hover:text-white hover:bg-gray-800/50 rounded-lg">Blog</Link>
+            <Link to="/resume-analysis" className="w-full text-left px-4 py-3 text-gray-400 hover:text-white hover:bg-gray-800/50 rounded-lg flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              AI Resume
+            </Link>
+            <Link to="/interview-prep" className="w-full text-left px-4 py-3 text-gray-400 hover:text-white hover:bg-gray-800/50 rounded-lg flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              AI Interview
+            </Link>
             {!isAuthenticated && (
               <Link to="/login" className="block w-full text-left px-4 py-3 text-violet-400 hover:text-violet-300">
                 Đăng nhập

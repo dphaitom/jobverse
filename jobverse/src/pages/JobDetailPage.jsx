@@ -6,6 +6,7 @@ import {
   Heart, Share2, ArrowLeft, CheckCircle, Star, Zap, Calendar,
   Send, BookOpen, Award, ChevronRight
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { jobsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Navbar, Footer, LoadingSpinner, JobCard } from '../components';
@@ -67,14 +68,14 @@ const JobDetailPage = () => {
       navigate('/login');
       return;
     }
-    
+
     setApplyLoading(true);
     try {
       await jobsAPI.applyJob(id, { coverLetter });
       setShowApplyModal(false);
-      alert('Ứng tuyển thành công!');
+      toast.success('Ứng tuyển thành công! 🎉 Chúc bạn may mắn!');
     } catch (error) {
-      alert('Lỗi: ' + error.message);
+      toast.error('Lỗi: ' + error.message);
     } finally {
       setApplyLoading(false);
     }
@@ -89,7 +90,7 @@ const JobDetailPage = () => {
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert('Đã copy link!');
+      toast.success('Đã copy link! 📋');
     }
   };
 
