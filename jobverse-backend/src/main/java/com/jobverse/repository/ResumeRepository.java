@@ -12,7 +12,7 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
 
     List<Resume> findByUserIdOrderByCreatedAtDesc(Long userId);
 
-    Optional<Resume> findByUserIdAndIsDefaultTrue(Long userId);
+    Optional<Resume> findByUserIdAndIsPrimaryTrue(Long userId);
 
-    boolean existsByUserIdAndIsDefaultTrue(Long userId);
+    boolean existsByUserIdAndIsPrimaryTrue(Long userId);
 }

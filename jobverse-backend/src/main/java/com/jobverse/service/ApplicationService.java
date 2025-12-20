@@ -92,8 +92,8 @@ public class ApplicationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Get user's default resume
-        Resume defaultResume = resumeRepository.findByUserIdAndIsDefaultTrue(userId)
+        // Get user's primary resume
+        Resume defaultResume = resumeRepository.findByUserIdAndIsPrimaryTrue(userId)
                 .orElse(null);
 
         // Create quick application with minimal info
