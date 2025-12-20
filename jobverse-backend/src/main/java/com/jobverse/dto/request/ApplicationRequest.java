@@ -26,4 +26,8 @@ public class ApplicationRequest {
     
     @DecimalMin(value = "0", message = "Expected salary must be positive")
     private BigDecimal expectedSalary;
+
+    private Boolean isQuickApply;
+
+    private Boolean isAnonymous;
 }

@@ -90,4 +90,21 @@ public class NotificationService {
             // Don't throw exception - notification is already saved in DB
         }
     }
+
+    @Async
+    public void sendApplicationStatusUpdateNotification(Application application) {
+        Notification notification = Notification.builder()
+                .user(application.getUser())
+                .type(Notification.NotificationType.APPLICATION)
+                .title("Trạng thái đơn ứng tuyển đã thay đổi")
+                .content("Đơn ứng tuyển " + application.getJob().getTitle() +
+                        " của bạn đã chuyển sang trạng thái: " + application.getStatus())
+                .actionUrl("/applications/" + application.getId())
+                .build();
+
+        Notification saved = notificationRepository.save(notification);
+        sendRealTimeNotification(saved);
+
+        log.info("Application status update notification sent to user {}", application.getUser().getId());
+    }
 }
