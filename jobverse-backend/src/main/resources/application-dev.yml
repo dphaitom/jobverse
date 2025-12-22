@@ -1,36 +1,36 @@
 spring:
   application:
     name: jobverse-backend
-  
-  # H2 In-Memory Database (không cần cài đặt)
+
+  # PostgreSQL Database
   datasource:
-    url: jdbc:h2:mem:jobverse;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
-    username: sa
-    password: 
-    driver-class-name: org.h2.Driver
-  
-  # H2 Console để xem database
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-      settings:
-        web-allow-others: true
-  
+    url: jdbc:postgresql://localhost:5432/jobverse
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+
   # JPA Configuration
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     show-sql: true
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       hibernate:
         format_sql: true
+        default_schema: public
     open-in-view: false
-  
-  # TẮT Flyway hoàn toàn
+
+  # Flyway Migration
   flyway:
-    enabled: false
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
   
   # TẮT Redis
   data:

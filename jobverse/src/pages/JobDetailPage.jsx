@@ -38,11 +38,21 @@ const JobDetailPage = () => {
     try {
       const response = await jobsAPI.getJobById(id);
       setJob(response.data);
-      
+
       // Fetch related jobs
       if (response.data?.company?.id) {
         const relatedRes = await jobsAPI.getJobsByCompany(response.data.company.id);
         setRelatedJobs((relatedRes.data || []).filter(j => j.id !== parseInt(id)).slice(0, 3));
+      }
+
+      // Check if job is saved (only for authenticated users)
+      if (isAuthenticated) {
+        try {
+          const savedRes = await jobsAPI.checkSavedJob(id);
+          setIsSaved(savedRes.data?.isSaved || false);
+        } catch (error) {
+          console.error('Error checking saved status:', error);
+        }
       }
     } catch (error) {
       console.error('Error fetching job:', error);
@@ -59,12 +69,15 @@ const JobDetailPage = () => {
     try {
       if (isSaved) {
         await jobsAPI.unsaveJob(id);
+        toast.success('Đã bỏ lưu công việc');
       } else {
         await jobsAPI.saveJob(id);
+        toast.success('✓ Đã lưu công việc thành công!');
       }
       setIsSaved(!isSaved);
     } catch (error) {
       console.error('Error saving job:', error);
+      toast.error('Lỗi khi lưu công việc: ' + (error.response?.data?.error?.message || error.message));
     }
   };
 
@@ -99,7 +112,8 @@ const JobDetailPage = () => {
       setHasApplied(true);
       toast.success('⚡ Ứng tuyển nhanh thành công! Chúc bạn may mắn!');
     } catch (error) {
-      toast.error('Lỗi: ' + error.message);
+      console.error('Quick apply error:', error);
+      toast.error('Lỗi: ' + (error.response?.data?.error?.message || error.message));
     } finally {
       setQuickApplyLoading(false);
     }

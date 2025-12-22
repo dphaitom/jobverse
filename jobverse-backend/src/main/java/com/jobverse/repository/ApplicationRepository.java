@@ -46,7 +46,23 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     @Query("SELECT a FROM Application a WHERE a.user.id = :userId AND a.status IN :statuses")
     List<Application> findByUserIdAndStatusIn(Long userId, List<Application.ApplicationStatus> statuses);
 
+    @Query("SELECT a FROM Application a " +
+           "LEFT JOIN FETCH a.job j " +
+           "LEFT JOIN FETCH j.company c " +
+           "LEFT JOIN FETCH a.user u " +
+           "LEFT JOIN FETCH u.profile " +
+           "LEFT JOIN FETCH a.resume " +
+           "WHERE a.user.id = :userId " +
+           "ORDER BY a.appliedAt DESC")
     Page<Application> findByUserIdOrderByAppliedAtDesc(Long userId, Pageable pageable);
 
+    @Query("SELECT a FROM Application a " +
+           "LEFT JOIN FETCH a.job j " +
+           "LEFT JOIN FETCH j.company c " +
+           "LEFT JOIN FETCH a.user u " +
+           "LEFT JOIN FETCH u.profile " +
+           "LEFT JOIN FETCH a.resume " +
+           "WHERE a.job.id = :jobId " +
+           "ORDER BY a.appliedAt DESC")
     Page<Application> findByJobIdOrderByAppliedAtDesc(Long jobId, Pageable pageable);
 }

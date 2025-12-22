@@ -2,6 +2,9 @@ package com.jobverse.controller;
 
 import com.jobverse.dto.response.ApiResponse;
 import com.jobverse.dto.response.CompanyResponse;
+import com.jobverse.dto.response.JobResponse;
+import com.jobverse.entity.Job;
+import com.jobverse.repository.JobRepository;
 import com.jobverse.service.CompanyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,6 +27,7 @@ import java.util.List;
 public class CompanyController {
 
     private final CompanyService companyService;
+    private final JobRepository jobRepository;
 
     @GetMapping
     @Operation(summary = "Get all companies with pagination")
@@ -87,5 +91,40 @@ public class CompanyController {
         log.info("✅ Returning {} top rated companies", companies.getNumberOfElements());
 
         return ResponseEntity.ok(ApiResponse.success(companies));
+    }
+
+    @GetMapping("/{id}/jobs")
+    @Operation(summary = "Get jobs by company ID")
+    public ResponseEntity<ApiResponse<Page<JobResponse>>> getJobsByCompany(
+            @PathVariable Long id,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        log.info("💼 GET /v1/companies/{}/jobs", id);
+
+        Page<Job> jobs = jobRepository.findByCompanyIdAndStatus(id, Job.JobStatus.ACTIVE, pageable);
+        Page<JobResponse> jobResponses = jobs.map(job -> JobResponse.builder()
+                .id(job.getId())
+                .title(job.getTitle())
+                .slug(job.getSlug())
+                .description(job.getDescription())
+                .location(job.getLocation())
+                .salaryMin(job.getSalaryMin())
+                .salaryMax(job.getSalaryMax())
+                .salaryNegotiable(job.getSalaryNegotiable())
+                .currency(job.getCurrency())
+                .jobType(job.getJobType())
+                .experienceLevel(job.getExperienceLevel())
+                .deadline(job.getDeadline())
+                .isFeatured(job.getIsFeatured())
+                .isRemote(job.getIsRemote())
+                .isUrgent(job.getIsUrgent())
+                .positionsCount(job.getPositionsCount())
+                .status(job.getStatus())
+                .createdAt(job.getCreatedAt())
+                .build());
+
+        log.info("✅ Returning {} jobs for company {}", jobResponses.getNumberOfElements(), id);
+
+        return ResponseEntity.ok(ApiResponse.success(jobResponses));
     }
 }
