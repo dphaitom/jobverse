@@ -20,15 +20,30 @@ export const useWebSocket = (user, onNotification) => {
     // Only connect if user is authenticated
     if (!user || !user.id) {
       console.log('⏸️ WebSocket: No user, skipping connection');
+      setConnected(false);
+      setError(null);
       return;
     }
 
     console.log('🔌 WebSocket: Attempting to connect for user', user.id);
 
+    // Get auth token
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      console.warn('⚠️ WebSocket: No auth token, skipping connection');
+      setConnected(false);
+      return;
+    }
+
     // Create STOMP client
     const client = new Client({
       // Use SockJS for fallback compatibility
       webSocketFactory: () => new SockJS(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/ws`),
+
+      // Add auth headers
+      connectHeaders: {
+        Authorization: `Bearer ${token}`
+      },
 
       // Debug logging (disable in production)
       debug: (str) => {

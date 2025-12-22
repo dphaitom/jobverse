@@ -1,5 +1,5 @@
 // src/pages/InterviewPrepPage.jsx
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   MessageSquare, Code, Users, Briefcase, Award,
@@ -9,6 +9,217 @@ import {
 import { Navbar, Footer } from '../components';
 import { aiAPI } from '../services/api';
 import toast from 'react-hot-toast';
+
+// Move QuestionCard outside to prevent re-creation on each render
+const QuestionCard = memo(({
+  question,
+  category,
+  index,
+  expandedQuestion,
+  toggleQuestion,
+  userAnswers,
+  setUserAnswers,
+  evaluations,
+  evaluating,
+  handleEvaluate
+}) => {
+  const questionKey = `${category}-${index}`;
+  const isExpanded = expandedQuestion === questionKey;
+  const evaluation = evaluations[questionKey];
+
+  const getDifficultyColor = (difficulty) => {
+    switch (difficulty?.toLowerCase()) {
+      case 'easy': return 'text-green-500 bg-green-500/10 border-green-500/20';
+      case 'medium': return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20';
+      case 'hard': return 'text-red-500 bg-red-500/10 border-red-500/20';
+      default: return 'text-gray-500 bg-gray-500/10 border-gray-500/20';
+    }
+  };
+
+  const getTypeIcon = (type) => {
+    switch (type?.toLowerCase()) {
+      case 'hr': return <Users className="w-4 h-4" />;
+      case 'technical': return <Code className="w-4 h-4" />;
+      case 'coding': return <Code className="w-4 h-4" />;
+      case 'behavioral': return <MessageSquare className="w-4 h-4" />;
+      case 'system design': return <Briefcase className="w-4 h-4" />;
+      default: return <MessageSquare className="w-4 h-4" />;
+    }
+  };
+
+  return (
+    <div className="bg-nike-black-light border border-gray-800 rounded-xl overflow-hidden hover:border-ai-purple/30 transition-all duration-300">
+      <button
+        onClick={() => toggleQuestion(category, index)}
+        className="w-full px-6 py-4 flex items-start justify-between text-left hover:bg-white/5 transition-colors"
+      >
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-2">
+            <span className={`px-2 py-1 rounded text-xs font-medium border ${getDifficultyColor(question.difficulty)}`}>
+              {question.difficulty}
+            </span>
+            <span className="flex items-center gap-1 text-xs text-gray-400">
+              {getTypeIcon(question.type)}
+              {question.type}
+            </span>
+          </div>
+          <p className="text-white font-medium pr-4">{question.question}</p>
+        </div>
+        {isExpanded ? (
+          <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0" />
+        ) : (
+          <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
+        )}
+      </button>
+
+      {isExpanded && (
+        <div className="px-6 pb-6 space-y-4 border-t border-gray-800">
+          {/* Tips */}
+          {question.tips && (
+            <div className="pt-4">
+              <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-yellow-500" />
+                Tips:
+              </h4>
+              <p className="text-sm text-gray-400">{question.tips}</p>
+            </div>
+          )}
+
+          {/* Your Answer */}
+          <div>
+            <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-ai-purple" />
+              Câu trả lời của bạn:
+            </h4>
+            <textarea
+              value={userAnswers[questionKey] || ''}
+              onChange={(e) => {
+                const newValue = e.target.value;
+                setUserAnswers(prev => ({ ...prev, [questionKey]: newValue }));
+              }}
+              placeholder="Nhập câu trả lời của bạn..."
+              className="w-full px-4 py-3 bg-nike-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-ai-purple/50 focus:border-ai-purple/50 transition-all resize-none"
+              rows={4}
+            />
+            <button
+              onClick={() => handleEvaluate(question, category, index)}
+              disabled={evaluating[questionKey]}
+              className="mt-3 px-4 py-2 bg-gradient-to-r from-ai-purple to-ai-blue hover:from-ai-purple/90 hover:to-ai-blue/90 disabled:from-gray-700 disabled:to-gray-700 text-white rounded-lg font-medium text-sm transition-all duration-300 flex items-center gap-2"
+            >
+              {evaluating[questionKey] ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Đang đánh giá...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  Đánh Giá
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Evaluation */}
+          {evaluation && (
+            <div className="bg-gradient-to-br from-ai-purple/10 to-ai-blue/10 border border-ai-purple/20 rounded-lg p-4">
+              <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                <Award className="w-4 h-4 text-ai-purple" />
+                Đánh giá của AI:
+              </h4>
+              <div className="space-y-3 text-sm">
+                <div>
+                  <span className="text-gray-400">Score: </span>
+                  <span className="text-ai-purple font-bold">{evaluation.score}/100</span>
+                </div>
+                <div>
+                  <span className="text-gray-400">Feedback: </span>
+                  <p className="text-white mt-1">{evaluation.feedback}</p>
+                </div>
+                {evaluation.suggestions && evaluation.suggestions.length > 0 && (
+                  <div>
+                    <span className="text-gray-400 block mb-2">Suggestions:</span>
+                    <ul className="space-y-1">
+                      {evaluation.suggestions.map((suggestion, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-ai-purple flex-shrink-0 mt-0.5" />
+                          <span>{suggestion}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Sample Answer */}
+          {question.sampleAnswer && (
+            <div className="bg-nike-black border border-gray-700 rounded-lg p-4">
+              <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-green-500" />
+                Câu trả lời mẫu:
+              </h4>
+              <p className="text-sm text-gray-400 whitespace-pre-line">{question.sampleAnswer}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+});
+
+QuestionCard.displayName = 'QuestionCard';
+
+// Move QuestionSection outside as well
+const QuestionSection = memo(({
+  title,
+  questions,
+  category,
+  icon: Icon,
+  color,
+  expandedQuestion,
+  toggleQuestion,
+  userAnswers,
+  setUserAnswers,
+  evaluations,
+  evaluating,
+  handleEvaluate
+}) => {
+  if (!questions || questions.length === 0) return null;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <div className={`p-2 ${color} rounded-lg`}>
+          <Icon className="w-5 h-5" />
+        </div>
+        <h3 className="text-xl font-bold text-white">
+          {title} ({questions.length})
+        </h3>
+      </div>
+      <div className="space-y-3">
+        {questions.map((question, index) => (
+          <QuestionCard
+            key={`${category}-${index}`}
+            question={question}
+            category={category}
+            index={index}
+            expandedQuestion={expandedQuestion}
+            toggleQuestion={toggleQuestion}
+            userAnswers={userAnswers}
+            setUserAnswers={setUserAnswers}
+            evaluations={evaluations}
+            evaluating={evaluating}
+            handleEvaluate={handleEvaluate}
+          />
+        ))}
+      </div>
+    </div>
+  );
+});
+
+QuestionSection.displayName = 'QuestionSection';
 
 const InterviewPrepPage = () => {
   const navigate = useNavigate();
@@ -75,197 +286,26 @@ const InterviewPrepPage = () => {
       return;
     }
 
-    setEvaluating({ ...evaluating, [questionKey]: true });
+    setEvaluating(prev => ({ ...prev, [questionKey]: true }));
     try {
       const response = await aiAPI.evaluateAnswer({
         question: question.question,
         userAnswer: answer
       });
-      setEvaluations({ ...evaluations, [questionKey]: response.data });
+      setEvaluations(prev => ({ ...prev, [questionKey]: response.data }));
       toast.success('Đã đánh giá câu trả lời!');
     } catch (error) {
       console.error('Error evaluating answer:', error);
       toast.error(error.response?.data?.error?.message || 'Có lỗi xảy ra');
     } finally {
-      setEvaluating({ ...evaluating, [questionKey]: false });
+      setEvaluating(prev => ({ ...prev, [questionKey]: false }));
     }
   };
 
-  const toggleQuestion = (category, index) => {
+  const toggleQuestion = useCallback((category, index) => {
     const key = `${category}-${index}`;
-    setExpandedQuestion(expandedQuestion === key ? null : key);
-  };
-
-  const QuestionCard = ({ question, category, index }) => {
-    const questionKey = `${category}-${index}`;
-    const isExpanded = expandedQuestion === questionKey;
-    const evaluation = evaluations[questionKey];
-
-    const getDifficultyColor = (difficulty) => {
-      switch (difficulty?.toLowerCase()) {
-        case 'easy': return 'text-green-500 bg-green-500/10 border-green-500/20';
-        case 'medium': return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20';
-        case 'hard': return 'text-red-500 bg-red-500/10 border-red-500/20';
-        default: return 'text-gray-500 bg-gray-500/10 border-gray-500/20';
-      }
-    };
-
-    const getTypeIcon = (type) => {
-      switch (type?.toLowerCase()) {
-        case 'hr': return <Users className="w-4 h-4" />;
-        case 'technical': return <Code className="w-4 h-4" />;
-        case 'coding': return <Code className="w-4 h-4" />;
-        case 'behavioral': return <MessageSquare className="w-4 h-4" />;
-        case 'system design': return <Briefcase className="w-4 h-4" />;
-        default: return <MessageSquare className="w-4 h-4" />;
-      }
-    };
-
-    return (
-      <div className="bg-nike-black-light border border-gray-800 rounded-xl overflow-hidden hover:border-ai-purple/30 transition-all duration-300">
-        <button
-          onClick={() => toggleQuestion(category, index)}
-          className="w-full px-6 py-4 flex items-start justify-between text-left hover:bg-white/5 transition-colors"
-        >
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <span className={`px-2 py-1 rounded text-xs font-medium border ${getDifficultyColor(question.difficulty)}`}>
-                {question.difficulty}
-              </span>
-              <span className="flex items-center gap-1 text-xs text-gray-400">
-                {getTypeIcon(question.type)}
-                {question.type}
-              </span>
-            </div>
-            <p className="text-white font-medium pr-4">{question.question}</p>
-          </div>
-          {isExpanded ? (
-            <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0" />
-          ) : (
-            <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
-          )}
-        </button>
-
-        {isExpanded && (
-          <div className="px-6 pb-6 space-y-4 border-t border-gray-800">
-            {/* Tips */}
-            {question.tips && (
-              <div className="pt-4">
-                <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
-                  <Lightbulb className="w-4 h-4 text-yellow-500" />
-                  Tips:
-                </h4>
-                <p className="text-sm text-gray-400">{question.tips}</p>
-              </div>
-            )}
-
-            {/* Your Answer */}
-            <div>
-              <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-ai-purple" />
-                Câu trả lời của bạn:
-              </h4>
-              <textarea
-                value={userAnswers[questionKey] || ''}
-                onChange={(e) => setUserAnswers({ ...userAnswers, [questionKey]: e.target.value })}
-                placeholder="Nhập câu trả lời của bạn..."
-                className="w-full px-4 py-3 bg-nike-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-ai-purple/50 focus:border-ai-purple/50 transition-all resize-none"
-                rows={4}
-              />
-              <button
-                onClick={() => handleEvaluate(question, category, index)}
-                disabled={evaluating[questionKey]}
-                className="mt-3 px-4 py-2 bg-gradient-to-r from-ai-purple to-ai-blue hover:from-ai-purple/90 hover:to-ai-blue/90 disabled:from-gray-700 disabled:to-gray-700 text-white rounded-lg font-medium text-sm transition-all duration-300 flex items-center gap-2"
-              >
-                {evaluating[questionKey] ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Đang đánh giá...
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4" />
-                    Đánh Giá
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Evaluation */}
-            {evaluation && (
-              <div className="bg-gradient-to-br from-ai-purple/10 to-ai-blue/10 border border-ai-purple/20 rounded-lg p-4">
-                <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
-                  <Award className="w-4 h-4 text-ai-purple" />
-                  Đánh giá của AI:
-                </h4>
-                <div className="space-y-3 text-sm">
-                  <div>
-                    <span className="text-gray-400">Score: </span>
-                    <span className="text-ai-purple font-bold">{evaluation.score}/100</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Feedback: </span>
-                    <p className="text-white mt-1">{evaluation.feedback}</p>
-                  </div>
-                  {evaluation.suggestions && evaluation.suggestions.length > 0 && (
-                    <div>
-                      <span className="text-gray-400 block mb-2">Suggestions:</span>
-                      <ul className="space-y-1">
-                        {evaluation.suggestions.map((suggestion, idx) => (
-                          <li key={idx} className="flex items-start gap-2 text-gray-300">
-                            <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                            <span>{suggestion}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Sample Answer */}
-            {question.sampleAnswer && (
-              <div className="bg-nike-black border border-gray-700 rounded-lg p-4">
-                <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-green-500" />
-                  Câu trả lời mẫu:
-                </h4>
-                <p className="text-sm text-gray-400 whitespace-pre-line">{question.sampleAnswer}</p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const QuestionSection = ({ title, questions, category, icon: Icon, color }) => {
-    if (!questions || questions.length === 0) return null;
-
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className={`p-2 ${color} rounded-lg`}>
-            <Icon className="w-5 h-5" />
-          </div>
-          <h3 className="text-xl font-bold text-white">
-            {title} ({questions.length})
-          </h3>
-        </div>
-        <div className="space-y-3">
-          {questions.map((question, index) => (
-            <QuestionCard
-              key={index}
-              question={question}
-              category={category}
-              index={index}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  };
+    setExpandedQuestion(prev => prev === key ? null : key);
+  }, []);
 
   return (
     <div className="min-h-screen bg-nike-black">
@@ -360,6 +400,13 @@ const InterviewPrepPage = () => {
                 category="hr"
                 icon={Users}
                 color="bg-blue-500/10 text-blue-500"
+                expandedQuestion={expandedQuestion}
+                toggleQuestion={toggleQuestion}
+                userAnswers={userAnswers}
+                setUserAnswers={setUserAnswers}
+                evaluations={evaluations}
+                evaluating={evaluating}
+                handleEvaluate={handleEvaluate}
               />
 
               <QuestionSection
@@ -368,6 +415,13 @@ const InterviewPrepPage = () => {
                 category="technical"
                 icon={Code}
                 color="bg-purple-500/10 text-purple-500"
+                expandedQuestion={expandedQuestion}
+                toggleQuestion={toggleQuestion}
+                userAnswers={userAnswers}
+                setUserAnswers={setUserAnswers}
+                evaluations={evaluations}
+                evaluating={evaluating}
+                handleEvaluate={handleEvaluate}
               />
 
               <QuestionSection
@@ -376,6 +430,13 @@ const InterviewPrepPage = () => {
                 category="coding"
                 icon={Code}
                 color="bg-green-500/10 text-green-500"
+                expandedQuestion={expandedQuestion}
+                toggleQuestion={toggleQuestion}
+                userAnswers={userAnswers}
+                setUserAnswers={setUserAnswers}
+                evaluations={evaluations}
+                evaluating={evaluating}
+                handleEvaluate={handleEvaluate}
               />
 
               <QuestionSection
@@ -384,6 +445,13 @@ const InterviewPrepPage = () => {
                 category="behavioral"
                 icon={MessageSquare}
                 color="bg-yellow-500/10 text-yellow-500"
+                expandedQuestion={expandedQuestion}
+                toggleQuestion={toggleQuestion}
+                userAnswers={userAnswers}
+                setUserAnswers={setUserAnswers}
+                evaluations={evaluations}
+                evaluating={evaluating}
+                handleEvaluate={handleEvaluate}
               />
 
               <QuestionSection
@@ -392,6 +460,13 @@ const InterviewPrepPage = () => {
                 category="system-design"
                 icon={Briefcase}
                 color="bg-red-500/10 text-red-500"
+                expandedQuestion={expandedQuestion}
+                toggleQuestion={toggleQuestion}
+                userAnswers={userAnswers}
+                setUserAnswers={setUserAnswers}
+                evaluations={evaluations}
+                evaluating={evaluating}
+                handleEvaluate={handleEvaluate}
               />
             </div>
           )}

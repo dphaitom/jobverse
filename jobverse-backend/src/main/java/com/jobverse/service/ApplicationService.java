@@ -112,7 +112,18 @@ public class ApplicationService {
         // Increment application count
         jobRepository.incrementApplicationCount(job.getId());
 
-        // Send notification
+        // Eagerly fetch related entities to avoid LazyInitializationException
+        if (saved.getJob() != null) {
+            saved.getJob().getTitle(); // Initialize job
+            if (saved.getJob().getCompany() != null) {
+                saved.getJob().getCompany().getName(); // Initialize company
+            }
+        }
+        if (saved.getUser() != null && saved.getUser().getProfile() != null) {
+            saved.getUser().getProfile().getFullName(); // Initialize profile
+        }
+
+        // Send notification (async, doesn't need to block)
         try {
             notificationService.sendApplicationNotification(saved);
         } catch (Exception e) {

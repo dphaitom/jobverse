@@ -117,13 +117,16 @@ export const jobsAPI = {
     apiRequest(`/v1/companies/${companyId}/jobs`),
   
   saveJob: (jobId) =>
-    apiRequest(`/v1/jobs/${jobId}/save`, { method: 'POST' }),
-  
+    apiRequest(`/v1/saved-jobs/${jobId}`, { method: 'POST' }),
+
   unsaveJob: (jobId) =>
-    apiRequest(`/v1/jobs/${jobId}/unsave`, { method: 'DELETE' }),
-  
+    apiRequest(`/v1/saved-jobs/${jobId}`, { method: 'DELETE' }),
+
   getSavedJobs: () =>
-    apiRequest('/v1/users/me/saved-jobs'),
+    apiRequest('/v1/saved-jobs'),
+
+  checkSavedJob: (jobId) =>
+    apiRequest(`/v1/saved-jobs/check/${jobId}`),
   
   applyJob: (jobId, applicationData) =>
     apiRequest(`/v1/applications`, {
@@ -134,6 +137,7 @@ export const jobsAPI = {
   quickApply: (jobId) =>
     apiRequest(`/v1/applications/quick-apply/${jobId}`, {
       method: 'POST',
+      body: JSON.stringify({}),
     }),
 
   getMyApplications: () =>

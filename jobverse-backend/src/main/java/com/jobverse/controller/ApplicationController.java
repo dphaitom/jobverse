@@ -2,6 +2,7 @@ package com.jobverse.controller;
 
 import com.jobverse.dto.request.ApplicationRequest;
 import com.jobverse.dto.response.ApiResponse;
+import com.jobverse.dto.response.ApplicationResponse;
 import com.jobverse.entity.Application;
 import com.jobverse.security.UserPrincipal;
 import com.jobverse.service.ApplicationService;
@@ -43,29 +44,31 @@ public class ApplicationController {
     @PostMapping("/quick-apply/{jobId}")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Quick apply", description = "One-click apply with default resume")
-    public ResponseEntity<ApiResponse<Application>> quickApply(
+    public ResponseEntity<ApiResponse<ApplicationResponse>> quickApply(
             @PathVariable Long jobId,
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
         log.info("User {} quick applying for job {}", userPrincipal.getId(), jobId);
 
         Application application = applicationService.quickApply(jobId, userPrincipal.getId());
+        ApplicationResponse response = ApplicationResponse.fromEntity(application);
 
-        return ResponseEntity.ok(ApiResponse.success("Quick application submitted successfully", application));
+        return ResponseEntity.ok(ApiResponse.success("Quick application submitted successfully", response));
     }
 
     @GetMapping("/my-applications")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get my applications", description = "Get all applications of current user")
-    public ResponseEntity<ApiResponse<Page<Application>>> getMyApplications(
+    public ResponseEntity<ApiResponse<Page<ApplicationResponse>>> getMyApplications(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             Pageable pageable
     ) {
         log.info("Fetching applications for user {}", userPrincipal.getId());
 
         Page<Application> applications = applicationService.getUserApplications(userPrincipal.getId(), pageable);
+        Page<ApplicationResponse> response = applications.map(ApplicationResponse::fromEntity);
 
-        return ResponseEntity.ok(ApiResponse.success("Applications retrieved successfully", applications));
+        return ResponseEntity.ok(ApiResponse.success("Applications retrieved successfully", response));
     }
 
     @GetMapping("/job/{jobId}")

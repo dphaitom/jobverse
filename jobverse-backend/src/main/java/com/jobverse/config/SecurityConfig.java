@@ -50,6 +50,9 @@ public class SecurityConfig {
         "/v1/companies/{id}/jobs",
         "/v1/categories",
         "/v1/skills",
+        "/v1/skills/trending",
+        "/v1/skills/{id}",
+        "/v1/skills/slug/{slug}",
         "/v1/locations",
         "/v1/salary-insights",
         "/v1/statistics",
@@ -89,6 +92,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(
             "http://localhost:3000",
             "http://localhost:3001",
+            "http://localhost:3002",
             "http://localhost:5173",
             "https://jobverse.com"
         ));

@@ -73,6 +73,29 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error("VALIDATION_ERROR", errors.toString()));
     }
     
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiResponse<?>> handleRuntimeException(RuntimeException ex) {
+        log.error("Runtime exception: {}", ex.getMessage());
+
+        // For known business logic errors, return BAD_REQUEST with actual message
+        if (ex.getMessage() != null && (
+            ex.getMessage().contains("already applied") ||
+            ex.getMessage().contains("not found") ||
+            ex.getMessage().contains("Resume") ||
+            ex.getMessage().contains("Job") ||
+            ex.getMessage().contains("User")
+        )) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error("BAD_REQUEST", ex.getMessage()));
+        }
+
+        // For unknown errors, return generic message
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("INTERNAL_ERROR", "An unexpected error occurred"));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleGenericException(Exception ex) {
         log.error("Internal server error: ", ex);

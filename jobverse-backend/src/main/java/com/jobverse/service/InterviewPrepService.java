@@ -336,18 +336,79 @@ public class InterviewPrepService {
     public AnswerEvaluation evaluateAnswer(String question, String userAnswer) {
         String context = "User is practicing interview. Question: " + question + "\nUser's answer: " + userAnswer;
 
+        // Cải thiện prompt để có feedback cụ thể hơn
         String aiEvaluation = aiService.chat(
-            "Đánh giá câu trả lời phỏng vấn này và cho feedback (bằng tiếng Việt, ngắn gọn):\n\n" +
-            "Câu hỏi: " + question + "\n" +
-            "Trả lời: " + userAnswer,
+            String.format("""
+                Bạn là một interviewer chuyên nghiệp. Hãy đánh giá câu trả lời phỏng vấn sau:
+
+                Câu hỏi: %s
+                Câu trả lời: %s
+
+                Cho feedback theo format:
+                ⭐ ĐIỂM MẠNH:
+                • [liệt kê 2-3 điểm tốt]
+
+                ⚠️ CẦN CẢI THIỆN:
+                • [liệt kê 2-3 điểm cần cải thiện]
+
+                💡 GỢI Ý:
+                • [đưa ra 2-3 gợi ý cụ thể để cải thiện]
+
+                📊 ĐÁNH GIÁ TỔNG THỂ:
+                [1-2 câu tổng kết, cho điểm từ 1-10]
+
+                Trả lời bằng tiếng Việt, ngắn gọn, thực tế.
+                """, question, userAnswer),
             context
         );
+
+        // Tính điểm dựa trên độ dài và keywords
+        int score = calculateAnswerScore(question, userAnswer);
 
         return AnswerEvaluation.builder()
             .question(question)
             .userAnswer(userAnswer)
             .feedback(aiEvaluation)
+            .score(score)
             .build();
+    }
+
+    /**
+     * Calculate answer score based on length and keywords
+     */
+    private int calculateAnswerScore(String question, String answer) {
+        if (answer == null || answer.trim().isEmpty()) {
+            return 0;
+        }
+
+        int score = 50; // Base score
+        String answerLower = answer.toLowerCase();
+        String questionLower = question.toLowerCase();
+
+        // Length bonus (up to +20)
+        int wordCount = answer.split("\\s+").length;
+        if (wordCount >= 50) score += 20;
+        else if (wordCount >= 30) score += 15;
+        else if (wordCount >= 15) score += 10;
+        else if (wordCount < 10) score -= 10;
+
+        // Keyword bonuses
+        if (questionLower.contains("yourself") || questionLower.contains("bản thân")) {
+            if (answerLower.contains("experience") || answerLower.contains("kinh nghiệm")) score += 5;
+            if (answerLower.contains("skill") || answerLower.contains("kỹ năng")) score += 5;
+            if (answerLower.contains("passion") || answerLower.contains("đam mê")) score += 5;
+        }
+
+        // Technical keywords
+        if (answerLower.contains("because") || answerLower.contains("vì")) score += 3;
+        if (answerLower.contains("example") || answerLower.contains("ví dụ")) score += 5;
+        if (answerLower.contains("project") || answerLower.contains("dự án")) score += 3;
+
+        // Structure bonuses
+        if (answerLower.contains("first") || answerLower.contains("đầu tiên")) score += 3;
+        if (answerLower.contains("second") || answerLower.contains("thứ hai")) score += 3;
+
+        return Math.min(Math.max(score, 0), 100); // Clamp to 0-100
     }
 
     /**
