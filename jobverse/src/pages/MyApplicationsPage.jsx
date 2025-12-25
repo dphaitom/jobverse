@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { jobsAPI } from '../services/api';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Navbar, Footer, LoadingSpinner, EmptyState } from '../components';
 
 const STATUS_CONFIG = {
@@ -74,13 +74,46 @@ const MyApplicationsPage = () => {
     setLoading(true);
     try {
       const response = await jobsAPI.getMyApplications();
-      setApplications(response.data || []);
+      // Backend trả về ApiResponse với cấu trúc { success, message, data }
+      // Nhưng handleResponse trong api.js đã parse, nên response chính là object đó
+      const applications = response.data || [];
+      
+      // Map lại data để phù hợp với UI (vì backend trả về ApplicationResponse)
+      const mappedApplications = applications.map(app => ({
+        id: app.id,
+        status: app.status,
+        appliedAt: app.appliedAt,
+        coverLetter: app.coverLetter,
+        job: {
+          id: app.jobId,
+          title: app.jobTitle,
+          location: app.location,
+          salaryMin: app.salaryRange ? parseSalary(app.salaryRange, 'min') : null,
+          salaryMax: app.salaryRange ? parseSalary(app.salaryRange, 'max') : null,
+          company: {
+            name: app.companyName,
+            logoUrl: app.companyLogo
+          }
+        }
+      }));
+      
+      setApplications(mappedApplications);
     } catch (error) {
       console.error('Error fetching applications:', error);
       toast.error('Không thể tải danh sách đơn ứng tuyển');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper function để parse salary từ string "X - Y triệu"
+  const parseSalary = (salaryRange, type) => {
+    if (!salaryRange) return null;
+    const match = salaryRange.match(/(\d+)\s*-\s*(\d+)/);
+    if (match) {
+      return type === 'min' ? parseInt(match[1]) * 1000000 : parseInt(match[2]) * 1000000;
+    }
+    return null;
   };
 
   const applyFilters = () => {
@@ -137,7 +170,7 @@ const MyApplicationsPage = () => {
     <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
       <Navbar />
 
-      <main className="pt-24 pb-16 px-4">
+      <main className="px-4 pt-24 pb-16">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
@@ -158,7 +191,7 @@ const MyApplicationsPage = () => {
               action={
                 <button
                   onClick={() => navigate('/jobs')}
-                  className="btn-primary inline-flex items-center gap-2"
+                  className="inline-flex items-center gap-2 btn-primary"
                 >
                   <Search className="w-5 h-5" />
                   Tìm việc làm
@@ -168,45 +201,45 @@ const MyApplicationsPage = () => {
           ) : (
             <>
               {/* Stats Cards */}
-              <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
-                <div className="glass-card rounded-xl p-4 text-center">
+              <div className="grid grid-cols-2 gap-3 mb-6 md:grid-cols-6">
+                <div className="p-4 text-center glass-card rounded-xl">
                   <p className="text-2xl font-bold text-white">{stats.total}</p>
                   <p className="text-xs text-gray-400">Tổng số</p>
                 </div>
-                <div className="glass-card rounded-xl p-4 text-center">
+                <div className="p-4 text-center glass-card rounded-xl">
                   <p className="text-2xl font-bold text-yellow-400">{stats.pending}</p>
                   <p className="text-xs text-gray-400">Chờ xử lý</p>
                 </div>
-                <div className="glass-card rounded-xl p-4 text-center">
+                <div className="p-4 text-center glass-card rounded-xl">
                   <p className="text-2xl font-bold text-blue-400">{stats.reviewing}</p>
                   <p className="text-xs text-gray-400">Xem xét</p>
                 </div>
-                <div className="glass-card rounded-xl p-4 text-center">
+                <div className="p-4 text-center glass-card rounded-xl">
                   <p className="text-2xl font-bold text-purple-400">{stats.interviewing}</p>
                   <p className="text-xs text-gray-400">Phỏng vấn</p>
                 </div>
-                <div className="glass-card rounded-xl p-4 text-center">
+                <div className="p-4 text-center glass-card rounded-xl">
                   <p className="text-2xl font-bold text-green-400">{stats.accepted}</p>
                   <p className="text-xs text-gray-400">Chấp nhận</p>
                 </div>
-                <div className="glass-card rounded-xl p-4 text-center">
+                <div className="p-4 text-center glass-card rounded-xl">
                   <p className="text-2xl font-bold text-red-400">{stats.rejected}</p>
                   <p className="text-xs text-gray-400">Từ chối</p>
                 </div>
               </div>
 
               {/* Filters Bar */}
-              <div className="glass-card rounded-2xl p-4 mb-6">
-                <div className="flex flex-col md:flex-row items-center gap-4">
+              <div className="p-4 mb-6 glass-card rounded-2xl">
+                <div className="flex flex-col items-center gap-4 md:flex-row">
                   {/* Search Input */}
-                  <div className="flex-1 w-full flex items-center gap-2 px-4 py-2 bg-gray-900/50 rounded-xl">
+                  <div className="flex items-center flex-1 w-full gap-2 px-4 py-2 bg-gray-900/50 rounded-xl">
                     <Search className="w-5 h-5 text-gray-500" />
                     <input
                       type="text"
                       placeholder="Tìm kiếm công việc, công ty..."
                       value={filters.searchQuery}
                       onChange={(e) => setFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
-                      className="flex-1 bg-transparent text-white placeholder-gray-500 focus:outline-none"
+                      className="flex-1 text-white placeholder-gray-500 bg-transparent focus:outline-none"
                     />
                   </div>
 
@@ -214,7 +247,7 @@ const MyApplicationsPage = () => {
                   <select
                     value={filters.status}
                     onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-                    className="px-4 py-2 bg-gray-900/50 rounded-xl text-white focus:outline-none"
+                    className="px-4 py-2 text-white bg-gray-900/50 rounded-xl focus:outline-none"
                   >
                     <option value="">Tất cả trạng thái</option>
                     <option value="PENDING">Chờ xử lý</option>
@@ -228,7 +261,7 @@ const MyApplicationsPage = () => {
                   <select
                     value={filters.sortBy}
                     onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value }))}
-                    className="px-4 py-2 bg-gray-900/50 rounded-xl text-white focus:outline-none"
+                    className="px-4 py-2 text-white bg-gray-900/50 rounded-xl focus:outline-none"
                   >
                     <option value="newest">Mới nhất</option>
                     <option value="oldest">Cũ nhất</option>
@@ -239,7 +272,7 @@ const MyApplicationsPage = () => {
               {/* Results Count */}
               <div className="mb-4">
                 <p className="text-gray-400">
-                  Hiển thị <span className="text-white font-semibold">{filteredApplications.length}</span> / {applications.length} đơn ứng tuyển
+                  Hiển thị <span className="font-semibold text-white">{filteredApplications.length}</span> / {applications.length} đơn ứng tuyển
                 </p>
               </div>
 
@@ -259,17 +292,17 @@ const MyApplicationsPage = () => {
                     return (
                       <div
                         key={application.id}
-                        className="glass-card rounded-2xl p-5 hover:bg-gray-800/40 cursor-pointer group"
+                        className="p-5 cursor-pointer glass-card rounded-2xl hover:bg-gray-800/40 group"
                         onClick={() => navigate(`/jobs/${application.job?.id}`)}
                       >
-                        <div className="flex flex-col md:flex-row gap-4">
+                        <div className="flex flex-col gap-4 md:flex-row">
                           {/* Company Logo */}
-                          <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-3xl flex-shrink-0">
+                          <div className="flex items-center justify-center flex-shrink-0 w-16 h-16 text-3xl rounded-xl bg-gradient-to-br from-gray-800 to-gray-900">
                             {application.job?.company?.logoUrl ? (
                               <img
                                 src={application.job.company.logoUrl}
                                 alt={application.job.company.name}
-                                className="w-12 h-12 object-contain"
+                                className="object-contain w-12 h-12"
                               />
                             ) : (
                               '🏢'
@@ -279,11 +312,11 @@ const MyApplicationsPage = () => {
                           {/* Application Info */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-3 mb-2">
-                              <div className="min-w-0 flex-1">
-                                <h3 className="text-lg font-semibold text-white group-hover:text-violet-400 transition-colors mb-1">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="mb-1 text-lg font-semibold text-white transition-colors group-hover:text-violet-400">
                                   {application.job?.title}
                                 </h3>
-                                <p className="text-gray-400 text-sm flex items-center gap-2">
+                                <p className="flex items-center gap-2 text-sm text-gray-400">
                                   <Building2 className="w-4 h-4" />
                                   {application.job?.company?.name}
                                 </p>
@@ -297,7 +330,7 @@ const MyApplicationsPage = () => {
                             </div>
 
                             {/* Job Details */}
-                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500 mb-3">
+                            <div className="flex flex-wrap mb-3 text-sm text-gray-500 gap-x-4 gap-y-1">
                               <span className="flex items-center gap-1">
                                 <MapPin className="w-3.5 h-3.5" />
                                 {application.job?.location}
@@ -316,8 +349,8 @@ const MyApplicationsPage = () => {
 
                             {/* Cover Letter Preview */}
                             {application.coverLetter && (
-                              <div className="glass-card p-3 rounded-lg mb-3">
-                                <p className="text-sm text-gray-400 mb-1 font-medium">Thư xin việc:</p>
+                              <div className="p-3 mb-3 rounded-lg glass-card">
+                                <p className="mb-1 text-sm font-medium text-gray-400">Thư xin việc:</p>
                                 <p className="text-sm text-gray-300 line-clamp-2">
                                   {application.coverLetter}
                                 </p>

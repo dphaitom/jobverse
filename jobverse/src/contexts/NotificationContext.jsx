@@ -1,6 +1,6 @@
 // src/contexts/NotificationContext.jsx
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { authAPI } from '../services/api';
 import toast from 'react-hot-toast';
@@ -75,7 +75,7 @@ export const NotificationProvider = ({ children }) => {
                    notification.type === 'MESSAGE' ? '💬' : '📢'}
                 </span>
               </div>
-              <div className="ml-3 flex-1">
+              <div className="flex-1 ml-3">
                 <p className="text-sm font-medium text-white">
                   {notification.title}
                 </p>
@@ -88,7 +88,7 @@ export const NotificationProvider = ({ children }) => {
           <div className="flex border-l border-gray-700">
             <button
               onClick={() => toast.dismiss(t.id)}
-              className="w-full border border-transparent rounded-none rounded-r-xl p-4 flex items-center justify-center text-sm font-medium text-violet-400 hover:text-violet-300"
+              className="flex items-center justify-center w-full p-4 text-sm font-medium border border-transparent rounded-none rounded-r-xl text-violet-400 hover:text-violet-300"
             >
               Đóng
             </button>

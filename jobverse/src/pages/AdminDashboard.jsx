@@ -9,7 +9,7 @@ import { Navbar, Footer, LoadingSpinner } from '../components';
 import { authAPI } from '../services/api';
 import { fadeInUp, staggerContainer, staggerItem } from '../utils/animations';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -152,14 +152,14 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
       <Navbar />
 
-      <main className="pt-24 pb-16 px-4">
-        <div className="max-w-7xl mx-auto">
+      <main className="px-4 pt-24 pb-16">
+        <div className="mx-auto max-w-7xl">
           {/* Header */}
           <motion.div
             className="mb-8"
             {...fadeInUp}
           >
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+            <h1 className="mb-2 text-3xl font-bold text-white md:text-4xl">
               Admin Dashboard
             </h1>
             <p className="text-gray-400">
@@ -169,7 +169,7 @@ const AdminDashboard = () => {
 
           {/* Stats Grid */}
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
+            className="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2 lg:grid-cols-3"
             {...staggerContainer}
           >
             {statCards.map((stat, index) => (
@@ -185,7 +185,7 @@ const AdminDashboard = () => {
                   </div>
                   <span className="text-xs text-gray-400">{stat.trend}</span>
                 </div>
-                <h3 className="text-3xl font-bold text-white mb-1">{stat.value}</h3>
+                <h3 className="mb-1 text-3xl font-bold text-white">{stat.value}</h3>
                 <p className="text-sm text-gray-400">{stat.label}</p>
               </motion.div>
             ))}
@@ -197,8 +197,8 @@ const AdminDashboard = () => {
             {...fadeInUp}
             transition={{ delay: 0.3 }}
           >
-            <h2 className="text-xl font-semibold text-white mb-4">Hành động nhanh</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <h2 className="mb-4 text-xl font-semibold text-white">Hành động nhanh</h2>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
               {quickActions.map((action) => (
                 <motion.button
                   key={action.label}
@@ -208,17 +208,17 @@ const AdminDashboard = () => {
                   whileTap={{ scale: 0.98 }}
                 >
                   <action.icon className="w-8 h-8 mb-3" />
-                  <h3 className="font-semibold text-white mb-1">{action.label}</h3>
+                  <h3 className="mb-1 font-semibold text-white">{action.label}</h3>
                   <p className="text-xs text-gray-400">{action.description}</p>
                 </motion.button>
               ))}
             </div>
           </motion.div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid gap-8 lg:grid-cols-2">
             {/* Recent Jobs */}
             <motion.div
-              className="glass-card rounded-2xl p-6"
+              className="p-6 glass-card rounded-2xl"
               {...fadeInUp}
               transition={{ delay: 0.4 }}
             >
@@ -233,15 +233,15 @@ const AdminDashboard = () => {
               </div>
               <div className="space-y-3">
                 {recentJobs.length === 0 ? (
-                  <p className="text-gray-400 text-center py-8">Chưa có việc làm nào</p>
+                  <p className="py-8 text-center text-gray-400">Chưa có việc làm nào</p>
                 ) : (
                   recentJobs.map((job) => (
                     <div
                       key={job.id}
-                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-800/40 cursor-pointer transition-colors"
+                      className="flex items-start gap-3 p-3 transition-colors cursor-pointer rounded-xl hover:bg-gray-800/40"
                       onClick={() => navigate(`/jobs/${job.id}`)}
                     >
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center flex-shrink-0">
+                      <div className="flex items-center justify-center flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900">
                         <Briefcase className="w-6 h-6 text-violet-400" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -265,7 +265,7 @@ const AdminDashboard = () => {
 
             {/* Recent Users */}
             <motion.div
-              className="glass-card rounded-2xl p-6"
+              className="p-6 glass-card rounded-2xl"
               {...fadeInUp}
               transition={{ delay: 0.5 }}
             >
@@ -280,15 +280,15 @@ const AdminDashboard = () => {
               </div>
               <div className="space-y-3">
                 {recentUsers.length === 0 ? (
-                  <p className="text-gray-400 text-center py-8">Chưa có người dùng mới</p>
+                  <p className="py-8 text-center text-gray-400">Chưa có người dùng mới</p>
                 ) : (
                   recentUsers.map((user) => (
                     <div
                       key={user.id}
-                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-800/40 cursor-pointer transition-colors"
+                      className="flex items-center gap-3 p-3 transition-colors cursor-pointer rounded-xl hover:bg-gray-800/40"
                       onClick={() => navigate(`/admin/users/${user.id}`)}
                     >
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-violet-500 to-indigo-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 font-semibold text-white rounded-full bg-gradient-to-r from-violet-500 to-indigo-600">
                         {user.email?.charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">

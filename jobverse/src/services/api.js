@@ -15,7 +15,8 @@ const handleResponse = async (response) => {
   
   if (!response.ok) {
     if (response.status === 401) {
-      const refreshed = await tryRefreshToken();
+      // Token expired, try to refresh
+      const refreshed = await refreshToken();
       if (!refreshed) {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
@@ -23,13 +24,13 @@ const handleResponse = async (response) => {
         window.location.href = '/login';
       }
     }
-    throw new Error(data.error?.message || 'Request failed');
+    throw new Error(data.message || data.error?.message || 'Request failed');
   }
   
   return data;
 };
 
-const tryRefreshToken = async () => {
+const refreshToken = async () => {
   const refreshToken = localStorage.getItem('refreshToken');
   if (!refreshToken) return false;
   
@@ -45,12 +46,12 @@ const tryRefreshToken = async () => {
     if (response.ok) {
       const data = await response.json();
       localStorage.setItem('accessToken', data.data.accessToken);
-      localStorage.setItem('refreshToken', data.data.refreshToken);
       return true;
     }
   } catch (error) {
-    console.error('Token refresh failed:', error);
+    console.error('Refresh token error:', error);
   }
+  
   return false;
 };
 
@@ -71,23 +72,23 @@ const apiRequest = async (endpoint, options = {}) => {
 // ==================== AUTH API ====================
 
 export const authAPI = {
-  login: (email, password) => 
+  login: (email, password) =>
     apiRequest('/v1/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     }),
-    
+
   register: (userData) =>
     apiRequest('/v1/auth/register', {
       method: 'POST',
       body: JSON.stringify(userData),
     }),
-    
+
   logout: () =>
     apiRequest('/v1/auth/logout', { method: 'POST' }),
 
-  googleLogin: (credential) =>
-    apiRequest('/v1/auth/oauth/google', {
+  loginWithGoogle: (credential) =>
+    apiRequest('/v1/auth/google', {
       method: 'POST',
       body: JSON.stringify({ credential }),
     }),
@@ -105,17 +106,17 @@ export const jobsAPI = {
     apiRequest(`/v1/jobs/${id}`),
 
   searchJobs: (params = {}) => {
-    // Use the main /v1/jobs endpoint which supports all filters
     const queryString = new URLSearchParams(params).toString();
-    return apiRequest(`/v1/jobs${queryString ? `?${queryString}` : ''}`);
+    return apiRequest(`/v1/jobs/search${queryString ? `?${queryString}` : ''}`);
   },
-  
+
   getTrendingJobs: () =>
     apiRequest('/v1/jobs/trending'),
-  
+
   getJobsByCompany: (companyId) =>
     apiRequest(`/v1/companies/${companyId}/jobs`),
-  
+
+  // Saved Jobs
   saveJob: (jobId) =>
     apiRequest(`/v1/saved-jobs/${jobId}`, { method: 'POST' }),
 
@@ -127,21 +128,29 @@ export const jobsAPI = {
 
   checkSavedJob: (jobId) =>
     apiRequest(`/v1/saved-jobs/check/${jobId}`),
-  
-  applyJob: (jobId, applicationData) =>
-    apiRequest(`/v1/applications`, {
+
+  // Applications
+  applyJob: (applicationData) =>
+    apiRequest('/v1/applications', {
       method: 'POST',
-      body: JSON.stringify({ jobId, ...applicationData }),
+      body: JSON.stringify(applicationData),
     }),
 
+  // Thêm function quickApply
   quickApply: (jobId) =>
-    apiRequest(`/v1/applications/quick-apply/${jobId}`, {
+    apiRequest('/v1/applications/quick-apply', {
       method: 'POST',
-      body: JSON.stringify({}),
+      body: JSON.stringify({ jobId }),
     }),
+
+  checkApplied: (jobId) =>
+    apiRequest(`/v1/applications/check/${jobId}`),
 
   getMyApplications: () =>
-    apiRequest('/v1/applications/my-applications'),
+    apiRequest('/v1/applications/my'),
+
+  withdrawApplication: (applicationId) =>
+    apiRequest(`/v1/applications/${applicationId}/withdraw`, { method: 'POST' }),
 };
 
 // ==================== COMPANIES API ====================
@@ -151,13 +160,10 @@ export const companiesAPI = {
     const queryString = new URLSearchParams(params).toString();
     return apiRequest(`/v1/companies${queryString ? `?${queryString}` : ''}`);
   },
-  
+
   getCompanyById: (id) =>
     apiRequest(`/v1/companies/${id}`),
-  
-  getCompanyBySlug: (slug) =>
-    apiRequest(`/v1/companies/slug/${slug}`),
-  
+
   getCompanyReviews: (companyId) =>
     apiRequest(`/v1/companies/${companyId}/reviews`),
 };
@@ -174,35 +180,38 @@ export const categoriesAPI = {
 export const skillsAPI = {
   getSkills: () =>
     apiRequest('/v1/skills'),
-    
-  getTrendingSkills: () =>
-    apiRequest('/v1/skills/trending'),
 };
 
 // ==================== USER API ====================
 
 export const userAPI = {
   getProfile: () =>
-    apiRequest('/v1/users/me'),
+    apiRequest('/v1/users/profile'),
 
   updateProfile: (profileData) =>
-    apiRequest('/v1/users/me', {
+    apiRequest('/v1/users/profile', {
       method: 'PUT',
       body: JSON.stringify(profileData),
+    }),
+
+  changePassword: (passwordData) =>
+    apiRequest('/v1/users/change-password', {
+      method: 'PUT',
+      body: JSON.stringify(passwordData),
     }),
 };
 
 // ==================== AI API ====================
 
 export const aiAPI = {
-  // AI Chat
-  chat: (message, context) =>
+  // Chat
+  sendMessage: (message, context) =>
     apiRequest('/v1/ai/chat', {
       method: 'POST',
       body: JSON.stringify({ message, context }),
     }),
 
-  chatGuest: (message) =>
+  sendMessageGuest: (message) =>
     apiRequest('/v1/ai/chat/guest', {
       method: 'POST',
       body: JSON.stringify({ message }),
@@ -258,6 +267,8 @@ export const aiAPI = {
       headers: {}, // No auth required
     }),
 };
+
+// ==================== DEFAULT EXPORT ====================
 
 export default {
   auth: authAPI,
