@@ -1,5 +1,5 @@
 // src/contexts/AuthContext.jsx
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI, userAPI } from '../services/api';
 import toast from 'react-hot-toast';
 
@@ -16,24 +16,25 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Kiểm tra token và load user khi app khởi động
+  // Khởi tạo - kiểm tra token đã lưu
   useEffect(() => {
     const initAuth = async () => {
       const token = localStorage.getItem('accessToken');
-      if (token) {
+      const savedUser = localStorage.getItem('user');
+      
+      console.log('🔄 Init auth - token:', !!token, 'user:', !!savedUser);
+      
+      if (token && savedUser) {
         try {
-          // Thử lấy thông tin user
-          const response = await userAPI.getCurrentUser();
-          if (response.success) {
-            setUser(response.data);
-          }
-        } catch (err) {
-          console.error('Failed to load user:', err);
-          // Token hết hạn hoặc không hợp lệ
+          setUser(JSON.parse(savedUser));
+          setIsAuthenticated(true);
+        } catch (error) {
+          console.error('Error parsing saved user:', error);
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
         }
       }
       setLoading(false);
@@ -42,113 +43,94 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  // Đăng ký
-  const register = useCallback(async (data) => {
-    setError(null);
-    try {
-      const response = await authAPI.register(data);
-
-      if (response.success) {
-        // Lưu tokens
-        localStorage.setItem('accessToken', response.data.accessToken);
-        localStorage.setItem('refreshToken', response.data.refreshToken);
-
-        // Set user info
-        setUser(response.data.user);
-
-        toast.success(`Chào mừng ${response.data.user.fullName}! Đăng ký thành công 🎉`);
-        return { success: true };
-      }
-
-      toast.error(response.message || 'Đăng ký thất bại');
-      return { success: false, error: response.message };
-    } catch (err) {
-      setError(err.message);
-      toast.error(err.message || 'Có lỗi xảy ra khi đăng ký');
-      return { success: false, error: err.message };
-    }
-  }, []);
-
-  // Đăng nhập
-  const login = useCallback(async (email, password) => {
-    setError(null);
+  // Hàm login
+  const login = async (email, password) => {
     try {
       const response = await authAPI.login(email, password);
-
-      if (response.success) {
-        // Lưu tokens
-        localStorage.setItem('accessToken', response.data.accessToken);
-        localStorage.setItem('refreshToken', response.data.refreshToken);
-
-        // Set user info
-        setUser(response.data.user);
-
-        toast.success(`Xin chào ${response.data.user.fullName}! Đăng nhập thành công 👋`);
-        return { success: true };
+      console.log('📥 Login response:', response);
+      
+      // Lấy token và user từ response
+      // Có thể là response.data.accessToken hoặc response.accessToken
+      const accessToken = response.data?.accessToken || response.accessToken;
+      const refreshToken = response.data?.refreshToken || response.refreshToken;
+      const userData = response.data?.user || response.user;
+      
+      console.log('🔑 Extracted token:', accessToken ? 'Found' : 'Not found');
+      console.log('👤 Extracted user:', userData);
+      
+      if (!accessToken) {
+        throw new Error('No access token in response');
       }
-
-      toast.error(response.message || 'Đăng nhập thất bại');
-      return { success: false, error: response.message };
-    } catch (err) {
-      setError(err.message);
-      toast.error(err.message || 'Sai email hoặc mật khẩu');
-      return { success: false, error: err.message };
+      
+      // LƯU TOKEN VÀO LOCALSTORAGE
+      localStorage.setItem('accessToken', accessToken);
+      if (refreshToken) {
+        localStorage.setItem('refreshToken', refreshToken);
+      }
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      setUser(userData);
+      setIsAuthenticated(true);
+      
+      console.log('✅ Login successful, token saved');
+      
+      return { success: true, user: userData };
+    } catch (error) {
+      console.error('❌ Login error:', error);
+      throw error;
     }
-  }, []);
+  };
 
-  // Đăng xuất
-  const logout = useCallback(async () => {
+  // Hàm logout
+  const logout = async () => {
     try {
       await authAPI.logout();
-    } catch (err) {
-      console.error('Logout error:', err);
+    } catch (error) {
+      console.error('Logout error:', error);
     } finally {
-      // Xóa tokens và user
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
       setUser(null);
-      toast.success('Đã đăng xuất thành công. Hẹn gặp lại! 👋');
+      setIsAuthenticated(false);
     }
-  }, []);
+  };
 
-  // Refresh token
-  const refreshAccessToken = useCallback(async () => {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (!refreshToken) return false;
-
+  // Hàm register
+  const register = async (userData) => {
     try {
-      const response = await authAPI.refreshToken(refreshToken);
+      const response = await authAPI.register(userData);
+      console.log('📥 Register response:', response);
       
-      if (response.success) {
-        localStorage.setItem('accessToken', response.data.accessToken);
-        if (response.data.refreshToken) {
-          localStorage.setItem('refreshToken', response.data.refreshToken);
+      const accessToken = response.data?.accessToken || response.accessToken;
+      const refreshToken = response.data?.refreshToken || response.refreshToken;
+      const user = response.data?.user || response.user;
+      
+      if (accessToken) {
+        localStorage.setItem('accessToken', accessToken);
+        if (refreshToken) {
+          localStorage.setItem('refreshToken', refreshToken);
         }
-        return true;
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        setUser(user);
+        setIsAuthenticated(true);
       }
-      return false;
-    } catch (err) {
-      console.error('Refresh token error:', err);
-      logout();
-      return false;
+      
+      return { success: true, user };
+    } catch (error) {
+      console.error('Register error:', error);
+      throw error;
     }
-  }, [logout]);
-
-  // Cập nhật user info
-  const updateUser = useCallback((userData) => {
-    setUser(prev => ({ ...prev, ...userData }));
-  }, []);
+  };
 
   const value = {
     user,
     loading,
-    error,
-    isAuthenticated: !!user,
-    register,
+    isAuthenticated,
     login,
     logout,
-    refreshAccessToken,
-    updateUser,
+    register,
   };
 
   return (

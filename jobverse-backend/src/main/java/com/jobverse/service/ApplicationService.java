@@ -134,6 +134,13 @@ public class ApplicationService {
         return saved;
     }
 
+    /**
+     * Check if user has already applied for a job
+     */
+    public boolean hasApplied(Long userId, Long jobId) {
+        return applicationRepository.existsByJobIdAndUserId(jobId, userId);
+    }
+
     @Transactional(readOnly = true)
     public Page<Application> getUserApplications(Long userId, Pageable pageable) {
         return applicationRepository.findByUserIdOrderByAppliedAtDesc(userId, pageable);
