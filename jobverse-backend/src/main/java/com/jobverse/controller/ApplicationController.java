@@ -13,105 +13,130 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Slf4j
 @RestController
 @RequestMapping("/v1/applications")
 @RequiredArgsConstructor
-@Tag(name = "Applications", description = "Job application management APIs")
+@Tag(name = "Applications", description = "Job Application APIs")
 public class ApplicationController {
 
     private final ApplicationService applicationService;
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "Apply for job", description = "Submit a job application")
-    public ResponseEntity<ApiResponse<Application>> createApplication(
-            @Valid @RequestBody ApplicationRequest request,
-            @AuthenticationPrincipal UserPrincipal userPrincipal
+    @Operation(summary = "Apply for a job")
+    public ResponseEntity<ApiResponse<ApplicationResponse>> apply(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @Valid @RequestBody ApplicationRequest request
     ) {
-        log.info("User {} applying for job {}", userPrincipal.getId(), request.getJobId());
-
-        Application application = applicationService.createApplication(request, userPrincipal.getId());
-
-        return ResponseEntity.ok(ApiResponse.success("Application submitted successfully", application));
-    }
-
-    @PostMapping("/quick-apply/{jobId}")
-    @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "Quick apply", description = "One-click apply with default resume")
-    public ResponseEntity<ApiResponse<ApplicationResponse>> quickApply(
-            @PathVariable Long jobId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal
-    ) {
-        log.info("User {} quick applying for job {}", userPrincipal.getId(), jobId);
-
-        Application application = applicationService.quickApply(jobId, userPrincipal.getId());
+        log.info("User {} applying for job {}", currentUser.getId(), request.getJobId());
+        Application application = applicationService.createApplication(request, currentUser.getId());
         ApplicationResponse response = ApplicationResponse.fromEntity(application);
-
-        return ResponseEntity.ok(ApiResponse.success("Quick application submitted successfully", response));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Application submitted successfully", response));
     }
 
-    @GetMapping("/my-applications")
+    @PostMapping("/quick-apply")
     @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "Get my applications", description = "Get all applications of current user")
-    public ResponseEntity<ApiResponse<Page<ApplicationResponse>>> getMyApplications(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            Pageable pageable
+    @Operation(summary = "Quick apply for a job")
+    public ResponseEntity<ApiResponse<ApplicationResponse>> quickApply(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestBody Map<String, Long> request
     ) {
-        log.info("Fetching applications for user {}", userPrincipal.getId());
+        Long jobId = request.get("jobId");
+        if (jobId == null) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("BAD_REQUEST", "Job ID is required"));
+        }
 
-        Page<Application> applications = applicationService.getUserApplications(userPrincipal.getId(), pageable);
-        Page<ApplicationResponse> response = applications.map(ApplicationResponse::fromEntity);
-
-        return ResponseEntity.ok(ApiResponse.success("Applications retrieved successfully", response));
+        log.info("User {} quick applying for job {}", currentUser.getId(), jobId);
+        Application application = applicationService.quickApply(jobId, currentUser.getId());
+        ApplicationResponse response = ApplicationResponse.fromEntity(application);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Quick application submitted successfully", response));
     }
 
-    @GetMapping("/job/{jobId}")
+    @GetMapping("/my")
     @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "Get job applications", description = "Get all applications for a job (employer only)")
-    public ResponseEntity<ApiResponse<Page<Application>>> getJobApplications(
+    @Operation(summary = "Get my applications")
+    public ResponseEntity<ApiResponse<List<ApplicationResponse>>> getMyApplications(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
+        log.info("User {} fetching their applications", currentUser.getId());
+        Page<Application> applications = applicationService.getUserApplications(currentUser.getId(), pageable);
+        List<ApplicationResponse> responses = applications.getContent().stream()
+                .map(ApplicationResponse::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success("Applications retrieved", responses));
+    }
+
+    @GetMapping("/check/{jobId}")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Check if already applied")
+    public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkApplied(
             @PathVariable Long jobId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            Pageable pageable
+            @AuthenticationPrincipal UserPrincipal currentUser
     ) {
-        log.info("Fetching applications for job {} by user {}", jobId, userPrincipal.getId());
+        boolean hasApplied = applicationService.hasApplied(currentUser.getId(), jobId);
+        return ResponseEntity.ok(ApiResponse.success("Check completed", Map.of("hasApplied", hasApplied)));
+    }
 
-        Page<Application> applications = applicationService.getJobApplications(jobId, pageable);
-
-        return ResponseEntity.ok(ApiResponse.success("Applications retrieved successfully", applications));
+    @PostMapping("/{applicationId}/withdraw")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Withdraw application")
+    public ResponseEntity<ApiResponse<Void>> withdrawApplication(
+            @PathVariable Long applicationId,
+            @AuthenticationPrincipal UserPrincipal currentUser
+    ) {
+        log.info("User {} withdrawing application {}", currentUser.getId(), applicationId);
+        applicationService.withdrawApplication(applicationId, currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success("Application withdrawn successfully", null));
     }
 
     @PutMapping("/{applicationId}/status")
-    @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "Update application status", description = "Update application status (employer only)")
-    public ResponseEntity<ApiResponse<Application>> updateApplicationStatus(
+    @PreAuthorize("hasAuthority('EMPLOYER')")
+    @Operation(summary = "Update application status (Employer only)")
+    public ResponseEntity<ApiResponse<ApplicationResponse>> updateStatus(
             @PathVariable Long applicationId,
-            @RequestParam Application.ApplicationStatus status,
-            @AuthenticationPrincipal UserPrincipal userPrincipal
+            @RequestBody Map<String, String> request,
+            @AuthenticationPrincipal UserPrincipal currentUser
     ) {
-        log.info("User {} updating application {} status to {}", userPrincipal.getId(), applicationId, status);
+        String statusStr = request.get("status");
+        Application.ApplicationStatus status = Application.ApplicationStatus.valueOf(statusStr);
 
-        Application application = applicationService.updateApplicationStatus(applicationId, status, userPrincipal.getId());
-
-        return ResponseEntity.ok(ApiResponse.success("Application status updated successfully", application));
+        log.info("Employer {} updating application {} to status {}", currentUser.getId(), applicationId, status);
+        Application application = applicationService.updateApplicationStatus(applicationId, status, currentUser.getId());
+        ApplicationResponse response = ApplicationResponse.fromEntity(application);
+        return ResponseEntity.ok(ApiResponse.success("Status updated", response));
     }
 
-    @DeleteMapping("/{applicationId}")
-    @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "Withdraw application", description = "Withdraw an application")
-    public ResponseEntity<ApiResponse<String>> withdrawApplication(
-            @PathVariable Long applicationId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal
+    @GetMapping("/job/{jobId}")
+    @PreAuthorize("hasAuthority('EMPLOYER')")
+    @Operation(summary = "Get applications for a job (Employer only)")
+    public ResponseEntity<ApiResponse<List<ApplicationResponse>>> getJobApplications(
+            @PathVariable Long jobId,
+            @PageableDefault(size = 20) Pageable pageable,
+            @AuthenticationPrincipal UserPrincipal currentUser
     ) {
-        log.info("User {} withdrawing application {}", userPrincipal.getId(), applicationId);
-
-        applicationService.withdrawApplication(applicationId, userPrincipal.getId());
-
-        return ResponseEntity.ok(ApiResponse.success("Application withdrawn successfully", null));
+        log.info("Employer {} fetching applications for job {}", currentUser.getId(), jobId);
+        Page<Application> applications = applicationService.getJobApplications(jobId, pageable);
+        List<ApplicationResponse> responses = applications.getContent().stream()
+                .map(ApplicationResponse::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success("Applications retrieved", responses));
     }
 }

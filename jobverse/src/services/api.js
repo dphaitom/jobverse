@@ -116,12 +116,16 @@ export const jobsAPI = {
   getJobsByCompany: (companyId) =>
     apiRequest(`/v1/companies/${companyId}/jobs`),
 
-  // Saved Jobs
-  saveJob: (jobId) =>
-    apiRequest(`/v1/saved-jobs/${jobId}`, { method: 'POST' }),
+  // Saved Jobs - Cần auth
+  saveJob: (jobId) => {
+    console.log('Saving job with token:', localStorage.getItem('accessToken')); // Debug
+    return apiRequest(`/v1/saved-jobs/${jobId}`, { method: 'POST' });
+  },
 
-  unsaveJob: (jobId) =>
-    apiRequest(`/v1/saved-jobs/${jobId}`, { method: 'DELETE' }),
+  unsaveJob: (jobId) => {
+    console.log('Unsaving job with token:', localStorage.getItem('accessToken')); // Debug
+    return apiRequest(`/v1/saved-jobs/${jobId}`, { method: 'DELETE' });
+  },
 
   getSavedJobs: () =>
     apiRequest('/v1/saved-jobs'),
