@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Rocket, User, Building2, Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 // ==================== LOGIN PAGE ====================
 export const LoginPage = () => {
@@ -35,23 +35,23 @@ export const LoginPage = () => {
   return (
     <div className="min-h-screen bg-[#0a0a0b] flex items-center justify-center p-4">
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl" />
+        <div className="absolute rounded-full -top-40 -right-40 w-80 h-80 bg-purple-500/20 blur-3xl" />
+        <div className="absolute rounded-full -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 blur-3xl" />
       </div>
 
       <div className="relative w-full max-w-md">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-12 h-12 bg-gradient-to-r from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center">
-            <Rocket className="w-7 h-7 text-white" />
+          <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-violet-500 to-indigo-600 rounded-xl">
+            <Rocket className="text-white w-7 h-7" />
           </div>
           <span className="text-2xl font-bold gradient-text">JobVerse</span>
         </Link>
 
-        <div className="glass-card rounded-2xl p-8">
-          <h1 className="text-2xl font-bold text-white mb-6 text-center">Đăng Nhập</h1>
+        <div className="p-8 glass-card rounded-2xl">
+          <h1 className="mb-6 text-2xl font-bold text-center text-white">Đăng Nhập</h1>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400 text-sm">
+            <div className="p-3 mb-4 text-sm text-red-400 border rounded-lg bg-red-500/10 border-red-500/50">
               {error}
             </div>
           )}
@@ -64,7 +64,7 @@ export const LoginPage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your@email.com"
-                className="input-field w-full"
+                className="w-full input-field"
                 required
               />
             </div>
@@ -77,13 +77,13 @@ export const LoginPage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="input-field w-full pr-10"
+                  className="w-full pr-10 input-field"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  className="absolute text-gray-400 -translate-y-1/2 right-3 top-1/2 hover:text-white"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -92,7 +92,7 @@ export const LoginPage = () => {
 
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="w-4 h-4 rounded bg-gray-800 border-gray-700 text-violet-500" />
+                <input type="checkbox" className="w-4 h-4 bg-gray-800 border-gray-700 rounded text-violet-500" />
                 <span className="text-gray-400">Ghi nhớ đăng nhập</span>
               </label>
               <Link to="/forgot-password" className="text-violet-400 hover:text-violet-300">
@@ -103,7 +103,7 @@ export const LoginPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full py-3 disabled:opacity-50"
+              className="w-full py-3 btn-primary disabled:opacity-50"
             >
               {loading ? 'Đang đăng nhập...' : 'Đăng Nhập'}
             </button>
@@ -118,9 +118,9 @@ export const LoginPage = () => {
         </div>
 
         {/* Demo accounts */}
-        <div className="mt-6 p-4 glass-card rounded-xl">
-          <p className="text-sm text-gray-400 text-center mb-2">Tài khoản demo:</p>
-          <div className="text-xs text-gray-500 space-y-1">
+        <div className="p-4 mt-6 glass-card rounded-xl">
+          <p className="mb-2 text-sm text-center text-gray-400">Tài khoản demo:</p>
+          <div className="space-y-1 text-xs text-gray-500">
             <p>👤 Ứng viên: <span className="text-gray-300">candidate1@gmail.com</span> / password123</p>
             <p>🏢 NTD: <span className="text-gray-300">hr@fpt.com</span> / password123</p>
             <p>⚙️ Admin: <span className="text-gray-300">admin@jobverse.com</span> / password123</p>
@@ -186,20 +186,20 @@ export const RegisterPage = () => {
   return (
     <div className="min-h-screen bg-[#0a0a0b] flex items-center justify-center p-4">
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl" />
+        <div className="absolute rounded-full -top-40 -right-40 w-80 h-80 bg-purple-500/20 blur-3xl" />
+        <div className="absolute rounded-full -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 blur-3xl" />
       </div>
 
       <div className="relative w-full max-w-md">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-12 h-12 bg-gradient-to-r from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center">
-            <Rocket className="w-7 h-7 text-white" />
+          <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-violet-500 to-indigo-600 rounded-xl">
+            <Rocket className="text-white w-7 h-7" />
           </div>
           <span className="text-2xl font-bold gradient-text">JobVerse</span>
         </Link>
 
-        <div className="glass-card rounded-2xl p-8">
-          <h1 className="text-2xl font-bold text-white mb-6 text-center">Đăng Ký</h1>
+        <div className="p-8 glass-card rounded-2xl">
+          <h1 className="mb-6 text-2xl font-bold text-center text-white">Đăng Ký</h1>
 
           {/* Role Selection */}
           <div className="grid grid-cols-2 gap-3 mb-6">
@@ -230,7 +230,7 @@ export const RegisterPage = () => {
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400 text-sm">
+            <div className="p-3 mb-4 text-sm text-red-400 border rounded-lg bg-red-500/10 border-red-500/50">
               {error}
             </div>
           )}
@@ -244,7 +244,7 @@ export const RegisterPage = () => {
                 value={formData.fullName}
                 onChange={handleChange}
                 placeholder="Nguyễn Văn A"
-                className="input-field w-full"
+                className="w-full input-field"
                 required
               />
             </div>
@@ -257,7 +257,7 @@ export const RegisterPage = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="your@email.com"
-                className="input-field w-full"
+                className="w-full input-field"
                 required
               />
             </div>
@@ -271,13 +271,13 @@ export const RegisterPage = () => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Tối thiểu 8 ký tự"
-                  className="input-field w-full pr-10"
+                  className="w-full pr-10 input-field"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  className="absolute text-gray-400 -translate-y-1/2 right-3 top-1/2 hover:text-white"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -292,7 +292,7 @@ export const RegisterPage = () => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="Nhập lại mật khẩu"
-                className="input-field w-full"
+                className="w-full input-field"
                 required
               />
             </div>
@@ -300,7 +300,7 @@ export const RegisterPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full py-3 disabled:opacity-50"
+              className="w-full py-3 btn-primary disabled:opacity-50"
             >
               {loading ? 'Đang đăng ký...' : 'Đăng Ký'}
             </button>

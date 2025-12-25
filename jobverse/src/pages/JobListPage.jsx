@@ -1,17 +1,21 @@
 // src/pages/JobListPage.jsx
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Filter, ChevronDown, X, Briefcase, MapPin, DollarSign,
   Clock, Building2, Sparkles
 } from 'lucide-react';
 import { jobsAPI, categoriesAPI, skillsAPI } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
+import toast from 'react-hot-toast';
 import { Navbar, Footer, JobCard, SearchBar, LoadingSpinner, EmptyState } from '../components';
 import { fadeInUp, staggerContainer, staggerItem, slideInLeft } from '../utils/animations';
 
 const JobListPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [categories, setCategories] = useState([]);
   const [skills, setSkills] = useState([]);
@@ -37,6 +41,12 @@ const JobListPage = () => {
   useEffect(() => {
     fetchJobs();
   }, [searchParams]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchSavedJobs();
+    }
+  }, [isAuthenticated]);
 
   const fetchInitialData = async () => {
     try {
@@ -72,6 +82,16 @@ const JobListPage = () => {
     }
   };
 
+  const fetchSavedJobs = async () => {
+    try {
+      const response = await jobsAPI.getSavedJobs();
+      const savedJobIds = (response.data || []).map(job => job.id);
+      setSavedJobs(new Set(savedJobIds));
+    } catch (error) {
+      console.error('Error fetching saved jobs:', error);
+    }
+  };
+
   const handleSearch = ({ query, location }) => {
     const newParams = new URLSearchParams(searchParams);
     if (query) newParams.set('q', query);
@@ -102,14 +122,29 @@ const JobListPage = () => {
     setSearchParams(new URLSearchParams());
   };
 
-  const toggleSaveJob = (jobId) => {
-    const newSaved = new Set(savedJobs);
-    if (newSaved.has(jobId)) {
-      newSaved.delete(jobId);
-    } else {
-      newSaved.add(jobId);
+  const toggleSaveJob = async (jobId) => {
+    if (!isAuthenticated) {
+      toast.error('Vui lòng đăng nhập để lưu việc làm');
+      navigate('/login');
+      return;
     }
-    setSavedJobs(newSaved);
+
+    try {
+      const newSaved = new Set(savedJobs);
+      if (newSaved.has(jobId)) {
+        await jobsAPI.unsaveJob(jobId);
+        newSaved.delete(jobId);
+        toast.success('Đã bỏ lưu việc làm');
+      } else {
+        await jobsAPI.saveJob(jobId);
+        newSaved.add(jobId);
+        toast.success('Đã lưu việc làm');
+      }
+      setSavedJobs(newSaved);
+    } catch (error) {
+      console.error('Error toggling save job:', error);
+      toast.error('Lỗi: ' + (error.message || 'Không thể lưu việc làm'));
+    }
   };
 
   const activeFiltersCount = Object.values(filters).filter(v => v && v !== '').length;
@@ -118,23 +153,23 @@ const JobListPage = () => {
     <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
       <Navbar />
       
-      <main className="pt-24 pb-16 px-4">
-        <div className="max-w-7xl mx-auto">
+      <main className="px-4 pt-24 pb-16">
+        <div className="mx-auto max-w-7xl">
           {/* Header */}
           <motion.div
-            className="text-center mb-10"
+            className="mb-10 text-center"
             {...fadeInUp}
             transition={{ duration: 0.5 }}
           >
             <motion.h1
-              className="text-3xl md:text-4xl font-bold text-white mb-4"
+              className="mb-4 text-3xl font-bold text-white md:text-4xl"
               {...fadeInUp}
               transition={{ duration: 0.6, delay: 0.1 }}
             >
               Tìm kiếm <span className="gradient-text">việc làm IT</span>
             </motion.h1>
             <motion.p
-              className="text-gray-400 max-w-2xl mx-auto"
+              className="max-w-2xl mx-auto text-gray-400"
               {...fadeInUp}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
@@ -151,16 +186,16 @@ const JobListPage = () => {
             />
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col gap-8 lg:flex-row">
             {/* Filters Sidebar */}
             <motion.div
               className={`lg:w-72 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}
               {...slideInLeft}
               transition={{ duration: 0.4, delay: 0.3 }}
             >
-              <div className="glass-card rounded-2xl p-5 sticky top-24">
+              <div className="sticky p-5 glass-card rounded-2xl top-24">
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="font-semibold text-white flex items-center gap-2">
+                  <h3 className="flex items-center gap-2 font-semibold text-white">
                     <Filter className="w-5 h-5" /> Bộ lọc
                     {activeFiltersCount > 0 && (
                       <span className="px-2 py-0.5 text-xs bg-violet-500 text-white rounded-full">
@@ -177,11 +212,11 @@ const JobListPage = () => {
 
                 {/* Category Filter */}
                 <div className="mb-5">
-                  <label className="block text-sm text-gray-400 mb-2">Danh mục</label>
+                  <label className="block mb-2 text-sm text-gray-400">Danh mục</label>
                   <select
                     value={filters.category}
                     onChange={(e) => handleFilterChange('category', e.target.value)}
-                    className="input-field w-full"
+                    className="w-full input-field"
                   >
                     <option value="">Tất cả danh mục</option>
                     {categories.map(cat => (
@@ -192,11 +227,11 @@ const JobListPage = () => {
 
                 {/* Job Type Filter */}
                 <div className="mb-5">
-                  <label className="block text-sm text-gray-400 mb-2">Loại công việc</label>
+                  <label className="block mb-2 text-sm text-gray-400">Loại công việc</label>
                   <select
                     value={filters.jobType}
                     onChange={(e) => handleFilterChange('jobType', e.target.value)}
-                    className="input-field w-full"
+                    className="w-full input-field"
                   >
                     <option value="">Tất cả</option>
                     <option value="FULL_TIME">Full-time</option>
@@ -209,11 +244,11 @@ const JobListPage = () => {
 
                 {/* Experience Level Filter */}
                 <div className="mb-5">
-                  <label className="block text-sm text-gray-400 mb-2">Kinh nghiệm</label>
+                  <label className="block mb-2 text-sm text-gray-400">Kinh nghiệm</label>
                   <select
                     value={filters.experienceLevel}
                     onChange={(e) => handleFilterChange('experience', e.target.value)}
-                    className="input-field w-full"
+                    className="w-full input-field"
                   >
                     <option value="">Tất cả</option>
                     <option value="ENTRY">Fresher</option>
@@ -231,7 +266,7 @@ const JobListPage = () => {
                       type="checkbox"
                       checked={filters.isRemote}
                       onChange={(e) => handleFilterChange('remote', e.target.checked ? 'true' : '')}
-                      className="w-5 h-5 rounded bg-gray-800 border-gray-700 text-violet-500 focus:ring-violet-500"
+                      className="w-5 h-5 bg-gray-800 border-gray-700 rounded text-violet-500 focus:ring-violet-500"
                     />
                     <span className="text-gray-300">Chỉ việc Remote</span>
                   </label>
@@ -239,11 +274,11 @@ const JobListPage = () => {
 
                 {/* Salary Filter */}
                 <div className="mb-5">
-                  <label className="block text-sm text-gray-400 mb-2">Mức lương tối thiểu</label>
+                  <label className="block mb-2 text-sm text-gray-400">Mức lương tối thiểu</label>
                   <select
                     value={filters.salaryMin}
                     onChange={(e) => handleFilterChange('salaryMin', e.target.value)}
-                    className="input-field w-full"
+                    className="w-full input-field"
                   >
                     <option value="">Không giới hạn</option>
                     <option value="10000000">10 triệu+</option>
@@ -261,11 +296,11 @@ const JobListPage = () => {
               {/* Results Header */}
               <div className="flex items-center justify-between mb-5">
                 <p className="text-gray-400">
-                  Tìm thấy <span className="text-white font-semibold">{jobs.length}</span> việc làm
+                  Tìm thấy <span className="font-semibold text-white">{jobs.length}</span> việc làm
                 </p>
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="lg:hidden flex items-center gap-2 px-4 py-2 glass-card rounded-xl text-gray-400 hover:text-white"
+                  className="flex items-center gap-2 px-4 py-2 text-gray-400 lg:hidden glass-card rounded-xl hover:text-white"
                 >
                   <Filter className="w-4 h-4" />
                   Bộ lọc {activeFiltersCount > 0 && `(${activeFiltersCount})`}
@@ -276,19 +311,19 @@ const JobListPage = () => {
               {activeFiltersCount > 0 && (
                 <div className="flex flex-wrap gap-2 mb-5">
                   {filters.query && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-violet-500/20 text-violet-300 rounded-full text-sm">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-violet-500/20 text-violet-300">
                       Từ khóa: {filters.query}
                       <X className="w-4 h-4 cursor-pointer" onClick={() => handleFilterChange('q', '')} />
                     </span>
                   )}
                   {filters.location && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-violet-500/20 text-violet-300 rounded-full text-sm">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-violet-500/20 text-violet-300">
                       {filters.location}
                       <X className="w-4 h-4 cursor-pointer" onClick={() => handleFilterChange('location', '')} />
                     </span>
                   )}
                   {filters.isRemote && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-sm">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 text-sm text-green-300 rounded-full bg-green-500/20">
                       Remote
                       <X className="w-4 h-4 cursor-pointer" onClick={() => handleFilterChange('remote', '')} />
                     </span>

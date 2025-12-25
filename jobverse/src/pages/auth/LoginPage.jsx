@@ -1,7 +1,7 @@
 // src/pages/auth/LoginPage.jsx
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import GoogleLoginButton from '../../components/GoogleLoginButton';
 import {
   Eye,

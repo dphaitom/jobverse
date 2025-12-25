@@ -7,6 +7,7 @@ import com.jobverse.dto.request.UpdateApplicationStatusRequest;
 import com.jobverse.dto.response.ApiResponse;
 import com.jobverse.dto.response.ApplicationResponse;
 import com.jobverse.entity.Application;
+import com.jobverse.exception.BadRequestException;
 import com.jobverse.security.CurrentUser;
 import com.jobverse.security.UserPrincipal;
 import com.jobverse.service.ApplicationService;
@@ -46,6 +47,28 @@ public class ApplicationController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Application submitted successfully", response));
+    }
+    
+    @PostMapping("/quick-apply")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    @Operation(summary = "Quick apply for a job")
+    public ResponseEntity<ApiResponse<ApplicationResponse>> quickApply(
+            @CurrentUser UserPrincipal currentUser,
+            @RequestBody Map<String, Long> request
+    ) {
+        Long jobId = request.get("jobId");
+        if (jobId == null) {
+            throw new BadRequestException("Job ID is required");
+        }
+        
+        ApplicationRequest applicationRequest = new ApplicationRequest();
+        applicationRequest.setJobId(jobId);
+        // Quick apply không cần cover letter
+        
+        ApplicationResponse response = applicationService.apply(currentUser.getId(), applicationRequest);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Quick application submitted successfully", response));
     }
     
     @GetMapping("/my")

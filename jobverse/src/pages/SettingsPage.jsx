@@ -6,7 +6,7 @@ import {
   Smartphone, Globe, Shield, LogOut, Trash2, Sun, Moon
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { userAPI } from '../services/api';
 import { Navbar, Footer, LoadingSpinner } from '../components';
@@ -149,7 +149,7 @@ const SettingsPage = () => {
     <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
       <Navbar />
 
-      <main className="pt-24 pb-16 px-4">
+      <main className="px-4 pt-24 pb-16">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="mb-8">
@@ -162,10 +162,10 @@ const SettingsPage = () => {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-4 gap-6">
+          <div className="grid gap-6 lg:grid-cols-4">
             {/* Sidebar Tabs */}
             <div className="lg:col-span-1">
-              <div className="glass-card rounded-2xl p-2 space-y-1">
+              <div className="p-2 space-y-1 glass-card rounded-2xl">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
                   return (
@@ -190,54 +190,54 @@ const SettingsPage = () => {
             <div className="lg:col-span-3">
               {/* Profile Tab */}
               {activeTab === 'profile' && (
-                <div className="glass-card rounded-2xl p-6">
-                  <h2 className="text-xl font-semibold text-white mb-6">Thông tin cá nhân</h2>
+                <div className="p-6 glass-card rounded-2xl">
+                  <h2 className="mb-6 text-xl font-semibold text-white">Thông tin cá nhân</h2>
 
                   <div className="space-y-5">
                     <div>
-                      <label className="block text-sm text-gray-400 mb-2">Họ và tên</label>
+                      <label className="block mb-2 text-sm text-gray-400">Họ và tên</label>
                       <div className="flex items-center gap-2 px-4 py-3 bg-gray-900/50 rounded-xl">
                         <User className="w-5 h-5 text-gray-500" />
                         <input
                           type="text"
                           value={profileData.fullName}
                           onChange={(e) => setProfileData({ ...profileData, fullName: e.target.value })}
-                          className="flex-1 bg-transparent text-white focus:outline-none"
+                          className="flex-1 text-white bg-transparent focus:outline-none"
                           placeholder="Nguyễn Văn A"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm text-gray-400 mb-2">Email</label>
+                      <label className="block mb-2 text-sm text-gray-400">Email</label>
                       <div className="flex items-center gap-2 px-4 py-3 bg-gray-900/50 rounded-xl">
                         <Mail className="w-5 h-5 text-gray-500" />
                         <input
                           type="email"
                           value={profileData.email}
                           disabled
-                          className="flex-1 bg-transparent text-gray-500 cursor-not-allowed"
+                          className="flex-1 text-gray-500 bg-transparent cursor-not-allowed"
                         />
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">Email không thể thay đổi</p>
+                      <p className="mt-1 text-xs text-gray-500">Email không thể thay đổi</p>
                     </div>
 
                     <div>
-                      <label className="block text-sm text-gray-400 mb-2">Số điện thoại</label>
+                      <label className="block mb-2 text-sm text-gray-400">Số điện thoại</label>
                       <div className="flex items-center gap-2 px-4 py-3 bg-gray-900/50 rounded-xl">
                         <Smartphone className="w-5 h-5 text-gray-500" />
                         <input
                           type="tel"
                           value={profileData.phone}
                           onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-                          className="flex-1 bg-transparent text-white focus:outline-none"
+                          className="flex-1 text-white bg-transparent focus:outline-none"
                           placeholder="0912345678"
                         />
                       </div>
                     </div>
 
                     <div className="pt-4 border-t border-gray-700">
-                      <h3 className="text-sm font-medium text-white mb-3">Giao diện</h3>
+                      <h3 className="mb-3 text-sm font-medium text-white">Giao diện</h3>
                       <div className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl">
                         <div className="flex items-center gap-3">
                           {theme === 'dark' ? (
@@ -246,13 +246,13 @@ const SettingsPage = () => {
                             <Sun className="w-5 h-5 text-yellow-400" />
                           )}
                           <div>
-                            <p className="text-white font-medium">Chế độ {theme === 'dark' ? 'Tối' : 'Sáng'}</p>
+                            <p className="font-medium text-white">Chế độ {theme === 'dark' ? 'Tối' : 'Sáng'}</p>
                             <p className="text-xs text-gray-400">Thay đổi giao diện hiển thị</p>
                           </div>
                         </div>
                         <button
                           onClick={toggleTheme}
-                          className="btn-secondary py-2 px-4"
+                          className="px-4 py-2 btn-secondary"
                         >
                           Đổi sang {theme === 'dark' ? 'Sáng' : 'Tối'}
                         </button>
@@ -262,7 +262,7 @@ const SettingsPage = () => {
                     <button
                       onClick={handleProfileUpdate}
                       disabled={loading}
-                      className="btn-primary w-full py-3 flex items-center justify-center gap-2"
+                      className="flex items-center justify-center w-full gap-2 py-3 btn-primary"
                     >
                       <Save className="w-5 h-5" />
                       {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
@@ -273,19 +273,19 @@ const SettingsPage = () => {
 
               {/* Security Tab */}
               {activeTab === 'security' && (
-                <div className="glass-card rounded-2xl p-6">
-                  <h2 className="text-xl font-semibold text-white mb-6">Bảo mật</h2>
+                <div className="p-6 glass-card rounded-2xl">
+                  <h2 className="mb-6 text-xl font-semibold text-white">Bảo mật</h2>
 
                   <div className="space-y-5">
                     <div>
-                      <label className="block text-sm text-gray-400 mb-2">Mật khẩu hiện tại</label>
+                      <label className="block mb-2 text-sm text-gray-400">Mật khẩu hiện tại</label>
                       <div className="flex items-center gap-2 px-4 py-3 bg-gray-900/50 rounded-xl">
                         <Lock className="w-5 h-5 text-gray-500" />
                         <input
                           type={showPasswords.current ? 'text' : 'password'}
                           value={securityData.currentPassword}
                           onChange={(e) => setSecurityData({ ...securityData, currentPassword: e.target.value })}
-                          className="flex-1 bg-transparent text-white focus:outline-none"
+                          className="flex-1 text-white bg-transparent focus:outline-none"
                           placeholder="••••••••"
                         />
                         <button
@@ -298,14 +298,14 @@ const SettingsPage = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm text-gray-400 mb-2">Mật khẩu mới</label>
+                      <label className="block mb-2 text-sm text-gray-400">Mật khẩu mới</label>
                       <div className="flex items-center gap-2 px-4 py-3 bg-gray-900/50 rounded-xl">
                         <Lock className="w-5 h-5 text-gray-500" />
                         <input
                           type={showPasswords.new ? 'text' : 'password'}
                           value={securityData.newPassword}
                           onChange={(e) => setSecurityData({ ...securityData, newPassword: e.target.value })}
-                          className="flex-1 bg-transparent text-white focus:outline-none"
+                          className="flex-1 text-white bg-transparent focus:outline-none"
                           placeholder="••••••••"
                         />
                         <button
@@ -318,14 +318,14 @@ const SettingsPage = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm text-gray-400 mb-2">Xác nhận mật khẩu mới</label>
+                      <label className="block mb-2 text-sm text-gray-400">Xác nhận mật khẩu mới</label>
                       <div className="flex items-center gap-2 px-4 py-3 bg-gray-900/50 rounded-xl">
                         <Lock className="w-5 h-5 text-gray-500" />
                         <input
                           type={showPasswords.confirm ? 'text' : 'password'}
                           value={securityData.confirmPassword}
                           onChange={(e) => setSecurityData({ ...securityData, confirmPassword: e.target.value })}
-                          className="flex-1 bg-transparent text-white focus:outline-none"
+                          className="flex-1 text-white bg-transparent focus:outline-none"
                           placeholder="••••••••"
                         />
                         <button
@@ -340,24 +340,24 @@ const SettingsPage = () => {
                     <button
                       onClick={handlePasswordChange}
                       disabled={loading}
-                      className="btn-primary w-full py-3 flex items-center justify-center gap-2"
+                      className="flex items-center justify-center w-full gap-2 py-3 btn-primary"
                     >
                       <Shield className="w-5 h-5" />
                       {loading ? 'Đang cập nhật...' : 'Đổi mật khẩu'}
                     </button>
 
                     <div className="pt-6 border-t border-gray-700">
-                      <h3 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+                      <h3 className="flex items-center gap-2 mb-3 text-sm font-medium text-white">
                         <Trash2 className="w-5 h-5 text-red-400" />
                         Vùng nguy hiểm
                       </h3>
-                      <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
-                        <p className="text-sm text-gray-300 mb-3">
+                      <div className="p-4 border bg-red-500/10 border-red-500/30 rounded-xl">
+                        <p className="mb-3 text-sm text-gray-300">
                           Xóa tài khoản sẽ xóa vĩnh viễn tất cả dữ liệu của bạn. Hành động này không thể hoàn tác.
                         </p>
                         <button
                           onClick={handleDeleteAccount}
-                          className="btn-secondary bg-red-500/20 text-red-400 hover:bg-red-500/30 py-2 px-4"
+                          className="px-4 py-2 text-red-400 btn-secondary bg-red-500/20 hover:bg-red-500/30"
                         >
                           Xóa tài khoản
                         </button>
@@ -369,13 +369,13 @@ const SettingsPage = () => {
 
               {/* Notifications Tab */}
               {activeTab === 'notifications' && (
-                <div className="glass-card rounded-2xl p-6">
-                  <h2 className="text-xl font-semibold text-white mb-6">Cài đặt thông báo</h2>
+                <div className="p-6 glass-card rounded-2xl">
+                  <h2 className="mb-6 text-xl font-semibold text-white">Cài đặt thông báo</h2>
 
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl">
                       <div>
-                        <p className="text-white font-medium">Thông báo Email</p>
+                        <p className="font-medium text-white">Thông báo Email</p>
                         <p className="text-sm text-gray-400">Nhận thông báo qua email</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
@@ -391,7 +391,7 @@ const SettingsPage = () => {
 
                     <div className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl">
                       <div>
-                        <p className="text-white font-medium">Cảnh báo việc làm</p>
+                        <p className="font-medium text-white">Cảnh báo việc làm</p>
                         <p className="text-sm text-gray-400">Nhận thông báo về việc làm mới phù hợp</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
@@ -407,7 +407,7 @@ const SettingsPage = () => {
 
                     <div className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl">
                       <div>
-                        <p className="text-white font-medium">Cập nhật đơn ứng tuyển</p>
+                        <p className="font-medium text-white">Cập nhật đơn ứng tuyển</p>
                         <p className="text-sm text-gray-400">Thông báo khi có thay đổi trạng thái đơn</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
@@ -423,7 +423,7 @@ const SettingsPage = () => {
 
                     <div className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl">
                       <div>
-                        <p className="text-white font-medium">Thông báo SMS</p>
+                        <p className="font-medium text-white">Thông báo SMS</p>
                         <p className="text-sm text-gray-400">Nhận thông báo qua tin nhắn</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
@@ -439,7 +439,7 @@ const SettingsPage = () => {
 
                     <div className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl">
                       <div>
-                        <p className="text-white font-medium">Đăng ký nhận tin</p>
+                        <p className="font-medium text-white">Đăng ký nhận tin</p>
                         <p className="text-sm text-gray-400">Nhận bản tin và cập nhật từ JobVerse</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
@@ -456,7 +456,7 @@ const SettingsPage = () => {
                     <button
                       onClick={handleNotificationUpdate}
                       disabled={loading}
-                      className="btn-primary w-full py-3 flex items-center justify-center gap-2 mt-6"
+                      className="flex items-center justify-center w-full gap-2 py-3 mt-6 btn-primary"
                     >
                       <Save className="w-5 h-5" />
                       {loading ? 'Đang lưu...' : 'Lưu thay đổi'}

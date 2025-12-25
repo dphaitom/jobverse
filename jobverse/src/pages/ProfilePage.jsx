@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { userAPI } from '../services/api';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Navbar, Footer, LoadingSpinner } from '../components';
 
 const ProfilePage = () => {
@@ -99,17 +99,17 @@ const ProfilePage = () => {
     <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
       <Navbar />
       
-      <main className="pt-24 pb-16 px-4">
+      <main className="px-4 pt-24 pb-16">
         <div className="max-w-4xl mx-auto">
           {/* Header Card */}
-          <div className="glass-card rounded-2xl p-6 mb-6">
-            <div className="flex flex-col md:flex-row gap-6">
+          <div className="p-6 mb-6 glass-card rounded-2xl">
+            <div className="flex flex-col gap-6 md:flex-row">
               {/* Avatar */}
               <div className="relative">
-                <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-5xl text-white font-bold">
+                <div className="flex items-center justify-center w-32 h-32 text-5xl font-bold text-white rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600">
                   {formData.fullName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
                 </div>
-                <button className="absolute -bottom-2 -right-2 p-2 bg-violet-500 rounded-xl text-white hover:bg-violet-600 transition-colors">
+                <button className="absolute p-2 text-white transition-colors -bottom-2 -right-2 bg-violet-500 rounded-xl hover:bg-violet-600">
                   <Camera className="w-4 h-4" />
                 </button>
               </div>
@@ -118,7 +118,7 @@ const ProfilePage = () => {
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h1 className="text-2xl font-bold text-white mb-1">
+                    <h1 className="mb-1 text-2xl font-bold text-white">
                       {formData.fullName || 'Chưa cập nhật tên'}
                     </h1>
                     <p className="text-gray-400">{formData.currentPosition || 'Chưa có vị trí'}</p>
@@ -126,7 +126,7 @@ const ProfilePage = () => {
                   <button
                     onClick={() => editing ? handleSave() : setEditing(true)}
                     disabled={saving}
-                    className="btn-primary py-2 px-4 flex items-center gap-2"
+                    className="flex items-center gap-2 px-4 py-2 btn-primary"
                   >
                     {saving ? (
                       'Đang lưu...'
@@ -157,16 +157,16 @@ const ProfilePage = () => {
                 {/* Status Tags */}
                 <div className="flex flex-wrap gap-2 mt-4">
                   {formData.openToWork && (
-                    <span className="px-3 py-1 text-sm bg-green-500/20 text-green-400 rounded-full">
+                    <span className="px-3 py-1 text-sm text-green-400 rounded-full bg-green-500/20">
                       🟢 Đang tìm việc
                     </span>
                   )}
                   {formData.openToRemote && (
-                    <span className="px-3 py-1 text-sm bg-blue-500/20 text-blue-400 rounded-full">
+                    <span className="px-3 py-1 text-sm text-blue-400 rounded-full bg-blue-500/20">
                       🌍 Sẵn sàng Remote
                     </span>
                   )}
-                  <span className="px-3 py-1 text-sm bg-violet-500/20 text-violet-400 rounded-full">
+                  <span className="px-3 py-1 text-sm rounded-full bg-violet-500/20 text-violet-400">
                     {user?.role === 'CANDIDATE' ? '👤 Ứng viên' : user?.role === 'EMPLOYER' ? '🏢 Nhà tuyển dụng' : '⚙️ Admin'}
                   </span>
                 </div>
@@ -176,7 +176,7 @@ const ProfilePage = () => {
 
           {/* Edit Form */}
           {editing && (
-            <div className="glass-card rounded-2xl p-6 mb-6">
+            <div className="p-6 mb-6 glass-card rounded-2xl">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-white">Chỉnh sửa thông tin</h2>
                 <button onClick={() => setEditing(false)} className="text-gray-400 hover:text-white">
@@ -184,7 +184,7 @@ const ProfilePage = () => {
                 </button>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-5">
+              <div className="grid gap-5 md:grid-cols-2">
                 <div>
                   <label className="block text-sm text-gray-400 mb-1.5">Họ và tên</label>
                   <input
@@ -192,7 +192,7 @@ const ProfilePage = () => {
                     name="fullName"
                     value={formData.fullName}
                     onChange={handleChange}
-                    className="input-field w-full"
+                    className="w-full input-field"
                     placeholder="Nguyễn Văn A"
                   />
                 </div>
@@ -203,7 +203,7 @@ const ProfilePage = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="input-field w-full"
+                    className="w-full input-field"
                     placeholder="0912345678"
                   />
                 </div>
@@ -214,7 +214,7 @@ const ProfilePage = () => {
                     name="currentPosition"
                     value={formData.currentPosition}
                     onChange={handleChange}
-                    className="input-field w-full"
+                    className="w-full input-field"
                     placeholder="Senior Developer"
                   />
                 </div>
@@ -225,7 +225,7 @@ const ProfilePage = () => {
                     name="city"
                     value={formData.city}
                     onChange={handleChange}
-                    className="input-field w-full"
+                    className="w-full input-field"
                     placeholder="TP. Hồ Chí Minh"
                   />
                 </div>
@@ -236,7 +236,7 @@ const ProfilePage = () => {
                     name="experienceYears"
                     value={formData.experienceYears}
                     onChange={handleChange}
-                    className="input-field w-full"
+                    className="w-full input-field"
                     min="0"
                   />
                 </div>
@@ -247,7 +247,7 @@ const ProfilePage = () => {
                       name="openToWork"
                       checked={formData.openToWork}
                       onChange={handleChange}
-                      className="w-5 h-5 rounded bg-gray-800 border-gray-700 text-violet-500"
+                      className="w-5 h-5 bg-gray-800 border-gray-700 rounded text-violet-500"
                     />
                     <span className="text-gray-300">Đang tìm việc</span>
                   </label>
@@ -257,7 +257,7 @@ const ProfilePage = () => {
                       name="openToRemote"
                       checked={formData.openToRemote}
                       onChange={handleChange}
-                      className="w-5 h-5 rounded bg-gray-800 border-gray-700 text-violet-500"
+                      className="w-5 h-5 bg-gray-800 border-gray-700 rounded text-violet-500"
                     />
                     <span className="text-gray-300">Sẵn sàng Remote</span>
                   </label>
@@ -268,7 +268,7 @@ const ProfilePage = () => {
                     name="bio"
                     value={formData.bio}
                     onChange={handleChange}
-                    className="input-field w-full h-24 resize-none"
+                    className="w-full h-24 resize-none input-field"
                     placeholder="Viết vài dòng về bản thân..."
                   />
                 </div>
@@ -279,7 +279,7 @@ const ProfilePage = () => {
                     name="linkedinUrl"
                     value={formData.linkedinUrl}
                     onChange={handleChange}
-                    className="input-field w-full"
+                    className="w-full input-field"
                     placeholder="https://linkedin.com/in/username"
                   />
                 </div>
@@ -290,7 +290,7 @@ const ProfilePage = () => {
                     name="githubUrl"
                     value={formData.githubUrl}
                     onChange={handleChange}
-                    className="input-field w-full"
+                    className="w-full input-field"
                     placeholder="https://github.com/username"
                   />
                 </div>
@@ -300,25 +300,25 @@ const ProfilePage = () => {
 
           {/* Bio Section */}
           {!editing && formData.bio && (
-            <div className="glass-card rounded-2xl p-6 mb-6">
-              <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+            <div className="p-6 mb-6 glass-card rounded-2xl">
+              <h2 className="flex items-center gap-2 mb-4 text-xl font-semibold text-white">
                 <User className="w-5 h-5 text-violet-400" /> Giới thiệu
               </h2>
-              <p className="text-gray-300 leading-relaxed">{formData.bio}</p>
+              <p className="leading-relaxed text-gray-300">{formData.bio}</p>
             </div>
           )}
 
           {/* Social Links */}
           {!editing && (formData.linkedinUrl || formData.githubUrl || formData.portfolioUrl) && (
-            <div className="glass-card rounded-2xl p-6 mb-6">
-              <h2 className="text-xl font-semibold text-white mb-4">Liên kết</h2>
+            <div className="p-6 mb-6 glass-card rounded-2xl">
+              <h2 className="mb-4 text-xl font-semibold text-white">Liên kết</h2>
               <div className="flex flex-wrap gap-4">
                 {formData.linkedinUrl && (
                   <a
                     href={formData.linkedinUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2 glass-card rounded-xl text-blue-400 hover:text-blue-300"
+                    className="flex items-center gap-2 px-4 py-2 text-blue-400 glass-card rounded-xl hover:text-blue-300"
                   >
                     <Linkedin className="w-5 h-5" /> LinkedIn
                   </a>
@@ -328,7 +328,7 @@ const ProfilePage = () => {
                     href={formData.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2 glass-card rounded-xl text-gray-300 hover:text-white"
+                    className="flex items-center gap-2 px-4 py-2 text-gray-300 glass-card rounded-xl hover:text-white"
                   >
                     <Github className="w-5 h-5" /> GitHub
                   </a>
@@ -348,24 +348,24 @@ const ProfilePage = () => {
           )}
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="glass-card rounded-xl p-4 text-center">
-              <Briefcase className="w-8 h-8 text-violet-400 mx-auto mb-2" />
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="p-4 text-center glass-card rounded-xl">
+              <Briefcase className="w-8 h-8 mx-auto mb-2 text-violet-400" />
               <p className="text-2xl font-bold text-white">{formData.experienceYears}</p>
               <p className="text-xs text-gray-400">Năm kinh nghiệm</p>
             </div>
-            <div className="glass-card rounded-xl p-4 text-center">
-              <Award className="w-8 h-8 text-violet-400 mx-auto mb-2" />
+            <div className="p-4 text-center glass-card rounded-xl">
+              <Award className="w-8 h-8 mx-auto mb-2 text-violet-400" />
               <p className="text-2xl font-bold text-white">0</p>
               <p className="text-xs text-gray-400">Kỹ năng</p>
             </div>
-            <div className="glass-card rounded-xl p-4 text-center">
-              <Calendar className="w-8 h-8 text-violet-400 mx-auto mb-2" />
+            <div className="p-4 text-center glass-card rounded-xl">
+              <Calendar className="w-8 h-8 mx-auto mb-2 text-violet-400" />
               <p className="text-2xl font-bold text-white">0</p>
               <p className="text-xs text-gray-400">Đã ứng tuyển</p>
             </div>
-            <div className="glass-card rounded-xl p-4 text-center">
-              <Briefcase className="w-8 h-8 text-violet-400 mx-auto mb-2" />
+            <div className="p-4 text-center glass-card rounded-xl">
+              <Briefcase className="w-8 h-8 mx-auto mb-2 text-violet-400" />
               <p className="text-2xl font-bold text-white">0</p>
               <p className="text-xs text-gray-400">Việc đã lưu</p>
             </div>

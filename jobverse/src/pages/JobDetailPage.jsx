@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { jobsAPI } from '../services/api';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';  // Sửa từ '../context/AuthContext' thành '../contexts/AuthContext'
 import { Navbar, Footer, LoadingSpinner, JobCard } from '../components';
 import { fadeInUp, slideInRight, staggerContainer, staggerItem, scaleIn } from '../utils/animations';
 
@@ -89,12 +89,15 @@ const JobDetailPage = () => {
 
     setApplyLoading(true);
     try {
-      await jobsAPI.applyJob(id, { coverLetter, isAnonymous });
+      await jobsAPI.applyJob({ 
+        jobId: parseInt(id), 
+        coverLetter: coverLetter || null,
+      });
       setShowApplyModal(false);
       setHasApplied(true);
       toast.success('Ứng tuyển thành công! 🎉 Chúc bạn may mắn!');
     } catch (error) {
-      toast.error('Lỗi: ' + error.message);
+      toast.error('Lỗi: ' + (error.message || 'Không thể ứng tuyển'));
     } finally {
       setApplyLoading(false);
     }
@@ -108,12 +111,12 @@ const JobDetailPage = () => {
 
     setQuickApplyLoading(true);
     try {
-      await jobsAPI.quickApply(id);
+      await jobsAPI.quickApply(parseInt(id));
       setHasApplied(true);
       toast.success('⚡ Ứng tuyển nhanh thành công! Chúc bạn may mắn!');
     } catch (error) {
       console.error('Quick apply error:', error);
-      toast.error('Lỗi: ' + (error.response?.data?.error?.message || error.message));
+      toast.error('Lỗi: ' + (error.message || 'Không thể ứng tuyển'));
     } finally {
       setQuickApplyLoading(false);
     }
@@ -149,7 +152,7 @@ const JobDetailPage = () => {
         <Navbar />
         <div className="pt-24 text-center">
           <h1 className="text-2xl font-bold text-white">Không tìm thấy việc làm</h1>
-          <Link to="/jobs" className="btn-primary mt-4 inline-block">Quay lại danh sách</Link>
+          <Link to="/jobs" className="inline-block mt-4 btn-primary">Quay lại danh sách</Link>
         </div>
       </div>
     );
@@ -159,12 +162,12 @@ const JobDetailPage = () => {
     <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
       <Navbar />
       
-      <main className="pt-24 pb-16 px-4">
+      <main className="px-4 pt-24 pb-16">
         <div className="max-w-6xl mx-auto">
           {/* Back Button */}
           <motion.button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
+            className="flex items-center gap-2 mb-6 text-gray-400 transition-colors hover:text-white"
             {...fadeInUp}
             transition={{ duration: 0.3 }}
             whileHover={{ x: -4 }}
@@ -172,19 +175,19 @@ const JobDetailPage = () => {
             <ArrowLeft className="w-5 h-5" /> Quay lại
           </motion.button>
 
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid gap-8 lg:grid-cols-3">
             {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="space-y-6 lg:col-span-2">
               {/* Job Header */}
               <motion.div
-                className="glass-card rounded-2xl p-6"
+                className="p-6 glass-card rounded-2xl"
                 {...fadeInUp}
                 transition={{ duration: 0.5, delay: 0.1 }}
               >
-                <div className="flex flex-col md:flex-row gap-6">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-4xl flex-shrink-0">
+                <div className="flex flex-col gap-6 md:flex-row">
+                  <div className="flex items-center justify-center flex-shrink-0 w-20 h-20 text-4xl rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900">
                     {job.company?.logoUrl ? (
-                      <img src={job.company.logoUrl} alt={job.company.name} className="w-16 h-16 object-contain" />
+                      <img src={job.company.logoUrl} alt={job.company.name} className="object-contain w-16 h-16" />
                     ) : (
                       '🏢'
                     )}
@@ -202,10 +205,10 @@ const JobDetailPage = () => {
                         </span>
                       )}
                     </div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">{job.title}</h1>
+                    <h1 className="mb-2 text-2xl font-bold text-white md:text-3xl">{job.title}</h1>
                     <Link 
                       to={`/companies/${job.company?.id}`}
-                      className="text-lg text-violet-400 hover:text-violet-300 transition-colors"
+                      className="text-lg transition-colors text-violet-400 hover:text-violet-300"
                     >
                       {job.company?.name}
                     </Link>
@@ -233,27 +236,27 @@ const JobDetailPage = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap gap-3 mt-6 pt-6 border-t border-gray-800">
+                <div className="flex flex-wrap gap-3 pt-6 mt-6 border-t border-gray-800">
                   {!hasApplied ? (
                     <>
                       <button
                         onClick={() => setShowApplyModal(true)}
                         disabled={applyLoading || quickApplyLoading}
-                        className="btn-primary flex-1 md:flex-none py-3 px-6 disabled:opacity-50"
+                        className="flex-1 px-6 py-3 btn-primary md:flex-none disabled:opacity-50"
                       >
                         <Send className="w-5 h-5 mr-2" /> Ứng tuyển ngay
                       </button>
                       <button
                         onClick={handleQuickApply}
                         disabled={quickApplyLoading || applyLoading}
-                        className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white py-3 px-6 rounded-xl font-medium transition-all disabled:opacity-50 flex items-center gap-2"
+                        className="flex items-center gap-2 px-6 py-3 font-medium text-white transition-all bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 rounded-xl disabled:opacity-50"
                       >
                         <Zap className="w-5 h-5" />
                         {quickApplyLoading ? 'Đang gửi...' : 'Ứng tuyển nhanh'}
                       </button>
                     </>
                   ) : (
-                    <div className="flex-1 md:flex-none py-3 px-6 bg-green-500/20 text-green-400 rounded-xl font-medium flex items-center gap-2">
+                    <div className="flex items-center flex-1 gap-2 px-6 py-3 font-medium text-green-400 md:flex-none bg-green-500/20 rounded-xl">
                       <CheckCircle className="w-5 h-5" /> Đã ứng tuyển
                     </div>
                   )}
@@ -265,7 +268,7 @@ const JobDetailPage = () => {
                   >
                     <Heart className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`} />
                   </button>
-                  <button onClick={handleShare} className="p-3 glass-card rounded-xl text-gray-400 hover:text-white">
+                  <button onClick={handleShare} className="p-3 text-gray-400 glass-card rounded-xl hover:text-white">
                     <Share2 className="w-5 h-5" />
                   </button>
                 </div>
@@ -273,14 +276,14 @@ const JobDetailPage = () => {
 
               {/* Job Details */}
               <motion.div
-                className="glass-card rounded-2xl p-6"
+                className="p-6 glass-card rounded-2xl"
                 {...fadeInUp}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                <h2 className="flex items-center gap-2 mb-4 text-xl font-semibold text-white">
                   <BookOpen className="w-5 h-5 text-violet-400" /> Mô tả công việc
                 </h2>
-                <div className="prose prose-invert max-w-none text-gray-300 leading-relaxed">
+                <div className="leading-relaxed prose text-gray-300 prose-invert max-w-none">
                   {job.description?.split('\n').map((line, i) => (
                     <p key={i} className="mb-3">{line}</p>
                   ))}
@@ -290,17 +293,17 @@ const JobDetailPage = () => {
               {/* Requirements */}
               {job.requirements && (
                 <motion.div
-                  className="glass-card rounded-2xl p-6"
+                  className="p-6 glass-card rounded-2xl"
                   {...fadeInUp}
                   transition={{ duration: 0.5, delay: 0.3 }}
                 >
-                  <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                  <h2 className="flex items-center gap-2 mb-4 text-xl font-semibold text-white">
                     <CheckCircle className="w-5 h-5 text-violet-400" /> Yêu cầu
                   </h2>
-                  <div className="prose prose-invert max-w-none text-gray-300">
+                  <div className="prose text-gray-300 prose-invert max-w-none">
                     {job.requirements.split('\n').map((line, i) => (
-                      <p key={i} className="mb-2 flex items-start gap-2">
-                        <span className="text-violet-400 mt-1">•</span> {line}
+                      <p key={i} className="flex items-start gap-2 mb-2">
+                        <span className="mt-1 text-violet-400">•</span> {line}
                       </p>
                     ))}
                   </div>
@@ -310,17 +313,17 @@ const JobDetailPage = () => {
               {/* Responsibilities */}
               {job.responsibilities && (
                 <motion.div
-                  className="glass-card rounded-2xl p-6"
+                  className="p-6 glass-card rounded-2xl"
                   {...fadeInUp}
                   transition={{ duration: 0.5, delay: 0.4 }}
                 >
-                  <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                  <h2 className="flex items-center gap-2 mb-4 text-xl font-semibold text-white">
                     <Award className="w-5 h-5 text-violet-400" /> Trách nhiệm
                   </h2>
-                  <div className="prose prose-invert max-w-none text-gray-300">
+                  <div className="prose text-gray-300 prose-invert max-w-none">
                     {job.responsibilities.split('\n').map((line, i) => (
-                      <p key={i} className="mb-2 flex items-start gap-2">
-                        <span className="text-violet-400 mt-1">•</span> {line}
+                      <p key={i} className="flex items-start gap-2 mb-2">
+                        <span className="mt-1 text-violet-400">•</span> {line}
                       </p>
                     ))}
                   </div>
@@ -330,11 +333,11 @@ const JobDetailPage = () => {
               {/* Skills */}
               {job.skills && job.skills.length > 0 && (
                 <motion.div
-                  className="glass-card rounded-2xl p-6"
+                  className="p-6 glass-card rounded-2xl"
                   {...fadeInUp}
                   transition={{ duration: 0.5, delay: 0.5 }}
                 >
-                  <h2 className="text-xl font-semibold text-white mb-4">Kỹ năng yêu cầu</h2>
+                  <h2 className="mb-4 text-xl font-semibold text-white">Kỹ năng yêu cầu</h2>
                   <div className="flex flex-wrap gap-2">
                     {job.skills.map((skill, idx) => (
                       <span key={idx} className="skill-pill">{skill.name || skill}</span>
@@ -352,32 +355,32 @@ const JobDetailPage = () => {
             >
               {/* Job Info Card */}
               <motion.div
-                className="glass-card rounded-2xl p-6"
+                className="p-6 glass-card rounded-2xl"
                 {...scaleIn}
                 transition={{ duration: 0.4, delay: 0.3 }}
               >
-                <h3 className="font-semibold text-white mb-4">Thông tin chung</h3>
+                <h3 className="mb-4 font-semibold text-white">Thông tin chung</h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400 flex items-center gap-2">
+                    <span className="flex items-center gap-2 text-gray-400">
                       <Briefcase className="w-4 h-4" /> Loại công việc
                     </span>
                     <span className="text-white">{job.jobType?.replace('_', ' ')}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400 flex items-center gap-2">
+                    <span className="flex items-center gap-2 text-gray-400">
                       <Award className="w-4 h-4" /> Kinh nghiệm
                     </span>
                     <span className="text-white">{job.experienceLevel}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400 flex items-center gap-2">
+                    <span className="flex items-center gap-2 text-gray-400">
                       <Users className="w-4 h-4" /> Số lượng
                     </span>
                     <span className="text-white">{job.positionsCount || 1} người</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400 flex items-center gap-2">
+                    <span className="flex items-center gap-2 text-gray-400">
                       <Calendar className="w-4 h-4" /> Hạn nộp
                     </span>
                     <span className="text-white">
@@ -385,7 +388,7 @@ const JobDetailPage = () => {
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400 flex items-center gap-2">
+                    <span className="flex items-center gap-2 text-gray-400">
                       <Clock className="w-4 h-4" /> Đăng ngày
                     </span>
                     <span className="text-white">
@@ -397,15 +400,15 @@ const JobDetailPage = () => {
 
               {/* Company Card */}
               <motion.div
-                className="glass-card rounded-2xl p-6"
+                className="p-6 glass-card rounded-2xl"
                 {...scaleIn}
                 transition={{ duration: 0.4, delay: 0.4 }}
               >
-                <h3 className="font-semibold text-white mb-4">Về công ty</h3>
+                <h3 className="mb-4 font-semibold text-white">Về công ty</h3>
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-2xl">
+                  <div className="flex items-center justify-center text-2xl w-14 h-14 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900">
                     {job.company?.logoUrl ? (
-                      <img src={job.company.logoUrl} alt={job.company.name} className="w-10 h-10 object-contain" />
+                      <img src={job.company.logoUrl} alt={job.company.name} className="object-contain w-10 h-10" />
                     ) : (
                       '🏢'
                     )}
@@ -415,7 +418,7 @@ const JobDetailPage = () => {
                     <p className="text-sm text-gray-400">{job.company?.industry}</p>
                   </div>
                 </div>
-                <p className="text-sm text-gray-400 mb-4 line-clamp-3">
+                <p className="mb-4 text-sm text-gray-400 line-clamp-3">
                   {job.company?.description || 'Chưa có mô tả'}
                 </p>
                 <Link
@@ -429,19 +432,19 @@ const JobDetailPage = () => {
               {/* Related Jobs */}
               {relatedJobs.length > 0 && (
                 <motion.div
-                  className="glass-card rounded-2xl p-6"
+                  className="p-6 glass-card rounded-2xl"
                   {...scaleIn}
                   transition={{ duration: 0.4, delay: 0.5 }}
                 >
-                  <h3 className="font-semibold text-white mb-4">Việc làm liên quan</h3>
+                  <h3 className="mb-4 font-semibold text-white">Việc làm liên quan</h3>
                   <div className="space-y-3">
                     {relatedJobs.map(rJob => (
                       <Link
                         key={rJob.id}
                         to={`/jobs/${rJob.id}`}
-                        className="block p-3 rounded-xl hover:bg-gray-800/50 transition-colors"
+                        className="block p-3 transition-colors rounded-xl hover:bg-gray-800/50"
                       >
-                        <h4 className="font-medium text-white text-sm mb-1">{rJob.title}</h4>
+                        <h4 className="mb-1 text-sm font-medium text-white">{rJob.title}</h4>
                         <p className="text-xs text-gray-400">
                           {rJob.salaryMin && rJob.salaryMax 
                             ? `${(rJob.salaryMin/1000000).toFixed(0)}-${(rJob.salaryMax/1000000).toFixed(0)} triệu`
@@ -460,51 +463,51 @@ const JobDetailPage = () => {
       {/* Apply Modal */}
       {showApplyModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="glass-card rounded-2xl w-full max-w-lg p-6">
-            <h2 className="text-xl font-bold text-white mb-4">Ứng tuyển - {job.title}</h2>
+          <div className="w-full max-w-lg p-6 glass-card rounded-2xl">
+            <h2 className="mb-4 text-xl font-bold text-white">Ứng tuyển - {job.title}</h2>
             
             {!isAuthenticated ? (
-              <div className="text-center py-6">
-                <p className="text-gray-400 mb-4">Vui lòng đăng nhập để ứng tuyển</p>
+              <div className="py-6 text-center">
+                <p className="mb-4 text-gray-400">Vui lòng đăng nhập để ứng tuyển</p>
                 <Link to="/login" className="btn-primary">Đăng nhập</Link>
               </div>
             ) : (
               <>
                 <div className="mb-4">
-                  <label className="block text-sm text-gray-400 mb-2">Thư giới thiệu (không bắt buộc)</label>
+                  <label className="block mb-2 text-sm text-gray-400">Thư giới thiệu (không bắt buộc)</label>
                   <textarea
                     value={coverLetter}
                     onChange={(e) => setCoverLetter(e.target.value)}
                     placeholder="Viết vài dòng giới thiệu về bản thân và lý do bạn phù hợp với vị trí này..."
-                    className="input-field w-full h-32 resize-none"
+                    className="w-full h-32 resize-none input-field"
                   />
                 </div>
 
-                <div className="mb-4 flex items-start gap-3">
+                <div className="flex items-start gap-3 mb-4">
                   <input
                     type="checkbox"
                     id="anonymous"
                     checked={isAnonymous}
                     onChange={(e) => setIsAnonymous(e.target.checked)}
-                    className="mt-1 w-4 h-4 rounded border-gray-600 bg-gray-800 text-violet-500 focus:ring-violet-500"
+                    className="w-4 h-4 mt-1 bg-gray-800 border-gray-600 rounded text-violet-500 focus:ring-violet-500"
                   />
                   <label htmlFor="anonymous" className="text-sm text-gray-400 cursor-pointer">
-                    <span className="text-white font-medium">Ứng tuyển ẩn danh</span>
-                    <p className="text-xs mt-1">Thông tin cá nhân của bạn sẽ được ẩn khỏi nhà tuyển dụng cho đến khi bạn chấp nhận phỏng vấn</p>
+                    <span className="font-medium text-white">Ứng tuyển ẩn danh</span>
+                    <p className="mt-1 text-xs">Thông tin cá nhân của bạn sẽ được ẩn khỏi nhà tuyển dụng cho đến khi bạn chấp nhận phỏng vấn</p>
                   </label>
                 </div>
 
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowApplyModal(false)}
-                    className="flex-1 py-3 glass-card rounded-xl text-gray-400 hover:text-white"
+                    className="flex-1 py-3 text-gray-400 glass-card rounded-xl hover:text-white"
                   >
                     Hủy
                   </button>
                   <button
                     onClick={handleApply}
                     disabled={applyLoading}
-                    className="flex-1 btn-primary py-3 disabled:opacity-50"
+                    className="flex-1 py-3 btn-primary disabled:opacity-50"
                   >
                     {applyLoading ? 'Đang gửi...' : 'Gửi ứng tuyển'}
                   </button>

@@ -2,7 +2,7 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { ProtectedRoute } from './components';
@@ -118,9 +118,9 @@ function App() {
 const NotFoundPage = () => (
   <div className="min-h-screen bg-[#0a0a0b] flex items-center justify-center text-center px-4">
     <div>
-      <h1 className="text-6xl font-bold text-white mb-4">404</h1>
-      <p className="text-xl text-gray-400 mb-8">Trang không tồn tại</p>
-      <a href="/" className="btn-primary inline-block">Về trang chủ</a>
+      <h1 className="mb-4 text-6xl font-bold text-white">404</h1>
+      <p className="mb-8 text-xl text-gray-400">Trang không tồn tại</p>
+      <a href="/" className="inline-block btn-primary">Về trang chủ</a>
     </div>
   </div>
 );
@@ -130,12 +130,12 @@ const PlaceholderPage = ({ title, icon }) => {
   return (
     <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
       <Navbar />
-      <main className="pt-24 pb-16 px-4">
+      <main className="px-4 pt-24 pb-16">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="text-6xl mb-4">{icon}</div>
-          <h1 className="text-3xl font-bold text-white mb-4">{title}</h1>
-          <p className="text-gray-400 mb-8">Tính năng này đang được phát triển</p>
-          <a href="/" className="btn-primary inline-block">Về trang chủ</a>
+          <div className="mb-4 text-6xl">{icon}</div>
+          <h1 className="mb-4 text-3xl font-bold text-white">{title}</h1>
+          <p className="mb-8 text-gray-400">Tính năng này đang được phát triển</p>
+          <a href="/" className="inline-block btn-primary">Về trang chủ</a>
         </div>
       </main>
       <Footer />

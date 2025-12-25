@@ -108,32 +108,32 @@ const RegisterPage = () => {
   const strengthLabels = ['Yếu', 'Trung bình', 'Khá', 'Mạnh'];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
+    <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl" />
+        <div className="absolute rounded-full -top-40 -right-40 w-80 h-80 bg-purple-500/20 blur-3xl" />
+        <div className="absolute rounded-full -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 blur-3xl" />
       </div>
 
       <div className="relative w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="mb-8 text-center">
           <Link to="/" className="inline-flex items-center gap-2">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
-              <Briefcase className="w-7 h-7 text-white" />
+            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl">
+              <Briefcase className="text-white w-7 h-7" />
             </div>
             <span className="text-2xl font-bold text-white">JobVerse</span>
           </Link>
-          <p className="text-gray-400 mt-2">Tạo tài khoản để bắt đầu</p>
+          <p className="mt-2 text-gray-400">Tạo tài khoản để bắt đầu</p>
         </div>
 
         {/* Register Form */}
-        <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl border border-gray-700/50 p-8 shadow-2xl">
-          <h1 className="text-2xl font-bold text-white mb-6 text-center">Đăng Ký</h1>
+        <div className="p-8 border shadow-2xl bg-gray-800/50 backdrop-blur-xl rounded-2xl border-gray-700/50">
+          <h1 className="mb-6 text-2xl font-bold text-center text-white">Đăng Ký</h1>
 
           {/* Role Selection */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-300 mb-3">
+            <label className="block mb-3 text-sm font-medium text-gray-300">
               Bạn là
             </label>
             <div className="grid grid-cols-2 gap-3">
@@ -154,7 +154,7 @@ const RegisterPage = () => {
                 }`}>
                   Ứng viên
                 </span>
-                <span className="block text-xs text-gray-500 mt-1">Tìm việc làm</span>
+                <span className="block mt-1 text-xs text-gray-500">Tìm việc làm</span>
               </button>
 
               <button
@@ -174,15 +174,15 @@ const RegisterPage = () => {
                 }`}>
                   Nhà tuyển dụng
                 </span>
-                <span className="block text-xs text-gray-500 mt-1">Đăng tin tuyển dụng</span>
+                <span className="block mt-1 text-xs text-gray-500">Đăng tin tuyển dụng</span>
               </button>
             </div>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg flex items-center gap-2 text-red-400">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <div className="flex items-center gap-2 p-3 mb-4 text-red-400 border rounded-lg bg-red-500/10 border-red-500/50">
+              <AlertCircle className="flex-shrink-0 w-5 h-5" />
               <span className="text-sm">{error}</span>
             </div>
           )}
@@ -194,14 +194,14 @@ const RegisterPage = () => {
                 Họ và tên
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <User className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
                 <input
                   type="text"
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleChange}
                   placeholder="Nguyễn Văn A"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+                  className="w-full py-3 pl-10 pr-4 text-white placeholder-gray-400 transition-colors border border-gray-600 bg-gray-700/50 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                   required
                 />
               </div>
@@ -213,14 +213,14 @@ const RegisterPage = () => {
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Mail className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="your@email.com"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+                  className="w-full py-3 pl-10 pr-4 text-white placeholder-gray-400 transition-colors border border-gray-600 bg-gray-700/50 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                   required
                 />
               </div>
@@ -232,14 +232,14 @@ const RegisterPage = () => {
                 Số điện thoại <span className="text-gray-500">(không bắt buộc)</span>
               </label>
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Phone className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
                 <input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="0912 345 678"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+                  className="w-full py-3 pl-10 pr-4 text-white placeholder-gray-400 transition-colors border border-gray-600 bg-gray-700/50 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                 />
               </div>
             </div>
@@ -250,20 +250,20 @@ const RegisterPage = () => {
                 Mật khẩu
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Tối thiểu 8 ký tự"
-                  className="w-full pl-10 pr-12 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+                  className="w-full py-3 pl-10 pr-12 text-white placeholder-gray-400 transition-colors border border-gray-600 bg-gray-700/50 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  className="absolute text-gray-400 transition-colors -translate-y-1/2 right-3 top-1/2 hover:text-white"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -297,25 +297,25 @@ const RegisterPage = () => {
                 Xác nhận mật khẩu
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder="Nhập lại mật khẩu"
-                  className="w-full pl-10 pr-12 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+                  className="w-full py-3 pl-10 pr-12 text-white placeholder-gray-400 transition-colors border border-gray-600 bg-gray-700/50 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  className="absolute text-gray-400 transition-colors -translate-y-1/2 right-3 top-1/2 hover:text-white"
                 >
                   {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
                 {formData.confirmPassword && formData.password === formData.confirmPassword && (
-                  <CheckCircle2 className="absolute right-10 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+                  <CheckCircle2 className="absolute w-5 h-5 text-green-500 -translate-y-1/2 right-10 top-1/2" />
                 )}
               </div>
             </div>
@@ -327,7 +327,7 @@ const RegisterPage = () => {
                 id="terms"
                 checked={acceptTerms}
                 onChange={(e) => setAcceptTerms(e.target.checked)}
-                className="mt-1 w-4 h-4 rounded border-gray-600 bg-gray-700 text-purple-500 focus:ring-purple-500 focus:ring-offset-gray-800"
+                className="w-4 h-4 mt-1 text-purple-500 bg-gray-700 border-gray-600 rounded focus:ring-purple-500 focus:ring-offset-gray-800"
               />
               <label htmlFor="terms" className="text-sm text-gray-300">
                 Tôi đồng ý với{' '}
@@ -345,7 +345,7 @@ const RegisterPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold rounded-xl shadow-lg shadow-purple-500/25 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex items-center justify-center w-full gap-2 py-3 font-semibold text-white transition-all duration-300 shadow-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-xl shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
@@ -363,7 +363,7 @@ const RegisterPage = () => {
             Đã có tài khoản?{' '}
             <Link
               to="/login"
-              className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
+              className="font-medium text-purple-400 transition-colors hover:text-purple-300"
             >
               Đăng nhập
             </Link>
