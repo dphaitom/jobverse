@@ -28,8 +28,14 @@ const CompanyDetailPage = () => {
         companiesAPI.getCompanyById(id),
         jobsAPI.getJobsByCompany(id),
       ]);
+      
       setCompany(companyRes.data);
-      setJobs(jobsRes.data || []);
+      
+      // Handle different response formats
+      const jobsData = jobsRes.data?.content || jobsRes.data || [];
+      setJobs(Array.isArray(jobsData) ? jobsData : []);
+      
+      console.log('Company jobs:', jobsData);
     } catch (error) {
       console.error('Error fetching company:', error);
     } finally {
@@ -253,8 +259,8 @@ const CompanyDetailPage = () => {
                   ) : (
                     <EmptyState
                       icon={Briefcase}
-                      title="Chưa có việc làm"
-                      description="Công ty này hiện chưa đăng tin tuyển dụng nào."
+                      title="Chưa có tin tuyển dụng"
+                      description="Công ty này hiện chưa đăng tin tuyển dụng nào"
                     />
                   )}
                 </div>

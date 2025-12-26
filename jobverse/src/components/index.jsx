@@ -82,9 +82,17 @@ export const Navbar = () => {
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-gray-700/50 transition-colors"
                 >
-                  <div className="flex items-center justify-center text-sm font-semibold text-white rounded-full w-9 h-9 bg-gradient-to-r from-violet-500 to-indigo-600">
-                    {user?.fullName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
-                  </div>
+                  {user?.profile?.avatarUrl ? (
+                    <img
+                      src={`http://localhost:8080/api${user.profile.avatarUrl}`}
+                      alt="Avatar"
+                      className="object-cover w-9 h-9 rounded-full"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center text-sm font-semibold text-white rounded-full w-9 h-9 bg-gradient-to-r from-violet-500 to-indigo-600">
+                      {user?.fullName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <span className="hidden md:block text-sm text-white max-w-[100px] truncate">
                     {user?.fullName || user?.email}
                   </span>
@@ -105,6 +113,11 @@ export const Navbar = () => {
                       <Link to="/profile" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:text-white hover:bg-gray-700/50">
                         <User className="w-4 h-4" /> Hồ sơ của tôi
                       </Link>
+                      {user?.role === 'EMPLOYER' && (
+                        <Link to="/employer/dashboard" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:text-white hover:bg-gray-700/50">
+                          <Briefcase className="w-4 h-4" /> Quản lý tuyển dụng
+                        </Link>
+                      )}
                       {user?.role === 'CANDIDATE' && (
                         <>
                           <Link to="/saved-jobs" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:text-white hover:bg-gray-700/50">

@@ -449,4 +449,42 @@ public class JobService {
         long months = days / 30;
         return months + " tháng trước";
     }
+    
+    @Transactional(readOnly = true)
+    public Page<JobResponse> getJobsByEmployer(Long userId, Pageable pageable) {
+        log.info("Getting jobs posted by user: {}", userId);
+        
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        
+        // Check if user is employer
+        if (user.getRole() != User.Role.EMPLOYER && user.getRole() != User.Role.ADMIN) {
+            throw new UnauthorizedException("Only employers can view their posted jobs");
+        }
+        
+        Page<Job> jobs = jobRepository.findByPostedById(userId, pageable);
+        return jobs.map(job -> mapToJobResponse(job, userId));
+    }
+    
+    @Transactional
+    public JobResponse changeJobStatus(Long jobId, Job.JobStatus status, Long userId) {
+        log.info("Changing job {} status to {} by user {}", jobId, status, userId);
+        
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
+        
+        // Check authorization
+        if (!job.getPostedBy().getId().equals(userId)) {
+            User user = userRepository.findById(userId).orElseThrow();
+            if (user.getRole() != User.Role.ADMIN) {
+                throw new UnauthorizedException("You can only change status of your own jobs");
+            }
+        }
+        
+        job.setStatus(status);
+        job = jobRepository.save(job);
+        
+        log.info("Job status updated successfully");
+        return mapToJobResponse(job, userId);
+    }
 }

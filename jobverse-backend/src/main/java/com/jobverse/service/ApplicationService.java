@@ -147,7 +147,21 @@ public class ApplicationService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Application> getJobApplications(Long jobId, Pageable pageable) {
+    public Page<Application> getJobApplications(Long jobId, Long employerId, Pageable pageable) {
+        log.info("Getting applications for job {} by employer {}", jobId, employerId);
+        
+        // Verify job exists and employer owns it
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new RuntimeException("Job not found"));
+        
+        User employer = userRepository.findById(employerId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Check if user is employer and owns the job
+        if (!job.getPostedBy().getId().equals(employerId) && employer.getRole() != User.Role.ADMIN) {
+            throw new RuntimeException("You don't have permission to view applications for this job");
+        }
+        
         return applicationRepository.findByJobIdOrderByAppliedAtDesc(jobId, pageable);
     }
 

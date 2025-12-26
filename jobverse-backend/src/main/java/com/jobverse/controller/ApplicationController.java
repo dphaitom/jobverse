@@ -125,7 +125,7 @@ public class ApplicationController {
     }
 
     @GetMapping("/job/{jobId}")
-    @PreAuthorize("hasAuthority('EMPLOYER')")
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('ADMIN')")
     @Operation(summary = "Get applications for a job (Employer only)")
     public ResponseEntity<ApiResponse<List<ApplicationResponse>>> getJobApplications(
             @PathVariable Long jobId,
@@ -133,7 +133,7 @@ public class ApplicationController {
             @AuthenticationPrincipal UserPrincipal currentUser
     ) {
         log.info("Employer {} fetching applications for job {}", currentUser.getId(), jobId);
-        Page<Application> applications = applicationService.getJobApplications(jobId, pageable);
+        Page<Application> applications = applicationService.getJobApplications(jobId, currentUser.getId(), pageable);
         List<ApplicationResponse> responses = applications.getContent().stream()
                 .map(ApplicationResponse::fromEntity)
                 .collect(Collectors.toList());

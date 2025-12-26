@@ -130,8 +130,35 @@ export const jobsAPI = {
   getSavedJobs: () =>
     apiRequest('/v1/saved-jobs'),
 
+  getSavedJobsCount: () =>
+    apiRequest('/v1/saved-jobs/count'),
+
   checkSavedJob: (jobId) =>
     apiRequest(`/v1/saved-jobs/check/${jobId}`),
+
+  // Employer Job Management
+  createJob: (jobData) =>
+    apiRequest('/v1/jobs', {
+      method: 'POST',
+      body: JSON.stringify(jobData),
+    }),
+
+  getMyJobs: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return apiRequest(`/v1/jobs/my${queryString ? `?${queryString}` : ''}`);
+  },
+
+  updateJob: (jobId, jobData) =>
+    apiRequest(`/v1/jobs/${jobId}`, {
+      method: 'PUT',
+      body: JSON.stringify(jobData),
+    }),
+
+  deleteJob: (jobId) =>
+    apiRequest(`/v1/jobs/${jobId}`, { method: 'DELETE' }),
+
+  changeJobStatus: (jobId, status) =>
+    apiRequest(`/v1/jobs/${jobId}/status?status=${status}`, { method: 'PATCH' }),
 
   // Applications
   applyJob: (applicationData) =>
@@ -155,6 +182,17 @@ export const jobsAPI = {
 
   withdrawApplication: (applicationId) =>
     apiRequest(`/v1/applications/${applicationId}/withdraw`, { method: 'POST' }),
+
+  getJobApplications: (jobId, params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return apiRequest(`/v1/applications/job/${jobId}${queryString ? '?' + queryString : ''}`);
+  },
+
+  updateApplicationStatus: (applicationId, status) =>
+    apiRequest(`/v1/applications/${applicationId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    }),
 };
 
 // ==================== COMPANIES API ====================
@@ -190,13 +228,29 @@ export const skillsAPI = {
 
 export const userAPI = {
   getProfile: () =>
-    apiRequest('/v1/users/profile'),
+    apiRequest('/v1/users/me'),
 
   updateProfile: (profileData) =>
-    apiRequest('/v1/users/profile', {
+    apiRequest('/v1/users/me', {
       method: 'PUT',
       body: JSON.stringify(profileData),
     }),
+
+  uploadAvatar: async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const token = localStorage.getItem('accessToken');
+    const response = await fetch(`${API_BASE_URL}/v1/users/avatar`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+    
+    return handleResponse(response);
+  },
 
   changePassword: (passwordData) =>
     apiRequest('/v1/users/change-password', {

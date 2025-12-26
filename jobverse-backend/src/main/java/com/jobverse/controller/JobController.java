@@ -222,4 +222,27 @@ public class JobController {
         Page<JobResponse> jobs = jobService.getSavedJobs(currentUser.getId(), pageable);
         return ResponseEntity.ok(ApiResponse.success(jobs));
     }
+    
+    @GetMapping("/my")
+    @Operation(summary = "Get jobs posted by current employer")
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Page<JobResponse>>> getMyJobs(
+            @CurrentUser UserPrincipal currentUser,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<JobResponse> jobs = jobService.getJobsByEmployer(currentUser.getId(), pageable);
+        return ResponseEntity.ok(ApiResponse.success(jobs));
+    }
+    
+    @PatchMapping("/{id}/status")
+    @Operation(summary = "Change job status")
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<JobResponse>> changeJobStatus(
+            @PathVariable Long id,
+            @RequestParam Job.JobStatus status,
+            @CurrentUser UserPrincipal currentUser
+    ) {
+        JobResponse job = jobService.changeJobStatus(id, status, currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success("Job status updated", job));
+    }
 }

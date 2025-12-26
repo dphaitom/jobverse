@@ -21,6 +21,9 @@ import ResumeAnalysisPage from './pages/ResumeAnalysisPage';
 import InterviewPrepPage from './pages/InterviewPrepPage';
 import AdminDashboard from './pages/AdminDashboard';
 import CompanyReviewsPage from './pages/CompanyReviewsPage';
+import EmployerDashboard from './pages/EmployerDashboard';
+import CreateJobPage from './pages/CreateJobPage';
+import JobApplicantsPage from './pages/JobApplicantsPage';
 import { LoginPage, RegisterPage } from './pages/AuthPages';
 
 // CSS
@@ -73,6 +76,23 @@ function AnimatedRoutes() {
           <Route path="/admin" element={
             <ProtectedRoute>
               <AdminDashboard />
+            </ProtectedRoute>
+          } />
+
+          {/* Employer Routes */}
+          <Route path="/employer/dashboard" element={
+            <ProtectedRoute>
+              <EmployerDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/employer/jobs/new" element={
+            <ProtectedRoute>
+              <CreateJobPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/employer/jobs/:jobId/applicants" element={
+            <ProtectedRoute>
+              <JobApplicantsPage />
             </ProtectedRoute>
           } />
 

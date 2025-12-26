@@ -17,6 +17,11 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [stats, setStats] = useState({
+    applicationsCount: 0,
+    savedJobsCount: 0,
+  });
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -37,6 +42,7 @@ const ProfilePage = () => {
       return;
     }
     fetchProfile();
+    fetchStats();
   }, [isAuthenticated]);
 
   const fetchProfile = async () => {
@@ -64,6 +70,28 @@ const ProfilePage = () => {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      const [applicationsResponse, savedJobsResponse] = await Promise.all([
+        jobsAPI.getMyApplications().catch(() => ({ data: [] })),
+        jobsAPI.getSavedJobsCount().catch(() => ({ data: { count: 0 } })),
+      ]);
+
+      const applicationsCount = Array.isArray(applicationsResponse.data) 
+        ? applicationsResponse.data.length 
+        : 0;
+      
+      const savedJobsCount = savedJobsResponse.data?.count || 0;
+
+      setStats({
+        applicationsCount,
+        savedJobsCount,
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -83,6 +111,45 @@ const ProfilePage = () => {
       toast.error('Lỗi cập nhật: ' + error.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Vui lòng chọn file ảnh');
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Ảnh không được vượt quá 5MB');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const response = await userAPI.uploadAvatar(file);
+      const avatarUrl = response.data.avatarUrl;
+      
+      // Update local state
+      setProfile(prev => ({
+        ...prev,
+        profile: {
+          ...prev.profile,
+          avatarUrl: avatarUrl
+        }
+      }));
+
+      toast.success('Tải ảnh đại diện thành công! 📸');
+      fetchProfile(); // Refresh to get updated data
+    } catch (error) {
+      toast.error('Lỗi tải ảnh: ' + error.message);
+    } finally {
+      setUploadingAvatar(false);
     }
   };
 
@@ -106,12 +173,31 @@ const ProfilePage = () => {
             <div className="flex flex-col gap-6 md:flex-row">
               {/* Avatar */}
               <div className="relative">
-                <div className="flex items-center justify-center w-32 h-32 text-5xl font-bold text-white rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600">
-                  {formData.fullName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
-                </div>
-                <button className="absolute p-2 text-white transition-colors -bottom-2 -right-2 bg-violet-500 rounded-xl hover:bg-violet-600">
+                {profile?.profile?.avatarUrl ? (
+                  <img
+                    src={`http://localhost:8080/api${profile.profile.avatarUrl}`}
+                    alt="Avatar"
+                    className="object-cover w-32 h-32 rounded-2xl"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center w-32 h-32 text-5xl font-bold text-white rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600">
+                    {formData.fullName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <input
+                  type="file"
+                  id="avatar-upload"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                  disabled={uploadingAvatar}
+                />
+                <label
+                  htmlFor="avatar-upload"
+                  className={`absolute p-2 text-white transition-colors -bottom-2 -right-2 bg-violet-500 rounded-xl hover:bg-violet-600 cursor-pointer ${uploadingAvatar ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
                   <Camera className="w-4 h-4" />
-                </button>
+                </label>
               </div>
 
               {/* Info */}
@@ -351,7 +437,7 @@ const ProfilePage = () => {
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div className="p-4 text-center glass-card rounded-xl">
               <Briefcase className="w-8 h-8 mx-auto mb-2 text-violet-400" />
-              <p className="text-2xl font-bold text-white">{formData.experienceYears}</p>
+              <p className="text-2xl font-bold text-white">{formData.experienceYears || 0}</p>
               <p className="text-xs text-gray-400">Năm kinh nghiệm</p>
             </div>
             <div className="p-4 text-center glass-card rounded-xl">
@@ -359,14 +445,14 @@ const ProfilePage = () => {
               <p className="text-2xl font-bold text-white">0</p>
               <p className="text-xs text-gray-400">Kỹ năng</p>
             </div>
-            <div className="p-4 text-center glass-card rounded-xl">
+            <div className="p-4 text-center glass-card rounded-xl cursor-pointer hover:bg-gray-800/40" onClick={() => navigate('/my-applications')}>
               <Calendar className="w-8 h-8 mx-auto mb-2 text-violet-400" />
-              <p className="text-2xl font-bold text-white">0</p>
+              <p className="text-2xl font-bold text-white">{stats.applicationsCount}</p>
               <p className="text-xs text-gray-400">Đã ứng tuyển</p>
             </div>
-            <div className="p-4 text-center glass-card rounded-xl">
+            <div className="p-4 text-center glass-card rounded-xl cursor-pointer hover:bg-gray-800/40" onClick={() => navigate('/saved-jobs')}>
               <Briefcase className="w-8 h-8 mx-auto mb-2 text-violet-400" />
-              <p className="text-2xl font-bold text-white">0</p>
+              <p className="text-2xl font-bold text-white">{stats.savedJobsCount}</p>
               <p className="text-xs text-gray-400">Việc đã lưu</p>
             </div>
           </div>

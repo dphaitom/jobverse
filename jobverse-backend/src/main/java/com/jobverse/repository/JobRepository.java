@@ -80,4 +80,6 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     
     @Query("SELECT j.location, COUNT(j) FROM Job j WHERE j.status = 'ACTIVE' GROUP BY j.location ORDER BY COUNT(j) DESC")
     List<Object[]> countJobsByLocation();
+    
+    Page<Job> findByPostedById(Long userId, Pageable pageable);
 }

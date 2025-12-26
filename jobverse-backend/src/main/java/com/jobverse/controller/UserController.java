@@ -7,6 +7,7 @@ import com.jobverse.repository.UserProfileRepository;
 import com.jobverse.repository.UserRepository;
 import com.jobverse.security.CurrentUser;
 import com.jobverse.security.UserPrincipal;
+import com.jobverse.service.FileStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +29,7 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
+    private final FileStorageService fileStorageService;
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -160,6 +163,10 @@ public class UserController {
             profile.setOpenToRemote((Boolean) updates.get("openToRemote"));
         }
 
+        if (updates.containsKey("avatarUrl")) {
+            profile.setAvatarUrl((String) updates.get("avatarUrl"));
+        }
+
         // Save changes
         try {
             log.info("💾 Saving user and profile...");
@@ -178,6 +185,7 @@ public class UserController {
 
             Map<String, Object> profileData = new HashMap<>();
             profileData.put("fullName", savedProfile.getFullName());
+            profileData.put("avatarUrl", savedProfile.getAvatarUrl());
             profileData.put("city", savedProfile.getCity());
             profileData.put("bio", savedProfile.getBio());
             profileData.put("currentPosition", savedProfile.getCurrentPosition());
@@ -196,6 +204,52 @@ public class UserController {
             log.error("❌ Error updating profile: {}", e.getMessage(), e);
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error("UPDATE_FAILED", "Failed to update profile: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/avatar")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Upload user avatar")
+    public ResponseEntity<ApiResponse<Map<String, String>>> uploadAvatar(
+            @CurrentUser UserPrincipal currentUser,
+            @RequestParam("file") MultipartFile file
+    ) {
+        log.info("📸 Uploading avatar for user: {}", currentUser.getEmail());
+
+        try {
+            // Store file
+            String avatarUrl = fileStorageService.storeFile(file, "avatars");
+
+            // Update user profile
+            User user = userRepository.findById(currentUser.getId())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            UserProfile profile = user.getProfile();
+            if (profile == null) {
+                profile = UserProfile.builder()
+                        .user(user)
+                        .fullName(user.getEmail().split("@")[0])
+                        .build();
+            }
+
+            // Delete old avatar if exists
+            if (profile.getAvatarUrl() != null) {
+                fileStorageService.deleteFile(profile.getAvatarUrl());
+            }
+
+            profile.setAvatarUrl(avatarUrl);
+            userProfileRepository.save(profile);
+
+            log.info("✅ Avatar uploaded successfully: {}", avatarUrl);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("avatarUrl", avatarUrl);
+
+            return ResponseEntity.ok(ApiResponse.success("Avatar uploaded successfully", response));
+        } catch (Exception e) {
+            log.error("❌ Error uploading avatar: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("UPLOAD_FAILED", "Failed to upload avatar: " + e.getMessage()));
         }
     }
 }

@@ -40,6 +40,19 @@ const LoginPage = () => {
     setLoading(true);
     setError('');
 
+    // Basic email validation
+    if (!formData.email || !formData.email.includes('@')) {
+      setError('Vui lòng nhập địa chỉ email hợp lệ');
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.password || formData.password.length < 6) {
+      setError('Mật khẩu phải có ít nhất 6 ký tự');
+      setLoading(false);
+      return;
+    }
+
     try {
       const result = await login(formData.email, formData.password);
       
@@ -49,7 +62,17 @@ const LoginPage = () => {
         setError(result.error || 'Đăng nhập thất bại');
       }
     } catch (err) {
-      setError('Có lỗi xảy ra. Vui lòng thử lại.');
+      console.error('Login error:', err);
+      const errorMessage = err.message || 'Có lỗi xảy ra. Vui lòng thử lại.';
+      
+      if (errorMessage.toLowerCase().includes('credentials') || 
+          errorMessage.toLowerCase().includes('password')) {
+        setError('Email hoặc mật khẩu không đúng');
+      } else if (errorMessage.toLowerCase().includes('verified')) {
+        setError('Tài khoản chưa được xác thực. Vui lòng kiểm tra email.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }

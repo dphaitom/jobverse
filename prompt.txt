@@ -1,0 +1,108 @@
+Repo: dphaitom/jobverse
+Goal: Finish the JobVerse automated job marketplace website with complete user + employer flows.
+
+Hard constraint:
+
+Do NOT change or break any existing API endpoints.
+You may only add new APIs/endpoints and add new frontend logic that consumes them.
+Refactors are ok only if they don’t alter existing API contracts.
+Task 0 — Project audit + plan (required first)
+Inspect the repo structure and identify:
+backend framework(s) (Java/Spring? Python? etc.) and frontend entry points (JS).
+current auth flow (login/register endpoints, JWT/session, user model).
+role handling (user vs employer) and where profile/company/job pages are implemented.
+Output:
+a short architecture summary
+a prioritized implementation plan
+a list of new APIs you intend to add (names/paths + request/response sketch)
+Task 1 — Fix authentication to support real email login (baseline)
+Problem: Currently cannot log in with real email accounts.
+Implement:
+
+Ensure email/password login works reliably end-to-end (frontend + backend).
+Validate email format, handle error messages, and ensure tokens/sessions persist.
+If there is no solid token/session mechanism, add a new endpoint(s) rather than changing existing ones.
+Acceptance checks:
+
+A user can register (if supported), then log in with email/password, refresh the page, and still remain logged in.
+Clear error states for wrong password / unverified user (if relevant).
+Task 2 — Add avatar upload/update (user profile)
+Implement:
+
+Add avatar upload/update for logged-in users:
+backend: new endpoint(s) to upload image and update user profile avatar URL/path
+storage: local/dev-friendly storage is acceptable; document how it works
+frontend: add UI to pick image, upload, preview, and save.
+Display avatar consistently (navbar/profile).
+Acceptance checks:
+
+User uploads an image and sees it immediately.
+Avatar persists after refresh.
+File type/size validation.
+Task 3 — Fix “My Profile” stats + lists (Applied jobs & Saved jobs)
+Problem: “Applied jobs” and “Saved jobs” display incorrectly.
+Implement:
+
+Make “My Profile” correctly show:
+list of applied jobs
+list of saved jobs
+counts for each
+years of experience display (use existing data if present; if missing, add via new field + new endpoint, do not alter old endpoints)
+Ensure correct loading/empty/error states.
+Acceptance checks:
+
+Lists match server data.
+Counts are correct and update after applying/saving a job.
+Task 4 — Add missing navigation: sidebar on Saved Jobs page
+Implement:
+
+Add a sidebar navigation on the Saved Jobs page to go back to other areas.
+Prefer reusing an existing layout/sidebar component if one already exists.
+Acceptance checks:
+
+Sidebar is visible and links work.
+UI consistent with the rest of the app.
+Task 5 — Employer role MVP: job posting + basic management
+Problem: Employer role is missing job posting and core functionality.
+Implement an employer MVP flow:
+
+Employer can:
+create a job post
+view list of their job posts
+edit/close/delete job posts (choose minimal set if time-limited)
+Add backend models + new APIs for employer job management.
+Add frontend pages/forms for employer dashboard.
+Acceptance checks:
+
+Employer can create a job and see it listed.
+Validation errors are handled (missing title/description/etc.).
+Task 6 — Connect user ↔ employer flow for testing (apply + view applicants)
+Implement:
+
+User can apply to a job (if not already working, implement minimally with a new apply endpoint).
+Employer can view applicants per job (basic list: user name/email, application date, status).
+Prevent duplicate applications if appropriate.
+Acceptance checks:
+
+User applies → employer sees applicant in dashboard.
+Basic permission checks: only employer owner can view applicants.
+Task 7 — Fix Company page to display jobs
+Problem: Company page does not show jobs.
+Implement:
+
+Add/fix API to fetch jobs by company/employer.
+Render those jobs on the company page with pagination or simple list.
+Acceptance checks:
+
+Company page shows correct jobs for that company.
+Handles no jobs gracefully.
+Final deliverables (required)
+No existing APIs changed; only new endpoints added.
+Update README with any new env vars (OAuth secrets, upload path, etc.).
+Provide manual test steps for each task.
+Start now:
+Run Task 0 first, then implement tasks in order. For each task, show:
+
+files changed
+new APIs added (paths + payload)
+how to test manually
