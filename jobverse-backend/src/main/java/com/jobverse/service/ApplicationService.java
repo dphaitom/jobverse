@@ -31,16 +31,23 @@ public class ApplicationService {
     public Application createApplication(ApplicationRequest request, Long userId) {
         log.info("User {} applying for job {}", userId, request.getJobId());
 
+        // Get user and check role
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Block employers from applying
+        if (user.getRole() == User.Role.EMPLOYER) {
+            throw new RuntimeException("Employers cannot apply for jobs");
+        }
+
         // Check if already applied
         if (applicationRepository.existsByJobIdAndUserId(request.getJobId(), userId)) {
             throw new RuntimeException("You have already applied for this job");
         }
 
-        // Get job and user
+        // Get job
         Job job = jobRepository.findById(request.getJobId())
                 .orElseThrow(() -> new RuntimeException("Job not found"));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Get resume if provided
         Resume resume = null;
@@ -81,16 +88,23 @@ public class ApplicationService {
     public Application quickApply(Long jobId, Long userId) {
         log.info("User {} quick applying for job {}", userId, jobId);
 
+        // Get user and check role
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Block employers from applying
+        if (user.getRole() == User.Role.EMPLOYER) {
+            throw new RuntimeException("Employers cannot apply for jobs");
+        }
+
         // Check if already applied
         if (applicationRepository.existsByJobIdAndUserId(jobId, userId)) {
             throw new RuntimeException("You have already applied for this job");
         }
 
-        // Get job and user
+        // Get job
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Get user's primary resume
         Resume defaultResume = resumeRepository.findByUserIdAndIsPrimaryTrue(userId)
@@ -133,6 +147,7 @@ public class ApplicationService {
         log.info("Quick application created with ID: {}", saved.getId());
         return saved;
     }
+
 
     /**
      * Check if user has already applied for a job

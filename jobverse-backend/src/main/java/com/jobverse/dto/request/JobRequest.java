@@ -29,7 +29,7 @@ public class JobRequest {
     
     private String responsibilities;
     
-    @NotNull(message = "Company ID is required")
+    // CompanyId is optional - if not provided, will use employer's company
     private Long companyId;
     
     private Long categoryId;

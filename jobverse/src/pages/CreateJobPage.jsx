@@ -4,13 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import { Navbar, Footer, LoadingSpinner } from '../components';
 import { jobsAPI, companiesAPI, categoriesAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Building2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const CreateJobPage = () => {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
   const [companies, setCompanies] = useState([]);
   const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
@@ -21,14 +22,14 @@ const CreateJobPage = () => {
     companyId: '',
     categoryId: '',
     jobType: 'FULL_TIME',
-    experienceLevel: 'MIDDLE',
+    experienceLevel: 'MID',
     salaryMin: '',
     salaryMax: '',
     salaryNegotiable: false,
     currency: 'VND',
     location: '',
     isRemote: false,
-    remoteType: 'NO_REMOTE',
+    remoteType: 'ONSITE',
     positionsCount: 1,
     deadline: '',
   });
@@ -49,19 +50,41 @@ const CreateJobPage = () => {
   }, [isAuthenticated, user]);
 
   const fetchData = async () => {
+    setDataLoading(true);
     try {
+      // Fetch employer's own company (1:1 relationship - each employer has one company)
       const [companiesRes, categoriesRes] = await Promise.all([
-        companiesAPI.getCompanies().catch(() => ({ data: { content: [] } })),
-        categoriesAPI.getCategories().catch(() => ({ data: [] })),
+        companiesAPI.getMyCompanies().catch((err) => {
+          console.error('Error fetching companies:', err);
+          return { data: [] };
+        }),
+        categoriesAPI.getCategories().catch((err) => {
+          console.error('Error fetching categories:', err);
+          return { data: [] };
+        }),
       ]);
 
-      const companiesData = companiesRes.data?.content || companiesRes.data || [];
+      console.log('Companies response:', companiesRes);
+      console.log('Categories response:', categoriesRes);
+
+      const companiesData = companiesRes.data || [];
       const categoriesData = categoriesRes.data || [];
+
+      console.log('Companies data:', companiesData);
+      console.log('Categories data:', categoriesData);
 
       setCompanies(Array.isArray(companiesData) ? companiesData : []);
       setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+      
+      // Auto-select employer's company (employer has exactly one company)
+      if (companiesData.length >= 1) {
+        setFormData(prev => ({ ...prev, companyId: companiesData[0].id.toString() }));
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
+      toast.error('Không thể tải dữ liệu. Vui lòng thử lại.');
+    } finally {
+      setDataLoading(false);
     }
   };
 
@@ -119,6 +142,45 @@ const CreateJobPage = () => {
     }
   };
 
+  // Show loading while fetching data
+  if (dataLoading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+        <Navbar />
+        <main className="px-4 pt-24 pb-16 flex items-center justify-center min-h-[60vh]">
+          <LoadingSpinner />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Show error if employer has no company
+  if (user?.role === 'EMPLOYER' && companies.length === 0) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+        <Navbar />
+        <main className="px-4 pt-24 pb-16">
+          <div className="max-w-2xl mx-auto text-center">
+            <Building2 className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-white mb-2">Chưa có công ty</h1>
+            <p className="text-gray-400 mb-6">
+              Tài khoản của bạn chưa được liên kết với công ty nào. 
+              Vui lòng liên hệ admin để được hỗ trợ.
+            </p>
+            <button
+              onClick={() => navigate('/employer/dashboard')}
+              className="px-6 py-3 btn-primary"
+            >
+              Quay lại Dashboard
+            </button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
       <Navbar />
@@ -166,20 +228,29 @@ const CreateJobPage = () => {
                     <label className="block text-sm text-gray-400 mb-1.5">
                       Công ty <span className="text-red-400">*</span>
                     </label>
-                    <select
-                      name="companyId"
-                      value={formData.companyId}
-                      onChange={handleChange}
-                      className="w-full input-field"
-                      required
-                    >
-                      <option value="">Chọn công ty</option>
-                      {companies.map(company => (
-                        <option key={company.id} value={company.id}>
-                          {company.name}
-                        </option>
-                      ))}
-                    </select>
+                    {/* For EMPLOYER role: company is auto-selected and read-only */}
+                    {user?.role === 'EMPLOYER' && companies.length > 0 ? (
+                      <div className="w-full px-4 py-3 rounded-xl bg-gray-800/50 border border-gray-700 flex items-center gap-2 cursor-not-allowed">
+                        <Building2 className="w-4 h-4 text-violet-400 flex-shrink-0" />
+                        <span className="text-white truncate">{companies[0]?.name}</span>
+                        <span className="ml-auto text-xs text-gray-500 flex-shrink-0">(Tự động)</span>
+                      </div>
+                    ) : (
+                      <select
+                        name="companyId"
+                        value={formData.companyId}
+                        onChange={handleChange}
+                        className="w-full input-field"
+                        required
+                      >
+                        <option value="">Chọn công ty</option>
+                        {companies.map(company => (
+                          <option key={company.id} value={company.id}>
+                            {company.name}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   </div>
 
                   <div>
@@ -197,6 +268,9 @@ const CreateJobPage = () => {
                         </option>
                       ))}
                     </select>
+                    {categories.length === 0 && (
+                      <p className="text-xs text-yellow-500 mt-1">Đang tải danh mục...</p>
+                    )}
                   </div>
                 </div>
 
@@ -275,12 +349,13 @@ const CreateJobPage = () => {
                     className="w-full input-field"
                     required
                   >
-                    <option value="INTERN">Intern</option>
-                    <option value="FRESHER">Fresher</option>
+                    <option value="ENTRY">Entry Level</option>
                     <option value="JUNIOR">Junior</option>
-                    <option value="MIDDLE">Middle</option>
+                    <option value="MID">Mid Level</option>
                     <option value="SENIOR">Senior</option>
                     <option value="LEAD">Lead</option>
+                    <option value="MANAGER">Manager</option>
+                    <option value="DIRECTOR">Director</option>
                   </select>
                 </div>
 

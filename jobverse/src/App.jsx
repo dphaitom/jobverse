@@ -24,6 +24,8 @@ import CompanyReviewsPage from './pages/CompanyReviewsPage';
 import EmployerDashboard from './pages/EmployerDashboard';
 import CreateJobPage from './pages/CreateJobPage';
 import JobApplicantsPage from './pages/JobApplicantsPage';
+import AICVRankingPage from './pages/AICVRankingPage';
+import MessagesPage from './pages/MessagesPage';
 import { LoginPage, RegisterPage } from './pages/AuthPages';
 
 // CSS
@@ -66,6 +68,11 @@ function AnimatedRoutes() {
               <MyApplicationsPage />
             </ProtectedRoute>
           } />
+          <Route path="/messages" element={
+            <ProtectedRoute>
+              <MessagesPage />
+            </ProtectedRoute>
+          } />
           <Route path="/settings" element={
             <ProtectedRoute>
               <SettingsPage />
@@ -93,6 +100,11 @@ function AnimatedRoutes() {
           <Route path="/employer/jobs/:jobId/applicants" element={
             <ProtectedRoute>
               <JobApplicantsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/employer/cv-ranking" element={
+            <ProtectedRoute>
+              <AICVRankingPage />
             </ProtectedRoute>
           } />
 

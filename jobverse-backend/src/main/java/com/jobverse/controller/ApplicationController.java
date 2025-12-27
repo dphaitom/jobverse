@@ -108,7 +108,7 @@ public class ApplicationController {
     }
 
     @PutMapping("/{applicationId}/status")
-    @PreAuthorize("hasAuthority('EMPLOYER')")
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('ADMIN')")
     @Operation(summary = "Update application status (Employer only)")
     public ResponseEntity<ApiResponse<ApplicationResponse>> updateStatus(
             @PathVariable Long applicationId,

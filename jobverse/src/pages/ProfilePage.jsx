@@ -1,12 +1,13 @@
 // src/pages/ProfilePage.jsx
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   User, Mail, Phone, MapPin, Briefcase, Calendar, Edit2,
-  Save, X, Camera, Github, Linkedin, Globe, Award
+  Save, X, Camera, Github, Linkedin, Globe, Award, Building2, 
+  Users, Star, ExternalLink, Plus
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { userAPI } from '../services/api';
+import { userAPI, jobsAPI, companiesAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Navbar, Footer, LoadingSpinner } from '../components';
 
@@ -18,10 +19,20 @@ const ProfilePage = () => {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  
+  // Candidate-specific state
   const [stats, setStats] = useState({
     applicationsCount: 0,
     savedJobsCount: 0,
   });
+  
+  // Employer-specific state
+  const [myCompanies, setMyCompanies] = useState([]);
+  const [employerStats, setEmployerStats] = useState({
+    totalJobs: 0,
+    totalApplications: 0,
+  });
+  
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -36,14 +47,23 @@ const ProfilePage = () => {
     openToRemote: false,
   });
 
+  const isEmployer = user?.role === 'EMPLOYER';
+  const isCandidate = user?.role === 'CANDIDATE';
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
     fetchProfile();
-    fetchStats();
-  }, [isAuthenticated]);
+    
+    // Fetch role-specific data
+    if (isCandidate) {
+      fetchCandidateStats();
+    } else if (isEmployer) {
+      fetchEmployerData();
+    }
+  }, [isAuthenticated, user?.role]);
 
   const fetchProfile = async () => {
     try {
@@ -70,7 +90,8 @@ const ProfilePage = () => {
     }
   };
 
-  const fetchStats = async () => {
+  // Candidate: fetch applications and saved jobs counts
+  const fetchCandidateStats = async () => {
     try {
       const [applicationsResponse, savedJobsResponse] = await Promise.all([
         jobsAPI.getMyApplications().catch(() => ({ data: [] })),
@@ -88,7 +109,34 @@ const ProfilePage = () => {
         savedJobsCount,
       });
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      console.error('Error fetching candidate stats:', error);
+    }
+  };
+
+  // Employer: fetch companies and job stats
+  const fetchEmployerData = async () => {
+    try {
+      // Fetch employer's companies using the new API endpoint
+      const companiesRes = await companiesAPI.getMyCompanies().catch(() => ({ data: [] }));
+      const companies = companiesRes.data?.content || companiesRes.data || [];
+      setMyCompanies(Array.isArray(companies) ? companies : []);
+      
+      // Fetch employer's jobs for stats
+      const jobsRes = await jobsAPI.getMyJobs().catch(() => ({ data: { content: [] } }));
+      const jobs = jobsRes.data?.content || jobsRes.data || [];
+      
+      // Calculate total applications across all jobs
+      let totalApplications = 0;
+      if (Array.isArray(jobs)) {
+        totalApplications = jobs.reduce((sum, job) => sum + (job.applicationsCount || 0), 0);
+      }
+      
+      setEmployerStats({
+        totalJobs: Array.isArray(jobs) ? jobs.length : 0,
+        totalApplications,
+      });
+    } catch (error) {
+      console.error('Error fetching employer data:', error);
     }
   };
 
@@ -242,12 +290,13 @@ const ProfilePage = () => {
 
                 {/* Status Tags */}
                 <div className="flex flex-wrap gap-2 mt-4">
-                  {formData.openToWork && (
+                  {/* Candidate-only tags */}
+                  {isCandidate && formData.openToWork && (
                     <span className="px-3 py-1 text-sm text-green-400 rounded-full bg-green-500/20">
                       🟢 Đang tìm việc
                     </span>
                   )}
-                  {formData.openToRemote && (
+                  {isCandidate && formData.openToRemote && (
                     <span className="px-3 py-1 text-sm text-blue-400 rounded-full bg-blue-500/20">
                       🌍 Sẵn sàng Remote
                     </span>
@@ -293,61 +342,80 @@ const ProfilePage = () => {
                     placeholder="0912345678"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Vị trí hiện tại</label>
-                  <input
-                    type="text"
-                    name="currentPosition"
-                    value={formData.currentPosition}
-                    onChange={handleChange}
-                    className="w-full input-field"
-                    placeholder="Senior Developer"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Thành phố</label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleChange}
-                    className="w-full input-field"
-                    placeholder="TP. Hồ Chí Minh"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Số năm kinh nghiệm</label>
-                  <input
-                    type="number"
-                    name="experienceYears"
-                    value={formData.experienceYears}
-                    onChange={handleChange}
-                    className="w-full input-field"
-                    min="0"
-                  />
-                </div>
-                <div className="flex items-center gap-6 pt-6">
-                  <label className="flex items-center gap-2 cursor-pointer">
+                {/* Candidate-only fields */}
+                {isCandidate && (
+                  <>
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-1.5">Vị trí hiện tại</label>
+                      <input
+                        type="text"
+                        name="currentPosition"
+                        value={formData.currentPosition}
+                        onChange={handleChange}
+                        className="w-full input-field"
+                        placeholder="Senior Developer"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-1.5">Thành phố</label>
+                      <input
+                        type="text"
+                        name="city"
+                        value={formData.city}
+                        onChange={handleChange}
+                        className="w-full input-field"
+                        placeholder="TP. Hồ Chí Minh"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-1.5">Số năm kinh nghiệm</label>
+                      <input
+                        type="number"
+                        name="experienceYears"
+                        value={formData.experienceYears}
+                        onChange={handleChange}
+                        className="w-full input-field"
+                        min="0"
+                      />
+                    </div>
+                    <div className="flex items-center gap-6 pt-6">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="openToWork"
+                          checked={formData.openToWork}
+                          onChange={handleChange}
+                          className="w-5 h-5 bg-gray-800 border-gray-700 rounded text-violet-500"
+                        />
+                        <span className="text-gray-300">Đang tìm việc</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="openToRemote"
+                          checked={formData.openToRemote}
+                          onChange={handleChange}
+                          className="w-5 h-5 bg-gray-800 border-gray-700 rounded text-violet-500"
+                        />
+                        <span className="text-gray-300">Sẵn sàng Remote</span>
+                      </label>
+                    </div>
+                  </>
+                )}
+                {/* Employer sees simpler form */}
+                {isEmployer && (
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-1.5">Thành phố</label>
                     <input
-                      type="checkbox"
-                      name="openToWork"
-                      checked={formData.openToWork}
+                      type="text"
+                      name="city"
+                      value={formData.city}
                       onChange={handleChange}
-                      className="w-5 h-5 bg-gray-800 border-gray-700 rounded text-violet-500"
+                      className="w-full input-field"
+                      placeholder="TP. Hồ Chí Minh"
                     />
-                    <span className="text-gray-300">Đang tìm việc</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      name="openToRemote"
-                      checked={formData.openToRemote}
-                      onChange={handleChange}
-                      className="w-5 h-5 bg-gray-800 border-gray-700 rounded text-violet-500"
-                    />
-                    <span className="text-gray-300">Sẵn sàng Remote</span>
-                  </label>
-                </div>
+                  </div>
+                )}
                 <div className="md:col-span-2">
                   <label className="block text-sm text-gray-400 mb-1.5">Giới thiệu bản thân</label>
                   <textarea
@@ -433,29 +501,111 @@ const ProfilePage = () => {
             </div>
           )}
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <div className="p-4 text-center glass-card rounded-xl">
-              <Briefcase className="w-8 h-8 mx-auto mb-2 text-violet-400" />
-              <p className="text-2xl font-bold text-white">{formData.experienceYears || 0}</p>
-              <p className="text-xs text-gray-400">Năm kinh nghiệm</p>
+          {/* Employer Companies Section */}
+          {isEmployer && (
+            <div className="p-6 mb-6 glass-card rounded-2xl">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="flex items-center gap-2 text-xl font-semibold text-white">
+                  <Building2 className="w-5 h-5 text-violet-400" /> Công ty của tôi
+                </h2>
+                <Link to="/employer/companies/new" className="flex items-center gap-1 text-sm text-violet-400 hover:text-violet-300">
+                  <Plus className="w-4 h-4" /> Thêm công ty
+                </Link>
+              </div>
+              {myCompanies.length > 0 ? (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {myCompanies.map(company => (
+                    <Link
+                      key={company.id}
+                      to={`/companies/${company.id}`}
+                      className="flex items-start gap-4 p-4 transition-colors rounded-xl bg-gray-800/30 hover:bg-gray-800/50"
+                    >
+                      <div className="flex items-center justify-center flex-shrink-0 w-14 h-14 text-2xl rounded-xl bg-gradient-to-br from-gray-700 to-gray-800">
+                        {company.logoUrl ? (
+                          <img src={company.logoUrl} alt={company.name} className="object-contain w-10 h-10" />
+                        ) : (
+                          '🏢'
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-white truncate">{company.name}</h3>
+                        <p className="text-sm text-gray-400">{company.industry}</p>
+                        <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" /> {company.headquarters || 'N/A'}
+                          </span>
+                          {company.ratingAvg > 0 && (
+                            <span className="flex items-center gap-1 text-yellow-400">
+                              <Star className="w-3 h-3 fill-current" /> {company.ratingAvg}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-8 text-center">
+                  <Building2 className="w-12 h-12 mx-auto mb-3 text-gray-600" />
+                  <p className="text-gray-400">Bạn chưa có công ty nào</p>
+                  <Link to="/employer/companies/new" className="inline-block mt-3 btn-primary">
+                    Tạo công ty đầu tiên
+                  </Link>
+                </div>
+              )}
             </div>
-            <div className="p-4 text-center glass-card rounded-xl">
-              <Award className="w-8 h-8 mx-auto mb-2 text-violet-400" />
-              <p className="text-2xl font-bold text-white">0</p>
-              <p className="text-xs text-gray-400">Kỹ năng</p>
+          )}
+
+          {/* Stats - Role-based */}
+          {isCandidate && (
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              <div className="p-4 text-center glass-card rounded-xl">
+                <Briefcase className="w-8 h-8 mx-auto mb-2 text-violet-400" />
+                <p className="text-2xl font-bold text-white">{formData.experienceYears || 0}</p>
+                <p className="text-xs text-gray-400">Năm kinh nghiệm</p>
+              </div>
+              <div className="p-4 text-center glass-card rounded-xl">
+                <Award className="w-8 h-8 mx-auto mb-2 text-violet-400" />
+                <p className="text-2xl font-bold text-white">0</p>
+                <p className="text-xs text-gray-400">Kỹ năng</p>
+              </div>
+              <div className="p-4 text-center glass-card rounded-xl cursor-pointer hover:bg-gray-800/40" onClick={() => navigate('/my-applications')}>
+                <Calendar className="w-8 h-8 mx-auto mb-2 text-violet-400" />
+                <p className="text-2xl font-bold text-white">{stats.applicationsCount}</p>
+                <p className="text-xs text-gray-400">Đã ứng tuyển</p>
+              </div>
+              <div className="p-4 text-center glass-card rounded-xl cursor-pointer hover:bg-gray-800/40" onClick={() => navigate('/saved-jobs')}>
+                <Briefcase className="w-8 h-8 mx-auto mb-2 text-violet-400" />
+                <p className="text-2xl font-bold text-white">{stats.savedJobsCount}</p>
+                <p className="text-xs text-gray-400">Việc đã lưu</p>
+              </div>
             </div>
-            <div className="p-4 text-center glass-card rounded-xl cursor-pointer hover:bg-gray-800/40" onClick={() => navigate('/my-applications')}>
-              <Calendar className="w-8 h-8 mx-auto mb-2 text-violet-400" />
-              <p className="text-2xl font-bold text-white">{stats.applicationsCount}</p>
-              <p className="text-xs text-gray-400">Đã ứng tuyển</p>
+          )}
+
+          {isEmployer && (
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              <div className="p-4 text-center glass-card rounded-xl">
+                <Building2 className="w-8 h-8 mx-auto mb-2 text-violet-400" />
+                <p className="text-2xl font-bold text-white">{myCompanies.length}</p>
+                <p className="text-xs text-gray-400">Công ty</p>
+              </div>
+              <div className="p-4 text-center glass-card rounded-xl cursor-pointer hover:bg-gray-800/40" onClick={() => navigate('/employer/dashboard')}>
+                <Briefcase className="w-8 h-8 mx-auto mb-2 text-violet-400" />
+                <p className="text-2xl font-bold text-white">{employerStats.totalJobs}</p>
+                <p className="text-xs text-gray-400">Tin tuyển dụng</p>
+              </div>
+              <div className="p-4 text-center glass-card rounded-xl cursor-pointer hover:bg-gray-800/40" onClick={() => navigate('/employer/dashboard')}>
+                <Users className="w-8 h-8 mx-auto mb-2 text-violet-400" />
+                <p className="text-2xl font-bold text-white">{employerStats.totalApplications}</p>
+                <p className="text-xs text-gray-400">Đơn ứng tuyển</p>
+              </div>
+              <div className="p-4 text-center glass-card rounded-xl cursor-pointer hover:bg-gray-800/40" onClick={() => navigate('/employer/jobs/new')}>
+                <Plus className="w-8 h-8 mx-auto mb-2 text-violet-400" />
+                <p className="text-sm font-medium text-white">Đăng tin</p>
+                <p className="text-xs text-gray-400">Tuyển dụng</p>
+              </div>
             </div>
-            <div className="p-4 text-center glass-card rounded-xl cursor-pointer hover:bg-gray-800/40" onClick={() => navigate('/saved-jobs')}>
-              <Briefcase className="w-8 h-8 mx-auto mb-2 text-violet-400" />
-              <p className="text-2xl font-bold text-white">{stats.savedJobsCount}</p>
-              <p className="text-xs text-gray-400">Việc đã lưu</p>
-            </div>
-          </div>
+          )}
         </div>
       </main>
 

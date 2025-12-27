@@ -79,9 +79,9 @@ public class User {
     @Builder.Default
     private Set<SavedJob> savedJobs = new HashSet<>();
     
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @Builder.Default
-    private Set<Company> companies = new HashSet<>();
+    // 1:1 relationship - each employer has exactly one company
+    @OneToOne(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Company company;
     
     public enum Role {
         CANDIDATE, EMPLOYER, ADMIN

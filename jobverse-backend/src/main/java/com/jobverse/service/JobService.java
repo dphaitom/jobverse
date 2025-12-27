@@ -182,12 +182,24 @@ public class JobService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         
-        Company company = companyRepository.findById(request.getCompanyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
+        Company company;
         
-        // Verify user owns the company or is admin
-        if (!company.getOwner().getId().equals(userId) && user.getRole() != User.Role.ADMIN) {
-            throw new UnauthorizedException("You don't have permission to post jobs for this company");
+        // If companyId is provided, use it (for backward compatibility)
+        // Otherwise, auto-derive from employer's company (1:1 relationship)
+        if (request.getCompanyId() != null) {
+            company = companyRepository.findById(request.getCompanyId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
+            
+            // Verify user owns the company or is admin
+            if (!company.getOwner().getId().equals(userId) && user.getRole() != User.Role.ADMIN) {
+                throw new UnauthorizedException("You don't have permission to post jobs for this company");
+            }
+        } else {
+            // Auto-derive company from employer (new behavior)
+            company = companyRepository.findByOwnerId(userId)
+                    .orElseThrow(() -> new BadRequestException(
+                        "No company found for your account. Please create a company first or contact support."
+                    ));
         }
         
         // Generate unique slug

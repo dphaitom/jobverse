@@ -23,8 +23,9 @@ public class Company {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", nullable = false)
+    // 1:1 relationship - each company belongs to exactly one employer
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false, unique = true)
     private User owner;
     
     @Column(nullable = false, unique = true)

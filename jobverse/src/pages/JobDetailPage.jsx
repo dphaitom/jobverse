@@ -45,13 +45,17 @@ const JobDetailPage = () => {
         setRelatedJobs((relatedRes.data || []).filter(j => j.id !== parseInt(id)).slice(0, 3));
       }
 
-      // Check if job is saved (only for authenticated users)
+      // Check if job is saved and applied (only for authenticated users)
       if (isAuthenticated) {
         try {
-          const savedRes = await jobsAPI.checkSavedJob(id);
+          const [savedRes, appliedRes] = await Promise.all([
+            jobsAPI.checkSavedJob(id).catch(() => ({ data: { isSaved: false } })),
+            jobsAPI.checkApplied(id).catch(() => ({ data: { hasApplied: false } })),
+          ]);
           setIsSaved(savedRes.data?.isSaved || false);
+          setHasApplied(appliedRes.data?.hasApplied || false);
         } catch (error) {
-          console.error('Error checking saved status:', error);
+          console.error('Error checking saved/applied status:', error);
         }
       }
     } catch (error) {
@@ -235,9 +239,14 @@ const JobDetailPage = () => {
                   </div>
                 </div>
 
-                {/* Action Buttons */}
+                {/* Action Buttons - Hide apply for employers */}
                 <div className="flex flex-wrap gap-3 pt-6 mt-6 border-t border-gray-800">
-                  {!hasApplied ? (
+                  {user?.role === 'EMPLOYER' ? (
+                    <div className="flex items-center gap-2 px-6 py-3 text-gray-400 bg-gray-800/50 rounded-xl">
+                      <Briefcase className="w-5 h-5" />
+                      <span>Chức năng ứng tuyển chỉ dành cho ứng viên</span>
+                    </div>
+                  ) : !hasApplied ? (
                     <>
                       <button
                         onClick={() => setShowApplyModal(true)}

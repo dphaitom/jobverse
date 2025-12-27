@@ -3,13 +3,16 @@ package com.jobverse.service;
 import com.jobverse.dto.request.LoginRequest;
 import com.jobverse.dto.request.RegisterRequest;
 import com.jobverse.dto.response.AuthResponse;
+import com.jobverse.entity.Company;
 import com.jobverse.entity.User;
 import com.jobverse.entity.UserProfile;
 import com.jobverse.exception.BadRequestException;
 import com.jobverse.exception.ResourceNotFoundException;
+import com.jobverse.repository.CompanyRepository;
 import com.jobverse.repository.UserRepository;
 import com.jobverse.security.JwtTokenProvider;
 import com.jobverse.security.UserPrincipal;
+import com.github.slugify.Slugify;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,10 +28,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
     
     private final UserRepository userRepository;
+    private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
+    
+    private final Slugify slugify = Slugify.builder().build();
     
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -61,6 +67,11 @@ public class AuthService {
         
         user = userRepository.save(user);
         
+        // Auto-create company for EMPLOYER users
+        if (request.getRole() == User.Role.EMPLOYER) {
+            createCompanyForEmployer(user, request.getCompanyName());
+        }
+        
         // Send verification email
         emailService.sendVerificationEmail(user);
         
@@ -68,6 +79,47 @@ public class AuthService {
         
         // Generate tokens
         return generateAuthResponse(user);
+    }
+    
+    /**
+     * Auto-create a company for employer during registration.
+     * Each employer has exactly one company (1:1 relationship).
+     */
+    private void createCompanyForEmployer(User employer, String companyName) {
+        // Use provided company name or generate from email
+        String name = (companyName != null && !companyName.isBlank()) 
+            ? companyName 
+            : generateCompanyName(employer.getEmail());
+        
+        String slug = generateUniqueSlug(name);
+        
+        Company company = Company.builder()
+                .owner(employer)
+                .name(name)
+                .slug(slug)
+                .verificationStatus(Company.VerificationStatus.PENDING)
+                .build();
+        
+        companyRepository.save(company);
+        employer.setCompany(company);
+        
+        log.info("🏢 Auto-created company '{}' for employer {}", name, employer.getEmail());
+    }
+    
+    private String generateCompanyName(String email) {
+        String localPart = email.split("@")[0];
+        // Capitalize first letter
+        return localPart.substring(0, 1).toUpperCase() + localPart.substring(1) + "'s Company";
+    }
+    
+    private String generateUniqueSlug(String name) {
+        String baseSlug = slugify.slugify(name);
+        String slug = baseSlug;
+        int counter = 1;
+        while (companyRepository.existsBySlug(slug)) {
+            slug = baseSlug + "-" + counter++;
+        }
+        return slug;
     }
     
     public AuthResponse login(LoginRequest request) {

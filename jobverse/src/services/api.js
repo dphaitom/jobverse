@@ -208,6 +208,10 @@ export const companiesAPI = {
 
   getCompanyReviews: (companyId) =>
     apiRequest(`/v1/companies/${companyId}/reviews`),
+
+  // Get companies owned by the current employer
+  getMyCompanies: () =>
+    apiRequest('/v1/companies/my'),
 };
 
 // ==================== CATEGORIES API ====================
@@ -326,6 +330,42 @@ export const aiAPI = {
     }),
 };
 
+// ==================== CHAT API ====================
+
+export const chatAPI = {
+  // Get or create conversation
+  createOrGetConversation: (data) =>
+    apiRequest('/v1/chat/conversations', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Get my conversations
+  getConversations: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return apiRequest(`/v1/chat/conversations${queryString ? `?${queryString}` : ''}`);
+  },
+
+  // Get messages in a conversation
+  getMessages: (conversationId, params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return apiRequest(`/v1/chat/conversations/${conversationId}/messages${queryString ? `?${queryString}` : ''}`);
+  },
+
+  // Send a message
+  sendMessage: (conversationId, content) =>
+    apiRequest(`/v1/chat/conversations/${conversationId}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ content }),
+    }),
+
+  // Mark messages as read
+  markAsRead: (conversationId) =>
+    apiRequest(`/v1/chat/conversations/${conversationId}/read`, {
+      method: 'PUT',
+    }),
+};
+
 // ==================== DEFAULT EXPORT ====================
 
 export default {
@@ -336,4 +376,5 @@ export default {
   skills: skillsAPI,
   user: userAPI,
   ai: aiAPI,
+  chat: chatAPI,
 };

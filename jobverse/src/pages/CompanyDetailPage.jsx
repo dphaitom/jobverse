@@ -6,20 +6,33 @@ import {
   ArrowLeft, ExternalLink, ChevronRight
 } from 'lucide-react';
 import { companiesAPI, jobsAPI } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import { Navbar, Footer, JobCard, LoadingSpinner, EmptyState } from '../components';
+import toast from 'react-hot-toast';
 
 const CompanyDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [company, setCompany] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [savedJobs, setSavedJobs] = useState(new Set());
+  const [appliedJobs, setAppliedJobs] = useState(new Set());
+
+  const isCandidate = user?.role === 'CANDIDATE';
 
   useEffect(() => {
     fetchCompanyData();
   }, [id]);
+
+  // Fetch saved/applied jobs for candidates when authenticated
+  useEffect(() => {
+    if (isAuthenticated && isCandidate) {
+      fetchSavedAndAppliedJobs();
+    }
+  }, [isAuthenticated, user?.role]);
 
   const fetchCompanyData = async () => {
     setLoading(true);
@@ -34,8 +47,6 @@ const CompanyDetailPage = () => {
       // Handle different response formats
       const jobsData = jobsRes.data?.content || jobsRes.data || [];
       setJobs(Array.isArray(jobsData) ? jobsData : []);
-      
-      console.log('Company jobs:', jobsData);
     } catch (error) {
       console.error('Error fetching company:', error);
     } finally {
@@ -43,14 +54,51 @@ const CompanyDetailPage = () => {
     }
   };
 
-  const toggleSaveJob = (jobId) => {
-    const newSaved = new Set(savedJobs);
-    if (newSaved.has(jobId)) {
-      newSaved.delete(jobId);
-    } else {
-      newSaved.add(jobId);
+  // Hydrate saved/applied state from backend
+  const fetchSavedAndAppliedJobs = async () => {
+    try {
+      const [savedRes, appliedRes] = await Promise.all([
+        jobsAPI.getSavedJobs().catch(() => ({ data: [] })),
+        jobsAPI.getMyApplications().catch(() => ({ data: [] })),
+      ]);
+
+      // Parse saved jobs
+      const savedData = savedRes.data?.content || savedRes.data || [];
+      const savedIds = Array.isArray(savedData) ? savedData.map(job => job.id) : [];
+      setSavedJobs(new Set(savedIds));
+
+      // Parse applied jobs
+      const appliedData = appliedRes.data || [];
+      const appliedIds = Array.isArray(appliedData) ? appliedData.map(app => app.jobId) : [];
+      setAppliedJobs(new Set(appliedIds));
+    } catch (error) {
+      console.error('Error fetching saved/applied jobs:', error);
     }
-    setSavedJobs(newSaved);
+  };
+
+  const toggleSaveJob = async (jobId) => {
+    if (!isAuthenticated) {
+      toast.error('Vui lòng đăng nhập để lưu việc làm');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const newSaved = new Set(savedJobs);
+      if (newSaved.has(jobId)) {
+        await jobsAPI.unsaveJob(jobId);
+        newSaved.delete(jobId);
+        toast.success('Đã bỏ lưu việc làm');
+      } else {
+        await jobsAPI.saveJob(jobId);
+        newSaved.add(jobId);
+        toast.success('Đã lưu việc làm');
+      }
+      setSavedJobs(newSaved);
+    } catch (error) {
+      console.error('Error toggling save job:', error);
+      toast.error('Lỗi: ' + (error.message || 'Không thể lưu việc làm'));
+    }
   };
 
   if (loading) {
@@ -254,6 +302,8 @@ const CompanyDetailPage = () => {
                         job={{...job, company}}
                         onSave={toggleSaveJob}
                         isSaved={savedJobs.has(job.id)}
+                        isApplied={appliedJobs.has(job.id)}
+                        userRole={user?.role}
                       />
                     ))
                   ) : (

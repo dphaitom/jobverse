@@ -1,6 +1,7 @@
 package com.jobverse.repository;
 
 import com.jobverse.entity.Company;
+import com.jobverse.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,8 +20,12 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     
     boolean existsByName(String name);
     
-    @Query("SELECT c FROM Company c WHERE c.owner.id = :ownerId")
-    List<Company> findByOwnerId(Long ownerId);
+    // Returns single company for employer (1:1 relationship)
+    Optional<Company> findByOwnerId(Long ownerId);
+    
+    Optional<Company> findByOwner(User owner);
+    
+    boolean existsByOwnerId(Long ownerId);
     
     @Query("SELECT c FROM Company c WHERE c.verificationStatus = 'VERIFIED' ORDER BY c.ratingAvg DESC")
     Page<Company> findTopRatedCompanies(Pageable pageable);

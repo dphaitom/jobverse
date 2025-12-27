@@ -11,20 +11,26 @@ import { jobsAPI, categoriesAPI, skillsAPI } from '../services/api';
 import { Navbar, Footer, JobCard, SearchBar } from '../components';
 import AIChat from '../components/AIChat';
 import { fadeInUp, staggerContainer, staggerItem, scaleIn } from '../utils/animations';
+import { useAuth } from '../contexts/AuthContext';
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [categories, setCategories] = useState([]);
   const [trendingSkills, setTrendingSkills] = useState([]);
   const [savedJobs, setSavedJobs] = useState(new Set());
+  const [appliedJobIds, setAppliedJobIds] = useState(new Set());
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [loading, setLoading] = useState(true);
   const [showAI, setShowAI] = useState(false);
 
   useEffect(() => {
     fetchData();
-  }, []);
+    if (isAuthenticated && user?.role === 'CANDIDATE') {
+      fetchSavedAndAppliedJobs();
+    }
+  }, [isAuthenticated, user]);
 
   const fetchData = async () => {
     try {
@@ -44,14 +50,50 @@ const HomePage = () => {
     }
   };
 
-  const toggleSaveJob = (jobId) => {
-    const newSaved = new Set(savedJobs);
-    if (newSaved.has(jobId)) {
-      newSaved.delete(jobId);
-    } else {
-      newSaved.add(jobId);
+  const fetchSavedAndAppliedJobs = async () => {
+    try {
+      const [savedIdsRes, appliedRes] = await Promise.all([
+        jobsAPI.getSavedJobs().catch(() => ({ data: { content: [] } })),
+        jobsAPI.getMyApplications().catch(() => ({ data: [] })),
+      ]);
+
+      // Handle saved jobs
+      const savedJobsData = savedIdsRes.data?.content || savedIdsRes.data || [];
+      const savedIds = Array.isArray(savedJobsData) 
+        ? savedJobsData.map(job => job.id) 
+        : [];
+      setSavedJobs(new Set(savedIds));
+
+      // Handle applied jobs
+      const appliedData = appliedRes.data || [];
+      const appliedIds = Array.isArray(appliedData) 
+        ? appliedData.map(app => app.jobId) 
+        : [];
+      setAppliedJobIds(new Set(appliedIds));
+    } catch (error) {
+      console.error('Error fetching saved/applied jobs:', error);
     }
-    setSavedJobs(newSaved);
+  };
+
+  const toggleSaveJob = async (jobId) => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const newSaved = new Set(savedJobs);
+      if (newSaved.has(jobId)) {
+        await jobsAPI.unsaveJob(jobId);
+        newSaved.delete(jobId);
+      } else {
+        await jobsAPI.saveJob(jobId);
+        newSaved.add(jobId);
+      }
+      setSavedJobs(newSaved);
+    } catch (error) {
+      console.error('Error toggling save job:', error);
+    }
   };
 
   const handleSearch = ({ query, location }) => {
@@ -219,6 +261,8 @@ const HomePage = () => {
                     job={job} 
                     onSave={toggleSaveJob}
                     isSaved={savedJobs.has(job.id)}
+                    isApplied={appliedJobIds.has(job.id)}
+                    userRole={user?.role}
                   />
                 ))
               ) : (

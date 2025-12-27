@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -77,6 +78,27 @@ public class CompanyService {
         log.info("✅ Found {} top rated companies", companies.getTotalElements());
 
         return companies.map(this::mapToResponse);
+    }
+
+    public List<CompanyResponse> getCompaniesByOwnerId(Long ownerId) {
+        log.info("🏢 Fetching company for owner: {}", ownerId);
+
+        // With 1:1 relationship, there's at most one company per owner
+        Optional<Company> companyOpt = companyRepository.findByOwnerId(ownerId);
+
+        if (companyOpt.isPresent()) {
+            log.info("✅ Found company for owner {}", ownerId);
+            return List.of(mapToResponse(companyOpt.get()));
+        }
+        
+        log.info("ℹ️ No company found for owner {}", ownerId);
+        return List.of();
+    }
+    
+    // Get single company for employer (1:1 relationship)
+    public Optional<CompanyResponse> getCompanyByOwnerId(Long ownerId) {
+        return companyRepository.findByOwnerId(ownerId)
+                .map(this::mapToResponse);
     }
 
     private CompanyResponse mapToResponse(Company company) {

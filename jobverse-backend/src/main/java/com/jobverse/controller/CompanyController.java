@@ -5,6 +5,7 @@ import com.jobverse.dto.response.CompanyResponse;
 import com.jobverse.dto.response.JobResponse;
 import com.jobverse.entity.Job;
 import com.jobverse.repository.JobRepository;
+import com.jobverse.security.UserPrincipal;
 import com.jobverse.service.CompanyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,6 +44,21 @@ public class CompanyController {
         log.info("✅ Returning {} companies (total: {})", companies.getNumberOfElements(), companies.getTotalElements());
 
         return ResponseEntity.ok(ApiResponse.success(companies));
+    }
+
+    @GetMapping("/my")
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('ADMIN')")
+    @Operation(summary = "Get companies owned by current employer")
+    public ResponseEntity<ApiResponse<List<CompanyResponse>>> getMyCompanies(
+            @AuthenticationPrincipal UserPrincipal currentUser
+    ) {
+        log.info("🏢 GET /v1/companies/my - employer={}", currentUser.getId());
+
+        List<CompanyResponse> companies = companyService.getCompaniesByOwnerId(currentUser.getId());
+
+        log.info("✅ Returning {} companies for employer {}", companies.size(), currentUser.getId());
+
+        return ResponseEntity.ok(ApiResponse.success("My companies retrieved", companies));
     }
 
     @GetMapping("/{id}")

@@ -14,13 +14,14 @@ import { fadeInUp, staggerContainer, staggerItem, slideInLeft } from '../utils/a
 
 const JobListPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [categories, setCategories] = useState([]);
   const [skills, setSkills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [savedJobs, setSavedJobs] = useState(new Set());
+  const [appliedJobIds, setAppliedJobIds] = useState(new Set());
   const [showFilters, setShowFilters] = useState(false);
   
   // Filter states
@@ -43,10 +44,10 @@ const JobListPage = () => {
   }, [searchParams]);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user?.role === 'CANDIDATE') {
       fetchSavedJobs();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   const fetchInitialData = async () => {
     try {
@@ -84,11 +85,26 @@ const JobListPage = () => {
 
   const fetchSavedJobs = async () => {
     try {
-      const response = await jobsAPI.getSavedJobs();
-      const savedJobIds = (response.data || []).map(job => job.id);
-      setSavedJobs(new Set(savedJobIds));
+      const [savedJobsRes, appliedRes] = await Promise.all([
+        jobsAPI.getSavedJobs().catch(() => ({ data: [] })),
+        jobsAPI.getMyApplications().catch(() => ({ data: [] })),
+      ]);
+
+      // Handle saved jobs
+      const savedJobsData = savedJobsRes.data || [];
+      const savedIds = Array.isArray(savedJobsData) 
+        ? savedJobsData.map(job => job.id) 
+        : [];
+      setSavedJobs(new Set(savedIds));
+
+      // Handle applied jobs  
+      const appliedData = appliedRes.data || [];
+      const appliedIds = Array.isArray(appliedData) 
+        ? appliedData.map(app => app.jobId) 
+        : [];
+      setAppliedJobIds(new Set(appliedIds));
     } catch (error) {
-      console.error('Error fetching saved jobs:', error);
+      console.error('Error fetching saved/applied jobs:', error);
     }
   };
 
@@ -349,6 +365,8 @@ const JobListPage = () => {
                         job={job}
                         onSave={toggleSaveJob}
                         isSaved={savedJobs.has(job.id)}
+                        isApplied={appliedJobIds.has(job.id)}
+                        userRole={user?.role}
                       />
                     </motion.div>
                   ))}

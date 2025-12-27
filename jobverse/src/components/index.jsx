@@ -10,7 +10,7 @@ import {
   Search, MapPin, Briefcase, Clock, DollarSign, Heart, ChevronDown,
   Bell, User, Menu, X, Rocket, Building2, LogOut, Settings,
   FileText, Bookmark, Star, Globe, Zap, Users, Filter, ChevronRight,
-  ArrowRight, Sparkles, Sun, Moon
+  ArrowRight, Sparkles, Sun, Moon, CheckCircle, MessageCircle
 } from 'lucide-react';
 
 // ==================== NAVBAR ====================
@@ -21,6 +21,9 @@ export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const menuRef = useRef(null);
+
+  const isEmployer = user?.role === 'EMPLOYER';
+  const isCandidate = user?.role === 'CANDIDATE';
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -52,14 +55,26 @@ export const Navbar = () => {
           <div className="items-center hidden gap-8 md:flex">
             <Link to="/jobs" className="text-gray-400 transition-colors hover:text-white">Việc làm</Link>
             <Link to="/companies" className="text-gray-400 transition-colors hover:text-white">Công ty</Link>
-            <Link to="/resume-analysis" className="flex items-center gap-1 text-gray-400 transition-colors hover:text-white">
-              <Sparkles className="w-4 h-4" />
-              AI Resume
-            </Link>
-            <Link to="/interview-prep" className="flex items-center gap-1 text-gray-400 transition-colors hover:text-white">
-              <Sparkles className="w-4 h-4" />
-              AI Interview
-            </Link>
+            {/* Candidate-only AI features */}
+            {(!isAuthenticated || isCandidate) && (
+              <>
+                <Link to="/resume-analysis" className="flex items-center gap-1 text-gray-400 transition-colors hover:text-white">
+                  <Sparkles className="w-4 h-4" />
+                  AI Resume
+                </Link>
+                <Link to="/interview-prep" className="flex items-center gap-1 text-gray-400 transition-colors hover:text-white">
+                  <Sparkles className="w-4 h-4" />
+                  AI Interview
+                </Link>
+              </>
+            )}
+            {/* Employer-only AI features */}
+            {isEmployer && (
+              <Link to="/employer/cv-ranking" className="flex items-center gap-1 text-gray-400 transition-colors hover:text-white">
+                <Sparkles className="w-4 h-4" />
+                AI CV Ranking
+              </Link>
+            )}
           </div>
 
           <div className="flex items-center gap-4">
@@ -113,6 +128,9 @@ export const Navbar = () => {
                       <Link to="/profile" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:text-white hover:bg-gray-700/50">
                         <User className="w-4 h-4" /> Hồ sơ của tôi
                       </Link>
+                      <Link to="/messages" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:text-white hover:bg-gray-700/50">
+                        <MessageCircle className="w-4 h-4" /> Tin nhắn
+                      </Link>
                       {user?.role === 'EMPLOYER' && (
                         <Link to="/employer/dashboard" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:text-white hover:bg-gray-700/50">
                           <Briefcase className="w-4 h-4" /> Quản lý tuyển dụng
@@ -165,14 +183,26 @@ export const Navbar = () => {
           <div className="px-4 py-4 space-y-2">
             <Link to="/jobs" className="block w-full px-4 py-3 text-left text-gray-400 rounded-lg hover:text-white hover:bg-gray-800/50">Việc làm</Link>
             <Link to="/companies" className="block w-full px-4 py-3 text-left text-gray-400 rounded-lg hover:text-white hover:bg-gray-800/50">Công ty</Link>
-            <Link to="/resume-analysis" className="flex items-center w-full gap-2 px-4 py-3 text-left text-gray-400 rounded-lg hover:text-white hover:bg-gray-800/50">
-              <Sparkles className="w-4 h-4" />
-              AI Resume
-            </Link>
-            <Link to="/interview-prep" className="flex items-center w-full gap-2 px-4 py-3 text-left text-gray-400 rounded-lg hover:text-white hover:bg-gray-800/50">
-              <Sparkles className="w-4 h-4" />
-              AI Interview
-            </Link>
+            {/* Candidate-only AI features */}
+            {(!isAuthenticated || isCandidate) && (
+              <>
+                <Link to="/resume-analysis" className="flex items-center w-full gap-2 px-4 py-3 text-left text-gray-400 rounded-lg hover:text-white hover:bg-gray-800/50">
+                  <Sparkles className="w-4 h-4" />
+                  AI Resume
+                </Link>
+                <Link to="/interview-prep" className="flex items-center w-full gap-2 px-4 py-3 text-left text-gray-400 rounded-lg hover:text-white hover:bg-gray-800/50">
+                  <Sparkles className="w-4 h-4" />
+                  AI Interview
+                </Link>
+              </>
+            )}
+            {/* Employer-only AI features */}
+            {isEmployer && (
+              <Link to="/employer/cv-ranking" className="flex items-center w-full gap-2 px-4 py-3 text-left text-gray-400 rounded-lg hover:text-white hover:bg-gray-800/50">
+                <Sparkles className="w-4 h-4" />
+                AI CV Ranking
+              </Link>
+            )}
             {!isAuthenticated && (
               <Link to="/login" className="block w-full px-4 py-3 text-left text-violet-400 hover:text-violet-300">
                 Đăng nhập
@@ -236,8 +266,25 @@ export const Footer = () => (
 );
 
 // ==================== JOB CARD ====================
-export const JobCard = ({ job, onSave, isSaved }) => {
+export const JobCard = ({ job, onSave, onApply, isSaved, isApplied, userRole }) => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const isCand = userRole === 'CANDIDATE';
+  const isEmployer = userRole === 'EMPLOYER';
+
+  const handleApplyClick = (e) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    if (onApply) {
+      onApply(job.id);
+    } else {
+      // Navigate to job detail page if no onApply handler
+      navigate(`/jobs/${job.id}`);
+    }
+  };
 
   return (
     <motion.div
@@ -313,21 +360,43 @@ export const JobCard = ({ job, onSave, isSaved }) => {
               <Clock className="w-4 h-4" />
               {job.createdAt ? new Date(job.createdAt).toLocaleDateString('vi-VN') : 'Mới đăng'}
             </span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={(e) => { e.stopPropagation(); onSave && onSave(job.id); }}
-                className={`p-2 rounded-xl transition-all ${
-                  isSaved
-                    ? 'bg-violet-500/20 text-violet-400'
-                    : 'bg-gray-800/50 text-gray-400 hover:text-white'
-                }`}
-              >
-                <Heart className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`} />
-              </button>
-              <button className="py-2 text-sm btn-primary">
-                Ứng tuyển <ArrowRight className="w-4 h-4 ml-1" />
-              </button>
-            </div>
+            {/* Show apply buttons for candidates and unauthenticated users, hide for employers */}
+            {!isEmployer ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={(e) => { e.stopPropagation(); onSave && onSave(job.id); }}
+                  className={`p-2 rounded-xl transition-all ${
+                    isSaved
+                      ? 'bg-violet-500/20 text-violet-400'
+                      : 'bg-gray-800/50 text-gray-400 hover:text-white'
+                  }`}
+                >
+                  <Heart className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`} />
+                </button>
+                <button 
+                  className={`py-2 text-sm ${
+                    isApplied 
+                      ? 'px-4 bg-green-500/20 text-green-400 rounded-xl cursor-default'
+                      : 'btn-primary'
+                  }`}
+                  disabled={isApplied}
+                  onClick={handleApplyClick}
+                >
+                  {isApplied ? (
+                    <span className="flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4" />
+                      Đã ứng tuyển
+                    </span>
+                  ) : (
+                    <span className="flex items-center">
+                      Ứng tuyển <ArrowRight className="w-4 h-4 ml-1" />
+                    </span>
+                  )}
+                </button>
+              </div>
+            ) : (
+              <span className="text-sm text-gray-500 italic">Dành cho ứng viên</span>
+            )}
           </div>
         </div>
       </div>
@@ -373,7 +442,7 @@ export const CompanyCard = ({ company }) => {
         </div>
       </div>
       <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-800/50">
-        <span className="text-sm text-gray-500">{company.jobCount || 0} việc làm đang tuyển</span>
+        <span className="text-sm text-gray-500">{company.activeJobCount || company.jobCount || 0} việc làm đang tuyển</span>
         <ChevronRight className="w-5 h-5 text-gray-500 transition-colors group-hover:text-violet-400" />
       </div>
     </div>

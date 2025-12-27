@@ -33,4 +33,8 @@ public class RegisterRequest {
     
     @NotNull(message = "Role is required")
     private User.Role role;
+    
+    // Optional: Company name for employer registration
+    // If not provided, a default name will be generated
+    private String companyName;
 }
