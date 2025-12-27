@@ -5,11 +5,11 @@ import { motion } from 'framer-motion';
 import {
   MapPin, DollarSign, Briefcase, Clock, Globe, Users, Building2,
   Heart, Share2, ArrowLeft, CheckCircle, Star, Zap, Calendar,
-  Send, BookOpen, Award, ChevronRight
+  Send, BookOpen, Award, ChevronRight, MessageCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { jobsAPI } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';  // Sửa từ '../context/AuthContext' thành '../contexts/AuthContext'
+import { jobsAPI, chatAPI } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import { Navbar, Footer, LoadingSpinner, JobCard } from '../components';
 import { fadeInUp, slideInRight, staggerContainer, staggerItem, scaleIn } from '../utils/animations';
 
@@ -31,7 +31,7 @@ const JobDetailPage = () => {
 
   useEffect(() => {
     fetchJobDetail();
-  }, [id]);
+  }, [id, isAuthenticated]);
 
   const fetchJobDetail = async () => {
     setLoading(true);
@@ -46,14 +46,23 @@ const JobDetailPage = () => {
       }
 
       // Check if job is saved and applied (only for authenticated users)
-      if (isAuthenticated) {
+      if (isAuthenticated && user?.role === 'CANDIDATE') {
         try {
           const [savedRes, appliedRes] = await Promise.all([
             jobsAPI.checkSavedJob(id).catch(() => ({ data: { isSaved: false } })),
             jobsAPI.checkApplied(id).catch(() => ({ data: { hasApplied: false } })),
           ]);
-          setIsSaved(savedRes.data?.isSaved || false);
-          setHasApplied(appliedRes.data?.hasApplied || false);
+          console.log('Check saved response:', savedRes);
+          console.log('Check applied response:', appliedRes);
+          
+          // Handle both { data: { isSaved } } and { isSaved } formats
+          const savedData = savedRes.data || savedRes;
+          const appliedData = appliedRes.data || appliedRes;
+          
+          setIsSaved(savedData?.isSaved || savedData?.saved || false);
+          setHasApplied(appliedData?.hasApplied || false);
+          
+          console.log('hasApplied set to:', appliedData?.hasApplied);
         } catch (error) {
           console.error('Error checking saved/applied status:', error);
         }
@@ -123,6 +132,28 @@ const JobDetailPage = () => {
       toast.error('Lỗi: ' + (error.message || 'Không thể ứng tuyển'));
     } finally {
       setQuickApplyLoading(false);
+    }
+  };
+
+  const handleStartChat = async () => {
+    if (!isAuthenticated || !job?.company?.id) return;
+    
+    try {
+      // Create or get conversation with the company
+      const response = await chatAPI.createOrGetConversation({
+        companyId: job.company.id,
+        jobId: parseInt(id),
+      });
+      
+      const conversationId = response.data?.id;
+      if (conversationId) {
+        navigate(`/messages?conversation=${conversationId}`);
+      } else {
+        navigate('/messages');
+      }
+    } catch (error) {
+      console.error('Error starting chat:', error);
+      toast.error('Không thể bắt đầu cuộc trò chuyện');
     }
   };
 
@@ -265,9 +296,18 @@ const JobDetailPage = () => {
                       </button>
                     </>
                   ) : (
-                    <div className="flex items-center flex-1 gap-2 px-6 py-3 font-medium text-green-400 md:flex-none bg-green-500/20 rounded-xl">
-                      <CheckCircle className="w-5 h-5" /> Đã ứng tuyển
-                    </div>
+                    <>
+                      <div className="flex items-center gap-2 px-6 py-3 font-medium text-green-400 bg-green-500/20 rounded-xl">
+                        <CheckCircle className="w-5 h-5" /> Đã ứng tuyển
+                      </div>
+                      <button
+                        onClick={handleStartChat}
+                        className="flex items-center gap-2 px-6 py-3 font-medium text-white transition-all bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-xl"
+                      >
+                        <MessageCircle className="w-5 h-5" />
+                        Nhắn tin với nhà tuyển dụng
+                      </button>
+                    </>
                   )}
                   <button
                     onClick={handleSaveJob}
