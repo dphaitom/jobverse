@@ -1,134 +1,165 @@
-Repository: dphaitom/jobverse
-Context: Employer can now post jobs and candidates can apply, but several role-based and data consistency issues remain.
+Project Goal:
+Complete and finalize the JobVerse automated recruitment & e-commerce website.
 
-Hard constraints:
+Task 0 – System Review & Constraints
 
-Do not break existing API contracts or frontend routes.
-Prefer fixing with frontend logic and correct API usage first. Add new endpoints only if required.
-Task 0 — Audit (required first)
-Identify the components/pages for:
-Jobs listing page (where JobCards appear)
-Job detail page (where applying happens)
-Employer dashboard: applications list + application status update UI
-AI CV Ranking page
-Company list page (CompanyCard) and company detail page
-Any existing chat pages/components (if any)
-Identify the backend endpoints currently used for:
-apply job / quick apply
-check “has applied”
-save job / check saved
-employer viewing applications for a job
-employer updating application status
-companies + company job counts
-Confirm how role is determined on the frontend (AuthContext + user role string).
-Output: file list + current API call mapping.
+Review the current JobVerse system:
 
-Candidate (role: CANDIDATE / user)
-Task 1 — Cannot click “Apply” on JobCard in Jobs page
-Current issue: On the Jobs listing page, the Apply button on JobCard cannot be clicked.
+Frontend behavior
 
-Implement:
+Existing backend APIs
 
-Find why the button is disabled/blocked (overlay, pointer-events CSS, disabled state, missing handler, wrong conditional rendering).
-Ensure that for candidates:
-Apply button is clickable for jobs not yet applied
-Save (heart) is clickable
-Fix any CSS/HTML layering issues preventing clicks.
-Acceptance criteria:
+User, company, messaging, notification, and profile modules
 
-Candidate can click Apply from the job card (or it navigates to job detail/apply modal correctly).
-Task 2 — Applied state not reflected when revisiting job
-Current issue: After applying, when opening the same job again, it still shows an Apply button.
+Critical constraint:
 
-Implement:
+❗ Only API-level changes are allowed
 
-Ensure the job detail and job card UI hydrates “applied” state reliably from server:
-Use existing endpoint GET /v1/applications/check/{jobId} OR load GET /v1/applications/my and build an appliedJobIds set.
-Update UI rules:
-If hasApplied === true: hide Apply button or change it to “Applied” and disable it.
-Make sure state is updated both:
-immediately after a successful apply
-and after refresh / revisiting the job detail page
-Acceptance criteria:
+❗ Do NOT modify frontend UI components, layouts, or styles directly
 
-After applying, revisiting the same job shows “Applied” (not “Apply”).
-Employer (role: EMPLOYER)
-Task 3 — Employer cannot update application status
-Current issue: Employer is unable to change candidate application status.
+Any UI change must be enabled indirectly via APIs (data, configuration, or flags).
 
-Implement:
+Task 1 – Company Messaging API (Candidate ↔ Company)
+Current Issue
 
-Verify backend has an endpoint to update application status (e.g. PUT /v1/applications/{id}/status or employer-specific endpoint).
-Check security annotations and role checks: employer should be allowed only for applications on their own jobs.
-Fix frontend: ensure the status update request is made correctly (payload matches backend DTO).
-Fix backend bugs if the endpoint exists but fails (authorization, wrong path, wrong enum values, etc.).
-Acceptance criteria:
+There is no visible way for a candidate to message a company.
 
-Employer can change an application status (e.g., PENDING → REVIEWING → INTERVIEW → ACCEPTED/REJECTED) and see it persist.
-Task 4 — Employer still able to apply (must be blocked everywhere)
-Current issue: Even as EMPLOYER, it is still possible to apply to jobs.
+Candidates cannot contact companies they have applied to.
 
-Implement:
+Expected Behavior
 
-Ensure apply is blocked at two levels:
-Frontend: hide/disable apply actions for employers everywhere (job cards + job detail).
-Backend: enforce role restriction so only candidates can apply (even if frontend fails).
-If there are multiple controllers (duplicate ApplicationController packages), ensure the active one enforces role checks correctly.
-Add/adjust security annotations so apply endpoints require candidate role.
-Acceptance criteria:
+A candidate should be able to send messages to a company they have already applied to.
 
-EMPLOYER cannot apply from UI.
-Even if EMPLOYER calls apply endpoint manually, backend returns 403/400 and does not create applications.
-Task 5 — AI CV Ranking shows “candidate” only, not candidate names
-Current issue: AI CV Ranking UI displays generic “candidate” label instead of the candidate’s name.
+Requirements
 
-Implement:
+Add APIs to support:
 
-Determine where candidate name is stored (UserProfile.fullName vs User.fullName/email).
-Ensure the AI CV ranking endpoint (or the employer applications endpoint used by this page) returns candidate identity fields:
-candidateId
-candidateName (preferred: profile fullName; fallback to email)
-Update the frontend UI to display the actual name.
-Acceptance criteria:
+Creating a conversation between candidate and company
 
-AI CV Ranking list shows real candidate names (not generic placeholders).
-Shared / overall features
-Task 6 — Chat between candidate and company is missing
-Current issue: There is no visible working chat feature between candidate and employer/company.
+Sending messages
 
-Implement MVP chat:
+Fetching message history
 
-If chat backend already exists, wire up the frontend pages and routes to use it.
-If not implemented, add minimal chat support:
-Conversations + messages storage
-REST endpoints to create/list conversations and send/list messages
-Optional WebSocket real-time updates if WebSocket infra already exists
-Add UI entry points:
-Candidate: “Messages” page
-Employer: “Messages” in employer dashboard
-Acceptance criteria:
+Messaging rules:
 
-Candidate can start a conversation with a company (from job/company/applications context).
-Employer can reply and both can view the message history.
-Task 7 — CompanyCard shows “0 jobs hiring” even when company has jobs
-Current issue: Company cards display “0 open jobs” even though jobs exist.
+Only candidates who have applied to a company’s job can message that company
 
-Implement:
+Companies can reply to candidates
 
-Verify backend company list endpoint returns a correct activeJobCount (or equivalent).
-Check the backend count logic: it should count ACTIVE jobs for that company.
-Verify job status enum used in counting matches actual job statuses stored in DB.
-Fix frontend: ensure CompanyCard reads the correct field name from the API response.
-Acceptance criteria:
+API should return conversation metadata so frontend can render a “Message” button.
 
-Company list cards show correct “X jobs hiring” counts.
-Deliverables
-List of files changed, and which task each change addresses.
-Manual test steps for:
-Candidate apply flow + applied state persistence
-Employer status update flow
-Employer cannot apply (UI + API)
-AI CV ranking shows candidate names
-Chat MVP works
-Company job counts correct
-Start with Task 0, then implement Tasks 1 → 7 in order.
+Task 2 – Fix Avatar Display API
+Current Issue
+
+Avatar upload/update works
+
+But the avatar image cannot be displayed (broken or missing URL)
+
+Expected Behavior
+
+Users can see their current avatar correctly after uploading or updating it.
+
+Requirements
+
+Verify avatar storage and public access (URL generation).
+
+Ensure profile APIs return:
+
+Correct avatar URL
+
+Accessible image path
+
+Fix any mismatch between:
+
+Stored avatar path
+
+Returned API response
+
+Ensure backward compatibility with existing frontend avatar rendering logic.
+
+Task 3 – Light Mode Theme Configuration (API-driven)
+Current Issue
+
+In light mode, UI appearance is not as desired.
+
+Expected Behavior (Light Mode)
+
+Background color: white
+
+Sidebar, header, footer:
+
+Gray background
+
+Black text
+
+Constraints Handling
+
+Since UI cannot be changed directly:
+
+Implement this via API-based theme configuration
+
+Example: /api/settings/theme or /api/ui-config
+
+Requirements
+
+Add an API that:
+
+Returns theme configuration for light mode
+
+Includes colors for background, sidebar, header, footer, text
+
+Frontend will consume this configuration without changing UI code.
+
+Task 4 – Notification System API
+Current Issue
+
+Clicking the notification button shows nothing
+
+Notifications are not displayed.
+
+Expected Behavior
+
+Notifications should be shown when clicking the notification button.
+
+Requirements
+
+Implement or fix notification-related APIs:
+
+Fetch notifications for the logged-in user
+
+Mark notifications as read
+
+Notification sources may include:
+
+New job application updates
+
+Company replies/messages
+
+System events
+
+API should return:
+
+Notification list
+
+Unread count (for badge display)
+
+Task 5 – Final Validation & Integration Testing
+Requirements
+
+Verify all new APIs work correctly with the existing frontend:
+
+Messaging
+
+Avatar display
+
+Theme configuration
+
+Notifications
+
+Ensure:
+
+No breaking changes
+
+Role-based access control is enforced
+
+Provide sample API responses for frontend consumption.

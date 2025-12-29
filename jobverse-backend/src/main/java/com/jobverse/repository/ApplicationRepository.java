@@ -65,4 +65,11 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
            "WHERE a.job.id = :jobId " +
            "ORDER BY a.appliedAt DESC")
     Page<Application> findByJobIdOrderByAppliedAtDesc(Long jobId, Pageable pageable);
+
+    @Query("SELECT a.job.id FROM Application a WHERE a.user.id = :userId")
+    List<Long> findJobIdsByUserId(Long userId);
+
+    @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM Application a " +
+           "WHERE a.user.id = :userId AND a.job.company.id = :companyId")
+    boolean existsByUserIdAndCompanyId(Long userId, Long companyId);
 }

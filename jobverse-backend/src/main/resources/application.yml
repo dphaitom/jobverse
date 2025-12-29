@@ -99,6 +99,12 @@ spring:
             scope:
               - r_liteprofile
               - r_emailaddress
+          facebook:
+            client-id: ${FACEBOOK_APP_ID:}
+            client-secret: ${FACEBOOK_APP_SECRET:}
+            scope:
+              - email
+              - public_profile
 
 # Server Configuration
 server:

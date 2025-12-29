@@ -1,10 +1,14 @@
 package com.jobverse.controller;
 
+import com.jobverse.dto.request.FacebookTokenRequest;
+import com.jobverse.dto.request.GoogleTokenRequest;
 import com.jobverse.dto.request.LoginRequest;
 import com.jobverse.dto.request.RegisterRequest;
 import com.jobverse.dto.response.ApiResponse;
 import com.jobverse.dto.response.AuthResponse;
 import com.jobverse.service.AuthService;
+import com.jobverse.service.FacebookOAuthService;
+import com.jobverse.service.GoogleOAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -20,6 +24,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     
     private final AuthService authService;
+    private final GoogleOAuthService googleOAuthService;
+    private final FacebookOAuthService facebookOAuthService;
     
     @PostMapping("/register")
     @Operation(summary = "Register a new user")
@@ -85,5 +91,23 @@ public class AuthController {
     ) {
         authService.verifyEmail(token);
         return ResponseEntity.ok(ApiResponse.success("Email verified successfully", null));
+    }
+
+    @PostMapping("/google")
+    @Operation(summary = "Authenticate with Google OAuth")
+    public ResponseEntity<ApiResponse<AuthResponse>> googleLogin(
+            @Valid @RequestBody GoogleTokenRequest request
+    ) {
+        AuthResponse response = googleOAuthService.authenticateWithGoogle(request.getCredential());
+        return ResponseEntity.ok(ApiResponse.success("Google authentication successful", response));
+    }
+
+    @PostMapping("/facebook")
+    @Operation(summary = "Authenticate with Facebook OAuth")
+    public ResponseEntity<ApiResponse<AuthResponse>> facebookLogin(
+            @Valid @RequestBody FacebookTokenRequest request
+    ) {
+        AuthResponse response = facebookOAuthService.authenticateWithFacebook(request.getAccessToken());
+        return ResponseEntity.ok(ApiResponse.success("Facebook authentication successful", response));
     }
 }

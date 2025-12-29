@@ -29,6 +29,7 @@ public class ChatService {
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
     private final JobRepository jobRepository;
+    private final ApplicationRepository applicationRepository;
     
     /**
      * Create or get existing conversation
@@ -65,10 +66,16 @@ public class ChatService {
             }
             companyId = request.getCompanyId();
             candidateId = currentUserId;
-            
+
             // Verify company exists
             if (!companyRepository.existsById(companyId)) {
                 throw new ResourceNotFoundException("Company not found");
+            }
+
+            // Check if candidate has applied to any job of this company
+            boolean hasAppliedToCompany = applicationRepository.existsByUserIdAndCompanyId(currentUserId, companyId);
+            if (!hasAppliedToCompany) {
+                throw new BadRequestException("Bạn cần ứng tuyển ít nhất một công việc của công ty này trước khi nhắn tin");
             }
         } else {
             throw new UnauthorizedException("Only employers and candidates can use chat");

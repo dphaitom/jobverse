@@ -16,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -159,6 +161,11 @@ public class ApplicationService {
     @Transactional(readOnly = true)
     public Page<Application> getUserApplications(Long userId, Pageable pageable) {
         return applicationRepository.findByUserIdOrderByAppliedAtDesc(userId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> getUserAppliedJobIds(Long userId) {
+        return applicationRepository.findJobIdsByUserId(userId);
     }
 
     @Transactional(readOnly = true)

@@ -101,7 +101,7 @@ export const Navbar = () => {
                     <img
                       src={`http://localhost:8080/api${user.profile.avatarUrl}`}
                       alt="Avatar"
-                      className="object-cover w-9 h-9 rounded-full"
+                      className="object-cover rounded-full w-9 h-9"
                     />
                   ) : (
                     <div className="flex items-center justify-center text-sm font-semibold text-white rounded-full w-9 h-9 bg-gradient-to-r from-violet-500 to-indigo-600">
@@ -248,14 +248,14 @@ export const Footer = () => (
         <div>
           <h4 className="mb-4 font-semibold text-white">Liên hệ</h4>
           <ul className="space-y-2 text-sm text-gray-500">
-            <li>Email: contact@jobverse.vn</li>
-            <li>Hotline: 1900 xxxx</li>
+            <li>Email: nq.tom255@gmail.com</li>
+            <li>Hotline: 0814 875 329</li>
             <li>Địa chỉ: TP. Hồ Chí Minh</li>
           </ul>
         </div>
       </div>
       <div className="flex flex-col items-center justify-between gap-4 pt-8 border-t sm:flex-row border-gray-800/30">
-        <p className="text-sm text-gray-500">© 2024 JobVerse. Made with ❤️ in Vietnam</p>
+        <p className="text-sm text-gray-500">© 2024 JobVerse. Vietnam</p>
         <div className="flex items-center gap-4 text-gray-500">
           <a href="#" className="hover:text-white">Điều khoản</a>
           <a href="#" className="hover:text-white">Bảo mật</a>
@@ -395,7 +395,7 @@ export const JobCard = ({ job, onSave, onApply, isSaved, isApplied, userRole }) 
                 </button>
               </div>
             ) : (
-              <span className="text-sm text-gray-500 italic">Dành cho ứng viên</span>
+              <span className="text-sm italic text-gray-500">Dành cho ứng viên</span>
             )}
           </div>
         </div>

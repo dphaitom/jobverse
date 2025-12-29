@@ -95,6 +95,17 @@ public class ApplicationController {
         return ResponseEntity.ok(ApiResponse.success("Check completed", Map.of("hasApplied", hasApplied)));
     }
 
+    @GetMapping("/my/job-ids")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Get list of job IDs that user has applied to")
+    public ResponseEntity<ApiResponse<List<Long>>> getMyAppliedJobIds(
+            @AuthenticationPrincipal UserPrincipal currentUser
+    ) {
+        log.info("User {} fetching their applied job IDs", currentUser.getId());
+        List<Long> jobIds = applicationService.getUserAppliedJobIds(currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success("Applied job IDs retrieved", jobIds));
+    }
+
     @PostMapping("/{applicationId}/withdraw")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Withdraw application")

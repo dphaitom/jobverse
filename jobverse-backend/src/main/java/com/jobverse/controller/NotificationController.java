@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +32,7 @@ public class NotificationController {
      * Get paginated list of notifications for current user
      */
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get user notifications", description = "Get paginated list of notifications for authenticated user")
     public ResponseEntity<ApiResponse<Page<Notification>>> getNotifications(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
@@ -50,6 +52,7 @@ public class NotificationController {
      * Get count of unread notifications
      */
     @GetMapping("/unread-count")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get unread count", description = "Get number of unread notifications")
     public ResponseEntity<ApiResponse<Long>> getUnreadCount(
             @AuthenticationPrincipal UserPrincipal userPrincipal
@@ -67,6 +70,7 @@ public class NotificationController {
      * Mark a notification as read
      */
     @PutMapping("/{id}/read")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Mark as read", description = "Mark a specific notification as read")
     public ResponseEntity<ApiResponse<Notification>> markAsRead(
             @PathVariable Long id,
@@ -95,6 +99,7 @@ public class NotificationController {
      * Mark all notifications as read
      */
     @PutMapping("/read-all")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Mark all as read", description = "Mark all notifications as read for current user")
     public ResponseEntity<ApiResponse<String>> markAllAsRead(
             @AuthenticationPrincipal UserPrincipal userPrincipal
@@ -113,6 +118,7 @@ public class NotificationController {
      * Delete a notification
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Delete notification", description = "Delete a specific notification")
     public ResponseEntity<ApiResponse<String>> deleteNotification(
             @PathVariable Long id,
