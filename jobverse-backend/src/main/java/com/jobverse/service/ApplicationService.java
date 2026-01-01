@@ -200,6 +200,23 @@ public class ApplicationService {
         application.setStatus(status);
         Application updated = applicationRepository.save(application);
 
+        // Initialize lazy-loaded entities for response serialization
+        if (updated.getJob() != null) {
+            updated.getJob().getTitle();
+            if (updated.getJob().getCompany() != null) {
+                updated.getJob().getCompany().getName();
+            }
+        }
+        if (updated.getUser() != null) {
+            updated.getUser().getEmail();
+            if (updated.getUser().getProfile() != null) {
+                updated.getUser().getProfile().getFullName();
+            }
+        }
+        if (updated.getResume() != null) {
+            updated.getResume().getTitle();
+        }
+
         // Notify candidate about status change
         try {
             notificationService.sendApplicationStatusUpdateNotification(updated);
@@ -225,5 +242,32 @@ public class ApplicationService {
         applicationRepository.save(application);
 
         log.info("Application {} withdrawn by user {}", applicationId, userId);
+    }
+
+    /**
+     * Delete an application (Employer only - can delete applications for their jobs)
+     */
+    @Transactional
+    public void deleteApplication(Long applicationId, Long employerId) {
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new RuntimeException("Application not found"));
+
+        User employer = userRepository.findById(employerId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Check if employer owns the job or is admin
+        boolean isOwner = application.getJob().getPostedBy().getId().equals(employerId);
+        boolean isAdmin = employer.getRole() == User.Role.ADMIN;
+
+        if (!isOwner && !isAdmin) {
+            throw new RuntimeException("You don't have permission to delete this application");
+        }
+
+        // Decrement application count on job
+        jobRepository.decrementApplicationCount(application.getJob().getId());
+
+        applicationRepository.delete(application);
+
+        log.info("Application {} deleted by employer/admin {}", applicationId, employerId);
     }
 }

@@ -103,12 +103,12 @@ const MessagesPage = () => {
   const getOtherParticipant = (conversation) => {
     if (user?.role === 'EMPLOYER') {
       return {
-        name: conversation.candidateName || 'Ứng viên',
+        name: conversation.candidate?.fullName || conversation.candidateName || 'Ứng viên',
         type: 'candidate'
       };
     } else {
       return {
-        name: conversation.companyName || 'Công ty',
+        name: conversation.company?.name || conversation.companyName || 'Công ty',
         type: 'company'
       };
     }
@@ -182,9 +182,9 @@ const MessagesPage = () => {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between">
                                 <h3 className="font-medium text-white truncate">{other.name}</h3>
-                                <span className="text-xs text-gray-500">{formatTime(conv.lastMessageAt)}</span>
+                                <span className="text-xs text-gray-500">{formatTime(conv.lastMessage?.createdAt || conv.lastMessageAt)}</span>
                               </div>
-                              <p className="text-sm text-gray-400 truncate">{conv.lastMessage || 'Bắt đầu trò chuyện...'}</p>
+                              <p className="text-sm text-gray-400 truncate">{conv.lastMessage?.content || conv.lastMessage || 'Bắt đầu trò chuyện...'}</p>
                             </div>
                             {conv.unreadCount > 0 && (
                               <span className="w-5 h-5 rounded-full bg-violet-500 text-white text-xs flex items-center justify-center">
@@ -226,8 +226,8 @@ const MessagesPage = () => {
                     </div>
                     <div>
                       <h3 className="font-medium text-white">{getOtherParticipant(selectedConversation).name}</h3>
-                      {selectedConversation.jobTitle && (
-                        <p className="text-xs text-gray-400">Về: {selectedConversation.jobTitle}</p>
+                      {(selectedConversation.job?.title || selectedConversation.jobTitle) && (
+                        <p className="text-xs text-gray-400">Về: {selectedConversation.job?.title || selectedConversation.jobTitle}</p>
                       )}
                     </div>
                   </div>
@@ -237,28 +237,32 @@ const MessagesPage = () => {
                     {messagesLoading ? (
                       <LoadingSpinner />
                     ) : messages.length > 0 ? (
-                      messages.map(msg => (
-                        <div
-                          key={msg.id}
-                          className={`flex ${msg.senderId === user?.id ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div className={`max-w-[70%] rounded-2xl px-4 py-2 ${
-                            msg.senderId === user?.id 
-                              ? 'bg-violet-500 text-white rounded-br-md' 
-                              : 'bg-gray-800 text-gray-100 rounded-bl-md'
-                          }`}>
-                            <p>{msg.content}</p>
-                            <div className={`flex items-center gap-1 mt-1 text-xs ${
-                              msg.senderId === user?.id ? 'text-violet-200' : 'text-gray-500'
+                      messages.map(msg => {
+                        // Use senderUserId for comparison (actual user ID who sent), fallback to senderId
+                        const isMyMessage = (msg.senderUserId || msg.senderId) === user?.id;
+                        return (
+                          <div
+                            key={msg.id}
+                            className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}
+                          >
+                            <div className={`max-w-[70%] rounded-2xl px-4 py-2 ${
+                              isMyMessage
+                                ? 'bg-violet-500 text-white rounded-br-md'
+                                : 'bg-gray-800 text-gray-100 rounded-bl-md'
                             }`}>
-                              <span>{formatTime(msg.createdAt)}</span>
-                              {msg.senderId === user?.id && (
-                                msg.isRead ? <CheckCheck className="w-3 h-3" /> : <Check className="w-3 h-3" />
-                              )}
+                              <p>{msg.content}</p>
+                              <div className={`flex items-center gap-1 mt-1 text-xs ${
+                                isMyMessage ? 'text-violet-200' : 'text-gray-500'
+                              }`}>
+                                <span>{formatTime(msg.createdAt)}</span>
+                                {isMyMessage && (
+                                  msg.isRead ? <CheckCheck className="w-3 h-3" /> : <Check className="w-3 h-3" />
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))
+                        );
+                      })
                     ) : (
                       <div className="text-center py-8 text-gray-400">
                         Bắt đầu cuộc trò chuyện

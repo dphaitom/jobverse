@@ -259,20 +259,24 @@ public class ChatService {
     private MessageResponse mapMessageToResponse(Message msg, Conversation conversation) {
         String senderName;
         String senderAvatarUrl;
-        
+        Long senderUserId;
+
         if (msg.getSenderType() == Message.SenderType.COMPANY) {
             senderName = conversation.getCompany().getName();
             senderAvatarUrl = conversation.getCompany().getLogoUrl();
+            // For company messages, get the owner's user ID
+            senderUserId = conversation.getCompany().getOwner().getId();
         } else {
             User candidate = conversation.getCandidate();
-            senderName = candidate.getProfile() != null 
-                    ? candidate.getProfile().getFullName() 
+            senderName = candidate.getProfile() != null
+                    ? candidate.getProfile().getFullName()
                     : candidate.getEmail();
-            senderAvatarUrl = candidate.getProfile() != null 
-                    ? candidate.getProfile().getAvatarUrl() 
+            senderAvatarUrl = candidate.getProfile() != null
+                    ? candidate.getProfile().getAvatarUrl()
                     : null;
+            senderUserId = candidate.getId();
         }
-        
-        return MessageResponse.fromEntity(msg, senderName, senderAvatarUrl);
+
+        return MessageResponse.fromEntity(msg, senderName, senderAvatarUrl, senderUserId);
     }
 }

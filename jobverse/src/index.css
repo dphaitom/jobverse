@@ -450,3 +450,46 @@ input[type="checkbox"]:checked {
 :root:not(.dark) .border-gray-800 {
   border-color: #cbd5e1 !important;
 }
+
+:root:not(.dark) .border-gray-800\/30 {
+  border-color: rgba(203, 213, 225, 0.3) !important;
+}
+
+:root:not(.dark) .border-gray-800\/50 {
+  border-color: rgba(203, 213, 225, 0.5) !important;
+}
+
+/* Footer trong light mode - gray background */
+:root:not(.dark) footer {
+  background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+}
+
+:root:not(.dark) footer .text-white {
+  color: #0f172a !important;
+}
+
+:root:not(.dark) footer .text-gray-500 {
+  color: #475569 !important;
+}
+
+:root:not(.dark) footer .hover\:text-white:hover {
+  color: #1e293b !important;
+}
+
+/* User menu dropdown trong light mode */
+:root:not(.dark) .glass-card.rounded-xl {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+:root:not(.dark) .hover\:bg-gray-700\/50:hover {
+  background-color: rgba(226, 232, 240, 0.5) !important;
+}
+
+/* Gradient text vẫn giữ màu tím trong light mode */
+:root:not(.dark) .gradient-text {
+  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 50%, #4f46e5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

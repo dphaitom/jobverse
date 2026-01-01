@@ -41,30 +41,49 @@ const JobDetailPage = () => {
 
       // Fetch related jobs
       if (response.data?.company?.id) {
-        const relatedRes = await jobsAPI.getJobsByCompany(response.data.company.id);
-        setRelatedJobs((relatedRes.data || []).filter(j => j.id !== parseInt(id)).slice(0, 3));
+        try {
+          const relatedRes = await jobsAPI.getJobsByCompany(response.data.company.id);
+          // Handle both array and Page object formats
+          const relatedData = relatedRes.data?.content || relatedRes.data || [];
+          const relatedArray = Array.isArray(relatedData) ? relatedData : [];
+          setRelatedJobs(relatedArray.filter(j => j.id !== parseInt(id)).slice(0, 3));
+        } catch (err) {
+          console.error('Error fetching related jobs:', err);
+          setRelatedJobs([]);
+        }
       }
 
       // Check if job is saved and applied (only for authenticated users)
       if (isAuthenticated && user?.role === 'CANDIDATE') {
         try {
           const [savedRes, appliedRes] = await Promise.all([
-            jobsAPI.checkSavedJob(id).catch(() => ({ data: { isSaved: false } })),
-            jobsAPI.checkApplied(id).catch(() => ({ data: { hasApplied: false } })),
+            jobsAPI.checkSavedJob(id).catch((err) => {
+              console.error('checkSavedJob error:', err);
+              return { data: { isSaved: false } };
+            }),
+            jobsAPI.checkApplied(id).catch((err) => {
+              console.error('checkApplied error:', err);
+              return { data: { hasApplied: false } };
+            }),
           ]);
           console.log('Check saved response:', savedRes);
           console.log('Check applied response:', appliedRes);
-          
-          // Handle both { data: { isSaved } } and { isSaved } formats
-          const savedData = savedRes.data || savedRes;
-          const appliedData = appliedRes.data || appliedRes;
-          
-          setIsSaved(savedData?.isSaved || savedData?.saved || false);
-          setHasApplied(appliedData?.hasApplied || false);
-          
-          console.log('hasApplied set to:', appliedData?.hasApplied);
+
+          // Handle various response formats: { data: { isSaved } }, { isSaved }, or direct boolean
+          const savedData = savedRes?.data ?? savedRes;
+          const appliedData = appliedRes?.data ?? appliedRes;
+
+          const isSavedValue = savedData?.isSaved ?? savedData?.saved ?? false;
+          const hasAppliedValue = appliedData?.hasApplied ?? false;
+
+          console.log('Parsed isSaved:', isSavedValue, 'hasApplied:', hasAppliedValue);
+
+          setIsSaved(isSavedValue);
+          setHasApplied(hasAppliedValue);
         } catch (error) {
           console.error('Error checking saved/applied status:', error);
+          setIsSaved(false);
+          setHasApplied(false);
         }
       }
     } catch (error) {

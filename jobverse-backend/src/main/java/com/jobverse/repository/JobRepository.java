@@ -74,6 +74,10 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     @Modifying
     @Query("UPDATE Job j SET j.applicationCount = j.applicationCount + 1 WHERE j.id = :id")
     void incrementApplicationCount(Long id);
+
+    @Modifying
+    @Query("UPDATE Job j SET j.applicationCount = CASE WHEN j.applicationCount > 0 THEN j.applicationCount - 1 ELSE 0 END WHERE j.id = :id")
+    void decrementApplicationCount(Long id);
     
     @Query("SELECT COUNT(j) FROM Job j WHERE j.status = 'ACTIVE'")
     long countActiveJobs();

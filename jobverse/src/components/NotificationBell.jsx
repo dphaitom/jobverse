@@ -15,7 +15,6 @@ export const NotificationBell = () => {
     notifications,
     unreadCount,
     loading,
-    connected,
     markAsRead,
     markAllAsRead,
     deleteNotification,
@@ -93,13 +92,6 @@ export const NotificationBell = () => {
           </motion.span>
         )}
 
-        {/* Connection Status Indicator */}
-        <span
-          className={`absolute bottom-0 right-0 w-2 h-2 rounded-full ${
-            connected ? 'bg-green-500' : 'bg-gray-500'
-          }`}
-          title={connected ? 'Kết nối real-time' : 'Đang kết nối...'}
-        />
       </motion.button>
 
       {/* Dropdown */}

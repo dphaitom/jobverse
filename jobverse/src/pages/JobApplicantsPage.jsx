@@ -19,12 +19,16 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+// Match backend ApplicationStatus enum exactly
 const STATUS_CONFIG = {
   PENDING: { label: 'Chờ xử lý', color: 'text-yellow-400', bgColor: 'bg-yellow-500/20', icon: Clock },
   REVIEWING: { label: 'Đang xem xét', color: 'text-blue-400', bgColor: 'bg-blue-500/20', icon: Eye },
-  INTERVIEWING: { label: 'Phỏng vấn', color: 'text-purple-400', bgColor: 'bg-purple-500/20', icon: Users },
-  ACCEPTED: { label: 'Chấp nhận', color: 'text-green-400', bgColor: 'bg-green-500/20', icon: CheckCircle },
+  SHORTLISTED: { label: 'Đã chọn', color: 'text-cyan-400', bgColor: 'bg-cyan-500/20', icon: CheckCircle },
+  INTERVIEW: { label: 'Mời phỏng vấn', color: 'text-purple-400', bgColor: 'bg-purple-500/20', icon: Users },
+  OFFERED: { label: 'Đã gửi offer', color: 'text-orange-400', bgColor: 'bg-orange-500/20', icon: CheckCircle },
+  HIRED: { label: 'Đã tuyển', color: 'text-green-400', bgColor: 'bg-green-500/20', icon: CheckCircle },
   REJECTED: { label: 'Từ chối', color: 'text-red-400', bgColor: 'bg-red-500/20', icon: XCircle },
+  WITHDRAWN: { label: 'Ứng viên rút đơn', color: 'text-gray-400', bgColor: 'bg-gray-500/20', icon: XCircle },
 };
 
 const JobApplicantsPage = () => {
@@ -88,9 +92,12 @@ const JobApplicantsPage = () => {
     total: applicants.length,
     pending: applicants.filter(a => a.status === 'PENDING').length,
     reviewing: applicants.filter(a => a.status === 'REVIEWING').length,
-    interviewing: applicants.filter(a => a.status === 'INTERVIEWING').length,
-    accepted: applicants.filter(a => a.status === 'ACCEPTED').length,
+    shortlisted: applicants.filter(a => a.status === 'SHORTLISTED').length,
+    interview: applicants.filter(a => a.status === 'INTERVIEW').length,
+    offered: applicants.filter(a => a.status === 'OFFERED').length,
+    hired: applicants.filter(a => a.status === 'HIRED').length,
     rejected: applicants.filter(a => a.status === 'REJECTED').length,
+    withdrawn: applicants.filter(a => a.status === 'WITHDRAWN').length,
   };
 
   if (loading) {
@@ -145,11 +152,11 @@ const JobApplicantsPage = () => {
             </div>
             <div className="glass-card p-4 rounded-2xl">
               <div className="text-gray-400 text-sm mb-1">Phỏng vấn</div>
-              <div className="text-2xl font-bold text-purple-400">{stats.interviewing}</div>
+              <div className="text-2xl font-bold text-purple-400">{stats.interview}</div>
             </div>
             <div className="glass-card p-4 rounded-2xl">
-              <div className="text-gray-400 text-sm mb-1">Chấp nhận</div>
-              <div className="text-2xl font-bold text-green-400">{stats.accepted}</div>
+              <div className="text-gray-400 text-sm mb-1">Đã tuyển</div>
+              <div className="text-2xl font-bold text-green-400">{stats.hired}</div>
             </div>
             <div className="glass-card p-4 rounded-2xl">
               <div className="text-gray-400 text-sm mb-1">Từ chối</div>

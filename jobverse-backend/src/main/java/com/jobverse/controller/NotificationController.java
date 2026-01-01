@@ -1,6 +1,7 @@
 package com.jobverse.controller;
 
 import com.jobverse.dto.response.ApiResponse;
+import com.jobverse.dto.response.NotificationResponse;
 import com.jobverse.entity.Notification;
 import com.jobverse.repository.NotificationRepository;
 import com.jobverse.security.UserPrincipal;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -33,8 +35,9 @@ public class NotificationController {
      */
     @GetMapping
     @PreAuthorize("isAuthenticated()")
+    @Transactional(readOnly = true)
     @Operation(summary = "Get user notifications", description = "Get paginated list of notifications for authenticated user")
-    public ResponseEntity<ApiResponse<Page<Notification>>> getNotifications(
+    public ResponseEntity<ApiResponse<Page<NotificationResponse>>> getNotifications(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             Pageable pageable
     ) {
@@ -42,9 +45,12 @@ public class NotificationController {
         Page<Notification> notifications = notificationRepository
                 .findByUserIdOrderByCreatedAtDesc(userPrincipal.getId(), pageable);
 
+        // Map to DTO to avoid LazyInitializationException
+        Page<NotificationResponse> response = notifications.map(NotificationResponse::fromEntity);
+
         return ResponseEntity.ok(ApiResponse.success(
                 "Notifications retrieved successfully",
-                notifications
+                response
         ));
     }
 
@@ -71,8 +77,9 @@ public class NotificationController {
      */
     @PutMapping("/{id}/read")
     @PreAuthorize("isAuthenticated()")
+    @Transactional
     @Operation(summary = "Mark as read", description = "Mark a specific notification as read")
-    public ResponseEntity<ApiResponse<Notification>> markAsRead(
+    public ResponseEntity<ApiResponse<NotificationResponse>> markAsRead(
             @PathVariable Long id,
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
@@ -87,11 +94,11 @@ public class NotificationController {
         }
 
         notification.setIsRead(true);
-        notificationRepository.save(notification);
+        notification = notificationRepository.save(notification);
 
         return ResponseEntity.ok(ApiResponse.success(
                 "Notification marked as read",
-                notification
+                NotificationResponse.fromEntity(notification)
         ));
     }
 
@@ -100,6 +107,7 @@ public class NotificationController {
      */
     @PutMapping("/read-all")
     @PreAuthorize("isAuthenticated()")
+    @Transactional
     @Operation(summary = "Mark all as read", description = "Mark all notifications as read for current user")
     public ResponseEntity<ApiResponse<String>> markAllAsRead(
             @AuthenticationPrincipal UserPrincipal userPrincipal
@@ -119,6 +127,7 @@ public class NotificationController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
+    @Transactional
     @Operation(summary = "Delete notification", description = "Delete a specific notification")
     public ResponseEntity<ApiResponse<String>> deleteNotification(
             @PathVariable Long id,

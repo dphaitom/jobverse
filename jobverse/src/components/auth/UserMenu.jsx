@@ -71,9 +71,17 @@ const UserMenu = () => {
         className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-gray-700/50 transition-colors"
       >
         {/* Avatar */}
-        <div className="w-9 h-9 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white font-semibold text-sm">
-          {user.fullName?.charAt(0) || user.email?.charAt(0).toUpperCase()}
-        </div>
+        {user.avatarUrl ? (
+          <img
+            src={`http://localhost:8080/api${user.avatarUrl}`}
+            alt="Avatar"
+            className="w-9 h-9 rounded-full object-cover"
+          />
+        ) : (
+          <div className="w-9 h-9 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white font-semibold text-sm">
+            {user.fullName?.charAt(0) || user.email?.charAt(0).toUpperCase()}
+          </div>
+        )}
         
         {/* Name (hidden on mobile) */}
         <div className="hidden md:block text-left">

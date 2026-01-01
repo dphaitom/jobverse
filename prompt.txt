@@ -1,165 +1,187 @@
-Project Goal:
-Complete and finalize the JobVerse automated recruitment & e-commerce website.
+Project Goal
 
-Task 0 – System Review & Constraints
+Debug and fix critical issues in the JobVerse automated recruitment website, focusing on messaging stability, application submission UI, and employer application status handling.
 
-Review the current JobVerse system:
+Task 0 – Bug Reproduction & Log Analysis
 
-Frontend behavior
+Reproduce all reported issues on both roles:
 
-Existing backend APIs
+candidate
 
-User, company, messaging, notification, and profile modules
+employer
 
-Critical constraint:
+Check:
 
-❗ Only API-level changes are allowed
+Browser console errors
 
-❗ Do NOT modify frontend UI components, layouts, or styles directly
+Network requests (request / response / status codes)
 
-Any UI change must be enabled indirectly via APIs (data, configuration, or flags).
+Backend logs
 
-Task 1 – Company Messaging API (Candidate ↔ Company)
-Current Issue
+Identify whether issues come from:
 
-There is no visible way for a candidate to message a company.
+API response structure
 
-Candidates cannot contact companies they have applied to.
+Frontend state handling
 
-Expected Behavior
+Missing or incorrect error handling
 
-A candidate should be able to send messages to a company they have already applied to.
+Task 1 – Fix Messaging Feature Errors (Candidate ↔ Company)
+Current Issues
 
-Requirements
+When sending a message:
 
-Add APIs to support:
+A console error appears immediately
 
-Creating a conversation between candidate and company
+After sending a message and refreshing the page:
 
-Sending messages
+The messaging page breaks or throws an error
 
-Fetching message history
-
-Messaging rules:
-
-Only candidates who have applied to a company’s job can message that company
-
-Companies can reply to candidates
-
-API should return conversation metadata so frontend can render a “Message” button.
-
-Task 2 – Fix Avatar Display API
-Current Issue
-
-Avatar upload/update works
-
-But the avatar image cannot be displayed (broken or missing URL)
+Conversation or messages fail to load
 
 Expected Behavior
 
-Users can see their current avatar correctly after uploading or updating it.
+Sending a message should:
 
-Requirements
+Not trigger console errors
 
-Verify avatar storage and public access (URL generation).
+Successfully update the message list
 
-Ensure profile APIs return:
+After page reload:
 
-Correct avatar URL
+Conversation and message history should load correctly
 
-Accessible image path
+No runtime or state errors should occur
 
-Fix any mismatch between:
+Required Actions
 
-Stored avatar path
+Backend:
 
-Returned API response
+Verify message creation API response format
 
-Ensure backward compatibility with existing frontend avatar rendering logic.
+Ensure conversation ID and message list are returned correctly
 
-Task 3 – Light Mode Theme Configuration (API-driven)
+Frontend:
+
+Fix state update after sending a message
+
+Ensure message fetching API is called on page reload
+
+Add null / undefined checks for conversation and message data
+
+Task 2 – Fix Job Application Submission UI Error (Candidate)
 Current Issue
 
-In light mode, UI appearance is not as desired.
+When applying for a job:
 
-Expected Behavior (Light Mode)
+User fills in description / additional information
 
-Background color: white
+UI shows an error message
 
-Sidebar, header, footer:
-
-Gray background
-
-Black text
-
-Constraints Handling
-
-Since UI cannot be changed directly:
-
-Implement this via API-based theme configuration
-
-Example: /api/settings/theme or /api/ui-config
-
-Requirements
-
-Add an API that:
-
-Returns theme configuration for light mode
-
-Includes colors for background, sidebar, header, footer, text
-
-Frontend will consume this configuration without changing UI code.
-
-Task 4 – Notification System API
-Current Issue
-
-Clicking the notification button shows nothing
-
-Notifications are not displayed.
+BUT backend has successfully received and stored the application
 
 Expected Behavior
 
-Notifications should be shown when clicking the notification button.
+If backend successfully creates the application:
 
-Requirements
+UI should show success feedback
 
-Implement or fix notification-related APIs:
+No error message should be displayed
 
-Fetch notifications for the logged-in user
+Required Actions
 
-Mark notifications as read
+Backend:
 
-Notification sources may include:
+Verify response status code (should be 200 / 201)
 
-New job application updates
+Ensure response body matches frontend expectations
 
-Company replies/messages
+Frontend:
 
-System events
+Fix success vs error handling logic
 
-API should return:
+Ensure UI relies on HTTP status or success flag correctly
 
-Notification list
+Prevent false-negative error messages
 
-Unread count (for badge display)
+Task 3 – Employer Application Status Update Limitation
+Current Issue
 
-Task 5 – Final Validation & Integration Testing
-Requirements
+When logged in as employer:
 
-Verify all new APIs work correctly with the existing frontend:
+Can only change application status to:
 
-Messaging
+Pending
 
-Avatar display
+Reviewing
 
-Theme configuration
+Cancelled
 
-Notifications
+Other statuses do not work or are rejected
 
-Ensure:
+Expected Behavior
 
-No breaking changes
+Employer should be able to update application status to all valid statuses, such as:
 
-Role-based access control is enforced
+Accepted
 
-Provide sample API responses for frontend consumption.
+Rejected
+
+Interview
+
+Hired
+(depending on defined business rules)
+
+Required Actions
+
+Backend:
+
+Review application status enum / validation logic
+
+Ensure all allowed statuses are:
+
+Defined
+
+Accepted by update API
+
+Frontend:
+
+Ensure status values sent match backend enum values exactly
+
+Authorization:
+
+Employer can only update applications for their own jobs
+
+Task 4 – Frontend–Backend Contract Alignment
+Goal
+
+Ensure frontend and backend are fully synchronized.
+
+Required Actions
+
+Validate:
+
+API request payloads
+
+API response schemas
+
+Status codes and error handling
+
+Fix any mismatch causing:
+
+UI errors despite backend success
+
+Crashes after page reload
+
+Task 5 – Final Stability & Regression Testing
+Checklist
+
+Messaging works without console errors
+
+Messages persist after page reload
+
+Job application submission shows correct UI feedback
+
+Employer can update all valid application statuses
+
+No new regressions introduced

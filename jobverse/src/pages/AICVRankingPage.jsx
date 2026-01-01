@@ -187,13 +187,22 @@ const AICVRankingPage = () => {
                           </div>
                           <div className={`text-xs ${
                             app.status === 'PENDING' ? 'text-yellow-400' :
-                            app.status === 'REVIEWED' ? 'text-blue-400' :
-                            app.status === 'ACCEPTED' ? 'text-green-400' :
+                            app.status === 'REVIEWING' ? 'text-blue-400' :
+                            app.status === 'SHORTLISTED' ? 'text-cyan-400' :
+                            app.status === 'INTERVIEW' ? 'text-purple-400' :
+                            app.status === 'OFFERED' ? 'text-orange-400' :
+                            app.status === 'HIRED' ? 'text-green-400' :
+                            app.status === 'REJECTED' ? 'text-red-400' :
                             'text-gray-400'
                           }`}>
                             {app.status === 'PENDING' ? 'Chờ xem xét' :
-                             app.status === 'REVIEWED' ? 'Đã xem' :
-                             app.status === 'ACCEPTED' ? 'Đã chấp nhận' :
+                             app.status === 'REVIEWING' ? 'Đang xem xét' :
+                             app.status === 'SHORTLISTED' ? 'Đã chọn' :
+                             app.status === 'INTERVIEW' ? 'Mời phỏng vấn' :
+                             app.status === 'OFFERED' ? 'Đã gửi offer' :
+                             app.status === 'HIRED' ? 'Đã tuyển' :
+                             app.status === 'REJECTED' ? 'Từ chối' :
+                             app.status === 'WITHDRAWN' ? 'Đã rút đơn' :
                              app.status}
                           </div>
                         </div>

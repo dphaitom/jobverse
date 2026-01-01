@@ -101,25 +101,58 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authAPI.register(userData);
       console.log('📥 Register response:', response);
-      
+
       const accessToken = response.data?.accessToken || response.accessToken;
       const refreshToken = response.data?.refreshToken || response.refreshToken;
       const user = response.data?.user || response.user;
-      
+
       if (accessToken) {
         localStorage.setItem('accessToken', accessToken);
         if (refreshToken) {
           localStorage.setItem('refreshToken', refreshToken);
         }
         localStorage.setItem('user', JSON.stringify(user));
-        
+
         setUser(user);
         setIsAuthenticated(true);
       }
-      
+
       return { success: true, user };
     } catch (error) {
       console.error('Register error:', error);
+      throw error;
+    }
+  };
+
+  // Hàm refresh user data (dùng sau khi update avatar, profile, etc.)
+  const refreshUser = async () => {
+    try {
+      const response = await userAPI.getProfile();
+      console.log('🔄 Refresh user response:', response);
+
+      const data = response.data;
+
+      // Build updated user object
+      const updatedUser = {
+        ...user,
+        id: data.id,
+        email: data.email,
+        phone: data.phone,
+        role: data.role,
+        fullName: data.profile?.fullName || data.fullName,
+        avatarUrl: data.profile?.avatarUrl,
+        profile: data.profile,
+      };
+
+      // Update localStorage and state
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+
+      console.log('✅ User refreshed with avatar:', updatedUser.avatarUrl);
+
+      return updatedUser;
+    } catch (error) {
+      console.error('❌ Refresh user error:', error);
       throw error;
     }
   };
@@ -131,6 +164,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     register,
+    refreshUser,
   };
 
   return (

@@ -10,6 +10,7 @@ import { jobsAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Navbar, Footer, LoadingSpinner, EmptyState } from '../components';
 
+// Match backend ApplicationStatus enum exactly
 const STATUS_CONFIG = {
   PENDING: {
     label: 'Chờ xử lý',
@@ -23,14 +24,26 @@ const STATUS_CONFIG = {
     color: 'text-blue-400',
     bgColor: 'bg-blue-500/20',
   },
-  INTERVIEWING: {
-    label: 'Phỏng vấn',
+  SHORTLISTED: {
+    label: 'Đã chọn',
+    icon: CheckCircle,
+    color: 'text-cyan-400',
+    bgColor: 'bg-cyan-500/20',
+  },
+  INTERVIEW: {
+    label: 'Mời phỏng vấn',
     icon: AlertCircle,
     color: 'text-purple-400',
     bgColor: 'bg-purple-500/20',
   },
-  ACCEPTED: {
-    label: 'Chấp nhận',
+  OFFERED: {
+    label: 'Đã gửi offer',
+    icon: CheckCircle,
+    color: 'text-orange-400',
+    bgColor: 'bg-orange-500/20',
+  },
+  HIRED: {
+    label: 'Đã tuyển',
     icon: CheckCircle,
     color: 'text-green-400',
     bgColor: 'bg-green-500/20',
@@ -40,6 +53,12 @@ const STATUS_CONFIG = {
     icon: XCircle,
     color: 'text-red-400',
     bgColor: 'bg-red-500/20',
+  },
+  WITHDRAWN: {
+    label: 'Đã rút đơn',
+    icon: XCircle,
+    color: 'text-gray-400',
+    bgColor: 'bg-gray-500/20',
   },
 };
 
@@ -148,9 +167,12 @@ const MyApplicationsPage = () => {
       total: applications.length,
       pending: applications.filter(app => app.status === 'PENDING').length,
       reviewing: applications.filter(app => app.status === 'REVIEWING').length,
-      interviewing: applications.filter(app => app.status === 'INTERVIEWING').length,
-      accepted: applications.filter(app => app.status === 'ACCEPTED').length,
+      shortlisted: applications.filter(app => app.status === 'SHORTLISTED').length,
+      interview: applications.filter(app => app.status === 'INTERVIEW').length,
+      offered: applications.filter(app => app.status === 'OFFERED').length,
+      hired: applications.filter(app => app.status === 'HIRED').length,
       rejected: applications.filter(app => app.status === 'REJECTED').length,
+      withdrawn: applications.filter(app => app.status === 'WITHDRAWN').length,
     };
     return stats;
   };
@@ -252,9 +274,12 @@ const MyApplicationsPage = () => {
                     <option value="">Tất cả trạng thái</option>
                     <option value="PENDING">Chờ xử lý</option>
                     <option value="REVIEWING">Đang xem xét</option>
-                    <option value="INTERVIEWING">Phỏng vấn</option>
-                    <option value="ACCEPTED">Chấp nhận</option>
+                    <option value="SHORTLISTED">Đã chọn</option>
+                    <option value="INTERVIEW">Mời phỏng vấn</option>
+                    <option value="OFFERED">Đã gửi offer</option>
+                    <option value="HIRED">Đã tuyển</option>
                     <option value="REJECTED">Từ chối</option>
+                    <option value="WITHDRAWN">Đã rút đơn</option>
                   </select>
 
                   {/* Sort */}

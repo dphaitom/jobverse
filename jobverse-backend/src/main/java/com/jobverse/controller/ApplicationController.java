@@ -150,4 +150,16 @@ public class ApplicationController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success("Applications retrieved", responses));
     }
+
+    @DeleteMapping("/{applicationId}")
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('ADMIN')")
+    @Operation(summary = "Delete an application (Employer only)")
+    public ResponseEntity<ApiResponse<Void>> deleteApplication(
+            @PathVariable Long applicationId,
+            @AuthenticationPrincipal UserPrincipal currentUser
+    ) {
+        log.info("Employer {} deleting application {}", currentUser.getId(), applicationId);
+        applicationService.deleteApplication(applicationId, currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success("Application deleted successfully", null));
+    }
 }

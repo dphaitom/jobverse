@@ -13,7 +13,7 @@ import { Navbar, Footer, LoadingSpinner } from '../components';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, refreshUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -182,7 +182,7 @@ const ProfilePage = () => {
     try {
       const response = await userAPI.uploadAvatar(file);
       const avatarUrl = response.data.avatarUrl;
-      
+
       // Update local state
       setProfile(prev => ({
         ...prev,
@@ -191,6 +191,9 @@ const ProfilePage = () => {
           avatarUrl: avatarUrl
         }
       }));
+
+      // Refresh user context to update avatar in header/menu
+      await refreshUser();
 
       toast.success('Tải ảnh đại diện thành công! 📸');
       fetchProfile(); // Refresh to get updated data

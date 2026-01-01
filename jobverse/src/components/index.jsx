@@ -6,21 +6,25 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useNotifications } from '../contexts/NotificationContext';
 import {
   Search, MapPin, Briefcase, Clock, DollarSign, Heart, ChevronDown,
   Bell, User, Menu, X, Rocket, Building2, LogOut, Settings,
   FileText, Bookmark, Star, Globe, Zap, Users, Filter, ChevronRight,
-  ArrowRight, Sparkles, Sun, Moon, CheckCircle, MessageCircle
+  ArrowRight, Sparkles, Sun, Moon, CheckCircle, MessageCircle, Trash2
 } from 'lucide-react';
 
 // ==================== NAVBAR ====================
 export const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const menuRef = useRef(null);
+  const notificationRef = useRef(null);
 
   const isEmployer = user?.role === 'EMPLOYER';
   const isCandidate = user?.role === 'CANDIDATE';
@@ -29,6 +33,9 @@ export const Navbar = () => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setIsUserMenuOpen(false);
+      }
+      if (notificationRef.current && !notificationRef.current.contains(e.target)) {
+        setIsNotificationOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -86,10 +93,98 @@ export const Navbar = () => {
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
 
-            <button className="relative p-2 text-gray-400 transition-colors hover:text-white">
-              <Bell className="w-5 h-5" />
-              <span className="absolute w-2 h-2 rounded-full top-1 right-1 bg-violet-500 animate-pulse" />
-            </button>
+            {/* Notification Bell */}
+            <div className="relative" ref={notificationRef}>
+              <button
+                onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                className="relative p-2 text-gray-400 transition-colors hover:text-white"
+              >
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute flex items-center justify-center w-5 h-5 text-xs font-bold text-white rounded-full -top-1 -right-1 bg-violet-500">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notification Dropdown */}
+              {isNotificationOpen && (
+                <div className="absolute right-0 z-50 w-80 mt-2 border border-gray-700 shadow-xl glass-card rounded-xl">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700">
+                    <h3 className="font-semibold text-white">Thông báo</h3>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={markAllAsRead}
+                        className="text-xs text-violet-400 hover:text-violet-300"
+                      >
+                        Đánh dấu tất cả đã đọc
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="overflow-y-auto max-h-80">
+                    {notifications.length === 0 ? (
+                      <div className="py-8 text-center">
+                        <Bell className="w-10 h-10 mx-auto mb-2 text-gray-600" />
+                        <p className="text-sm text-gray-400">Không có thông báo</p>
+                      </div>
+                    ) : (
+                      notifications.slice(0, 5).map((notification) => (
+                        <div
+                          key={notification.id}
+                          className={`px-4 py-3 border-b border-gray-700/50 hover:bg-gray-700/30 cursor-pointer ${
+                            !notification.isRead ? 'bg-violet-500/10' : ''
+                          }`}
+                          onClick={() => {
+                            if (!notification.isRead) {
+                              markAsRead(notification.id);
+                            }
+                          }}
+                        >
+                          <div className="flex items-start gap-3">
+                            <span className="text-xl">
+                              {notification.type === 'APPLICATION' ? '📬' :
+                               notification.type === 'STATUS_UPDATE' ? '🔔' :
+                               notification.type === 'MESSAGE' ? '💬' : '📢'}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-white truncate">
+                                {notification.title}
+                              </p>
+                              <p className="text-xs text-gray-400 line-clamp-2">
+                                {notification.content}
+                              </p>
+                              <p className="mt-1 text-xs text-gray-500">
+                                {new Date(notification.createdAt).toLocaleDateString('vi-VN')}
+                              </p>
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteNotification(notification.id);
+                              }}
+                              className="p-1 text-gray-500 hover:text-red-400"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {notifications.length > 0 && (
+                    <Link
+                      to="/notifications"
+                      onClick={() => setIsNotificationOpen(false)}
+                      className="block px-4 py-3 text-sm text-center border-t border-gray-700 text-violet-400 hover:text-violet-300"
+                    >
+                      Xem tất cả thông báo
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
 
             {isAuthenticated ? (
               <div className="relative" ref={menuRef}>

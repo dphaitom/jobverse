@@ -193,6 +193,11 @@ export const jobsAPI = {
       method: 'PUT',
       body: JSON.stringify({ status }),
     }),
+
+  deleteApplication: (applicationId) =>
+    apiRequest(`/v1/applications/${applicationId}`, {
+      method: 'DELETE',
+    }),
 };
 
 // ==================== COMPANIES API ====================
@@ -327,6 +332,33 @@ export const aiAPI = {
       method: 'POST',
       body: JSON.stringify(data),
       headers: {}, // No auth required
+    }),
+};
+
+// ==================== NOTIFICATIONS API ====================
+
+export const notificationsAPI = {
+  getNotifications: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return apiRequest(`/v1/notifications${queryString ? `?${queryString}` : ''}`);
+  },
+
+  getUnreadCount: () =>
+    apiRequest('/v1/notifications/unread-count'),
+
+  markAsRead: (notificationId) =>
+    apiRequest(`/v1/notifications/${notificationId}/read`, {
+      method: 'PUT',
+    }),
+
+  markAllAsRead: () =>
+    apiRequest('/v1/notifications/read-all', {
+      method: 'PUT',
+    }),
+
+  deleteNotification: (notificationId) =>
+    apiRequest(`/v1/notifications/${notificationId}`, {
+      method: 'DELETE',
     }),
 };
 

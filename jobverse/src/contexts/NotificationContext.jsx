@@ -1,8 +1,7 @@
 // src/contexts/NotificationContext.jsx
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useWebSocket } from '../hooks/useWebSocket';
-import { authAPI } from '../services/api';
+import { notificationsAPI } from '../services/api';
 import toast from 'react-hot-toast';
 
 const NotificationContext = createContext();
@@ -16,7 +15,7 @@ export const useNotifications = () => {
 };
 
 export const NotificationProvider = ({ children }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -27,8 +26,8 @@ export const NotificationProvider = ({ children }) => {
 
     try {
       setLoading(true);
-      const response = await authAPI.get('/v1/notifications?size=10');
-      setNotifications(response.data?.content || []);
+      const response = await notificationsAPI.getNotifications({ size: 10 });
+      setNotifications(response.data?.content || response.data || []);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
@@ -41,71 +40,17 @@ export const NotificationProvider = ({ children }) => {
     if (!isAuthenticated) return;
 
     try {
-      const response = await authAPI.get('/v1/notifications/unread-count');
+      const response = await notificationsAPI.getUnreadCount();
       setUnreadCount(response.data || 0);
     } catch (error) {
       console.error('Error fetching unread count:', error);
     }
   }, [isAuthenticated]);
 
-  // Handle incoming WebSocket notification
-  const handleNewNotification = useCallback((notification) => {
-    console.log('📨 New notification received:', notification);
-
-    // Add to notifications list
-    setNotifications((prev) => [notification, ...prev]);
-
-    // Increment unread count
-    setUnreadCount((prev) => prev + 1);
-
-    // Show toast notification
-    toast.custom(
-      (t) => (
-        <div
-          className={`${
-            t.visible ? 'animate-enter' : 'animate-leave'
-          } max-w-md w-full glass-card rounded-xl shadow-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
-        >
-          <div className="flex-1 w-0 p-4">
-            <div className="flex items-start">
-              <div className="flex-shrink-0 pt-0.5">
-                <span className="text-2xl">
-                  {notification.type === 'APPLICATION' ? '📬' :
-                   notification.type === 'STATUS_UPDATE' ? '🔔' :
-                   notification.type === 'MESSAGE' ? '💬' : '📢'}
-                </span>
-              </div>
-              <div className="flex-1 ml-3">
-                <p className="text-sm font-medium text-white">
-                  {notification.title}
-                </p>
-                <p className="mt-1 text-sm text-gray-400">
-                  {notification.content}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="flex border-l border-gray-700">
-            <button
-              onClick={() => toast.dismiss(t.id)}
-              className="flex items-center justify-center w-full p-4 text-sm font-medium border border-transparent rounded-none rounded-r-xl text-violet-400 hover:text-violet-300"
-            >
-              Đóng
-            </button>
-          </div>
-        </div>
-      ),
-      { duration: 5000 }
-    );
-  }, []);
-
-  // WebSocket connection
-  const { connected, error: wsError } = useWebSocket(user, handleNewNotification);
-
   // Mark notification as read
   const markAsRead = useCallback(async (notificationId) => {
     try {
-      await authAPI.put(`/v1/notifications/${notificationId}/read`);
+      await notificationsAPI.markAsRead(notificationId);
 
       // Update local state
       setNotifications((prev) =>
@@ -124,7 +69,7 @@ export const NotificationProvider = ({ children }) => {
   // Mark all as read
   const markAllAsRead = useCallback(async () => {
     try {
-      await authAPI.put('/v1/notifications/read-all');
+      await notificationsAPI.markAllAsRead();
 
       // Update local state
       setNotifications((prev) =>
@@ -142,7 +87,7 @@ export const NotificationProvider = ({ children }) => {
   // Delete notification
   const deleteNotification = useCallback(async (notificationId) => {
     try {
-      await authAPI.delete(`/v1/notifications/${notificationId}`);
+      await notificationsAPI.deleteNotification(notificationId);
 
       // Remove from local state
       setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
@@ -169,8 +114,6 @@ export const NotificationProvider = ({ children }) => {
     notifications,
     unreadCount,
     loading,
-    connected: connected && isAuthenticated,
-    wsError,
     fetchNotifications,
     fetchUnreadCount,
     markAsRead,
