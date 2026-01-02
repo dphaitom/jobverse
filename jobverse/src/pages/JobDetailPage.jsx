@@ -10,13 +10,16 @@ import {
 import toast from 'react-hot-toast';
 import { jobsAPI, chatAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { Navbar, Footer, LoadingSpinner, JobCard } from '../components';
+import AnimatedBackground from '../components/AnimatedBackground';
 import { fadeInUp, slideInRight, staggerContainer, staggerItem, scaleIn } from '../utils/animations';
 
 const JobDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
+  const { isDark } = useTheme();
   
   const [job, setJob] = useState(null);
   const [relatedJobs, setRelatedJobs] = useState([]);
@@ -213,7 +216,8 @@ const JobDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+    <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100 transition-colors duration-500`}>
+      <AnimatedBackground />
       <Navbar />
       
       <main className="px-4 pt-24 pb-16">

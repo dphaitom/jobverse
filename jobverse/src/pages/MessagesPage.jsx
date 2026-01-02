@@ -6,7 +6,9 @@ import {
   Clock, Check, CheckCheck
 } from 'lucide-react';
 import { Navbar, Footer, LoadingSpinner, EmptyState } from '../components';
+import AnimatedBackground from '../components/AnimatedBackground';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { chatAPI } from '../services/api';
 import toast from 'react-hot-toast';
 
@@ -14,6 +16,7 @@ const MessagesPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, isAuthenticated } = useAuth();
+  const { isDark } = useTheme();
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -128,7 +131,7 @@ const MessagesPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+      <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100`}>
         <Navbar />
         <div className="pt-24"><LoadingSpinner size="lg" /></div>
       </div>
@@ -136,14 +139,15 @@ const MessagesPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+    <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100 transition-colors duration-500`}>
+      <AnimatedBackground />
       <Navbar />
       
       <main className="pt-20 pb-0 h-screen flex flex-col">
         <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-4 flex flex-col">
           {/* Header */}
           <div className="mb-4">
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <h1 className={`text-2xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
               <MessageCircle className="w-6 h-6 text-violet-400" />
               Tin nhắn
             </h1>
@@ -152,13 +156,13 @@ const MessagesPage = () => {
           <div className="flex-1 grid lg:grid-cols-3 gap-4 min-h-0">
             {/* Conversations List */}
             <div className="lg:col-span-1 glass-card rounded-2xl flex flex-col overflow-hidden">
-              <div className="p-4 border-b border-gray-800">
-                <h2 className="font-semibold text-white">Hội thoại</h2>
+              <div className={`p-4 border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
+                <h2 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Hội thoại</h2>
               </div>
               
               <div className="flex-1 overflow-y-auto">
                 {conversations.length > 0 ? (
-                  <div className="divide-y divide-gray-800/50">
+                  <div className={`divide-y ${isDark ? 'divide-gray-800/50' : 'divide-gray-200'}`}>
                     {conversations.map(conv => {
                       const other = getOtherParticipant(conv);
                       return (

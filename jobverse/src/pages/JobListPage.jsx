@@ -8,13 +8,16 @@ import {
 } from 'lucide-react';
 import { jobsAPI, categoriesAPI, skillsAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import toast from 'react-hot-toast';
 import { Navbar, Footer, JobCard, SearchBar, LoadingSpinner, EmptyState } from '../components';
+import AnimatedBackground from '../components/AnimatedBackground';
 import { fadeInUp, staggerContainer, staggerItem, slideInLeft } from '../utils/animations';
 
 const JobListPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, isAuthenticated } = useAuth();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -166,7 +169,8 @@ const JobListPage = () => {
   const activeFiltersCount = Object.values(filters).filter(v => v && v !== '').length;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+    <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100 transition-colors duration-500`}>
+      <AnimatedBackground />
       <Navbar />
       
       <main className="px-4 pt-24 pb-16">

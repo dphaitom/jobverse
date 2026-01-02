@@ -1,19 +1,24 @@
 // src/pages/CompanyDetailPage.jsx
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   MapPin, Globe, Users, Star, Building2, Calendar, Briefcase,
   ArrowLeft, ExternalLink, ChevronRight
 } from 'lucide-react';
 import { companiesAPI, jobsAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { Navbar, Footer, JobCard, LoadingSpinner, EmptyState } from '../components';
+import AnimatedBackground from '../components/AnimatedBackground';
+import { fadeInUp, staggerContainer, staggerItem } from '../utils/animations';
 import toast from 'react-hot-toast';
 
 const CompanyDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const { isDark } = useTheme();
   const [company, setCompany] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -123,7 +128,8 @@ const CompanyDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+    <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100 transition-colors duration-500`}>
+      <AnimatedBackground />
       <Navbar />
       
       <main className="pt-20 pb-16">

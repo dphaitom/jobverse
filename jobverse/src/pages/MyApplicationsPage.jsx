@@ -8,7 +8,9 @@ import {
 import toast from 'react-hot-toast';
 import { jobsAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { Navbar, Footer, LoadingSpinner, EmptyState } from '../components';
+import AnimatedBackground from '../components/AnimatedBackground';
 
 // Match backend ApplicationStatus enum exactly
 const STATUS_CONFIG = {
@@ -64,6 +66,7 @@ const STATUS_CONFIG = {
 
 const MyApplicationsPage = () => {
   const { isAuthenticated } = useAuth();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState([]);
@@ -181,7 +184,7 @@ const MyApplicationsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+      <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100`}>
         <Navbar />
         <div className="pt-24"><LoadingSpinner size="lg" /></div>
       </div>
@@ -189,7 +192,8 @@ const MyApplicationsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+    <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100 transition-colors duration-500`}>
+      <AnimatedBackground />
       <Navbar />
 
       <main className="px-4 pt-24 pb-16">

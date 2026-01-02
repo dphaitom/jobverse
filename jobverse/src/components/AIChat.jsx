@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, X, Loader2 } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 const AIChat = ({ isOpen, onClose }) => {
+  const { isDark } = useTheme();
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Xin chào! 👋 Tôi là AI Career Coach. Tôi có thể giúp gì cho bạn?' }
   ]);
@@ -63,20 +65,24 @@ const AIChat = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 w-96 h-[500px] glass-card rounded-2xl flex flex-col overflow-hidden z-[9999] shadow-2xl">
+    <div className={`fixed bottom-4 right-4 w-96 h-[500px] rounded-2xl flex flex-col overflow-hidden z-[9999] shadow-2xl border ${
+      isDark 
+        ? 'bg-[#111]/95 backdrop-blur-xl border-gray-800' 
+        : 'bg-white/95 backdrop-blur-xl border-gray-200'
+    }`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-800">
+      <div className={`flex items-center justify-between p-4 border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
         <div className="flex items-center gap-3">
           <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h3 className="font-semibold text-white">AI Career Coach</h3>
+            <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Career Coach</h3>
             <span className="text-xs text-green-400">● Online</span>
           </div>
         </div>
-        <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-800">
-          <X className="w-5 h-5 text-gray-400" />
+        <button onClick={onClose} className={`p-2 rounded-lg ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}>
+          <X className={`w-5 h-5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
         </button>
       </div>
       
@@ -87,7 +93,9 @@ const AIChat = ({ isOpen, onClose }) => {
             <div className={`max-w-[80%] p-3 rounded-2xl ${
               msg.role === 'user' 
                 ? 'bg-violet-600 text-white rounded-br-sm' 
-                : 'bg-gray-800 text-gray-200 rounded-bl-sm'
+                : isDark 
+                  ? 'bg-gray-800 text-gray-200 rounded-bl-sm'
+                  : 'bg-gray-100 text-gray-800 rounded-bl-sm'
             }`}>
               {msg.content}
             </div>
@@ -95,7 +103,7 @@ const AIChat = ({ isOpen, onClose }) => {
         ))}
         {loading && (
           <div className="flex justify-start">
-            <div className="p-3 bg-gray-800 rounded-bl-sm rounded-2xl">
+            <div className={`p-3 rounded-bl-sm rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
               <Loader2 className="w-5 h-5 animate-spin text-violet-400" />
             </div>
           </div>
@@ -104,7 +112,7 @@ const AIChat = ({ isOpen, onClose }) => {
       </div>
       
       {/* Input */}
-      <div className="p-4 border-t border-gray-800">
+      <div className={`p-4 border-t ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
         <div className="flex gap-2">
           <input
             type="text"
@@ -112,7 +120,11 @@ const AIChat = ({ isOpen, onClose }) => {
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
             placeholder="Hỏi AI Coach..."
-            className="flex-1 px-4 py-3 text-white placeholder-gray-500 bg-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500"
+            className={`flex-1 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+              isDark 
+                ? 'bg-gray-800 text-white placeholder-gray-500' 
+                : 'bg-gray-100 text-gray-900 placeholder-gray-400'
+            }`}
           />
           <button 
             onClick={sendMessage}

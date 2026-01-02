@@ -2,8 +2,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Navbar, Footer, LoadingSpinner, EmptyState } from '../components';
+import AnimatedBackground from '../components/AnimatedBackground';
 import { jobsAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import {
   Plus,
   Briefcase,
@@ -30,6 +32,7 @@ const STATUS_CONFIG = {
 
 const EmployerDashboard = () => {
   const { user, isAuthenticated } = useAuth();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -105,7 +108,8 @@ const EmployerDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+    <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100 transition-colors duration-500`}>
+      <AnimatedBackground />
       <Navbar />
 
       <main className="px-4 pt-24 pb-16">

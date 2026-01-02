@@ -7,6 +7,9 @@ import {
   CheckCircle2, BookOpen
 } from 'lucide-react';
 import { Navbar, Footer } from '../components';
+import AnimatedBackground from '../components/AnimatedBackground';
+import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import { aiAPI } from '../services/api';
 import toast from 'react-hot-toast';
 
@@ -223,6 +226,8 @@ QuestionSection.displayName = 'QuestionSection';
 
 const InterviewPrepPage = () => {
   const navigate = useNavigate();
+  const { isDark } = useTheme();
+  const { isAuthenticated } = useAuth();
   const [role, setRole] = useState('');
   const [experienceLevel, setExperienceLevel] = useState('JUNIOR');
   const [loading, setLoading] = useState(false);
@@ -260,18 +265,21 @@ const InterviewPrepPage = () => {
 
     setLoading(true);
     try {
-      const response = await aiAPI.generateInterviewQuestions({
-        role,
-        experienceLevel,
-        skills: []
-      });
+      // Use guest endpoint if not authenticated
+      const response = isAuthenticated
+        ? await aiAPI.generateInterviewQuestions({ role, experienceLevel, skills: [] })
+        : await aiAPI.generateInterviewQuestionsGuest({ role, experienceLevel, skills: [] });
       setQuestions(response.data);
       setUserAnswers({});
       setEvaluations({});
       toast.success('Đã tạo câu hỏi phỏng vấn!');
     } catch (error) {
       console.error('Error generating questions:', error);
-      toast.error(error.response?.data?.error?.message || 'Có lỗi xảy ra');
+      const errorMessage = error.response?.data?.error?.message 
+        || error.response?.data?.message 
+        || error.message 
+        || 'Có lỗi xảy ra';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -308,22 +316,23 @@ const InterviewPrepPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-nike-black">
+    <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} transition-colors duration-500`}>
+      <AnimatedBackground />
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-br from-nike-black via-nike-black-light to-nike-black">
+      <section className={`relative py-20 ${isDark ? 'bg-gradient-to-br from-[#0a0a0b] via-[#111] to-[#0a0a0b]' : 'bg-gradient-to-br from-slate-50 via-white to-slate-50'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center animate-fade-in-up">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-ai-purple/10 border border-ai-purple/20 rounded-full mb-6">
-              <Target className="w-4 h-4 text-ai-purple" />
-              <span className="text-sm text-ai-purple font-medium">AI Interview Practice</span>
+          <div className="text-center animate-fade-in-up pt-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-violet-500/10 border border-violet-500/20 rounded-full mb-6">
+              <Target className="w-4 h-4 text-violet-500" />
+              <span className="text-sm text-violet-500 font-medium">AI Interview Practice</span>
             </div>
-            <h1 className="text-display-lg font-black text-white mb-6 tracking-tight">
+            <h1 className={`text-4xl md:text-5xl font-black mb-6 tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
               Luyện Tập
-              <span className="block text-ai-purple">Phỏng Vấn</span>
+              <span className="block text-violet-500">Phỏng Vấn</span>
             </h1>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
+            <p className={`text-xl max-w-2xl mx-auto leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               Chuẩn bị cho cuộc phỏng vấn với 100+ câu hỏi chuyên sâu và đánh giá bằng AI. Tự tin hơn trong mỗi buổi phỏng vấn.
             </p>
           </div>
@@ -333,18 +342,22 @@ const InterviewPrepPage = () => {
       {/* Setup Section */}
       <section className="py-16">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-nike-black-light border border-gray-800 rounded-2xl p-8 mb-8">
-            <h2 className="text-2xl font-bold text-white mb-6">Thiết Lập Phỏng Vấn</h2>
+          <div className={`${isDark ? 'bg-[#111] border-gray-800' : 'bg-white border-gray-200 shadow-sm'} border rounded-2xl p-8 mb-8`}>
+            <h2 className={`text-2xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>Thiết Lập Phỏng Vấn</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Role Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
+                <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                   Role / Position
                 </label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  className="w-full px-4 py-3 bg-nike-black border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-ai-purple/50 focus:border-ai-purple/50 transition-all"
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all ${
+                    isDark 
+                      ? 'bg-[#0a0a0b] border-gray-700 text-white' 
+                      : 'bg-gray-50 border-gray-300 text-gray-900'
+                  }`}
                 >
                   <option value="">-- Chọn role --</option>
                   {roles.map((r) => (
@@ -355,13 +368,17 @@ const InterviewPrepPage = () => {
 
               {/* Experience Level */}
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
+                <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                   Experience Level
                 </label>
                 <select
                   value={experienceLevel}
                   onChange={(e) => setExperienceLevel(e.target.value)}
-                  className="w-full px-4 py-3 bg-nike-black border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-ai-purple/50 focus:border-ai-purple/50 transition-all"
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all ${
+                    isDark 
+                      ? 'bg-[#0a0a0b] border-gray-700 text-white' 
+                      : 'bg-gray-50 border-gray-300 text-gray-900'
+                  }`}
                 >
                   {levels.map((level) => (
                     <option key={level.value} value={level.value}>
@@ -375,7 +392,7 @@ const InterviewPrepPage = () => {
             <button
               onClick={handleGenerate}
               disabled={loading || !role}
-              className="w-full mt-6 px-6 py-4 bg-gradient-to-r from-ai-purple to-ai-blue hover:from-ai-purple/90 hover:to-ai-blue/90 disabled:from-gray-700 disabled:to-gray-700 text-white rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3"
+              className="w-full mt-6 px-6 py-4 bg-gradient-to-r from-violet-500 to-indigo-600 hover:from-violet-600 hover:to-indigo-700 disabled:from-gray-500 disabled:to-gray-500 text-white rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3"
             >
               {loading ? (
                 <>

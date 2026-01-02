@@ -56,14 +56,20 @@ const refreshToken = async () => {
 };
 
 const apiRequest = async (endpoint, options = {}) => {
+  // Support skipAuth option to exclude auth headers
+  const authHeaders = options.skipAuth ? {} : getAuthHeaders();
+  
   const config = {
     headers: {
       'Content-Type': 'application/json',
-      ...getAuthHeaders(),
+      ...authHeaders,
       ...options.headers,
     },
     ...options,
   };
+  
+  // Remove custom options from config
+  delete config.skipAuth;
   
   const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
   return handleResponse(response);
@@ -217,6 +223,12 @@ export const companiesAPI = {
   // Get companies owned by the current employer
   getMyCompanies: () =>
     apiRequest('/v1/companies/my'),
+
+  // Get featured/top companies for homepage
+  getFeaturedCompanies: (params = { size: 4 }) => {
+    const queryString = new URLSearchParams(params).toString();
+    return apiRequest(`/v1/companies${queryString ? `?${queryString}` : ''}`);
+  },
 };
 
 // ==================== CATEGORIES API ====================
@@ -231,6 +243,9 @@ export const categoriesAPI = {
 export const skillsAPI = {
   getSkills: () =>
     apiRequest('/v1/skills'),
+  
+  getTrendingSkills: () =>
+    apiRequest('/v1/skills/trending'),
 };
 
 // ==================== USER API ====================
@@ -282,7 +297,7 @@ export const aiAPI = {
     apiRequest('/v1/ai/chat/guest', {
       method: 'POST',
       body: JSON.stringify({ message }),
-      headers: {}, // No auth required
+      skipAuth: true, // No auth required
     }),
 
   // Resume Analysis
@@ -305,7 +320,7 @@ export const aiAPI = {
     apiRequest('/v1/resume/analyze/guest', {
       method: 'POST',
       body: JSON.stringify(resumeData),
-      headers: {}, // No auth required
+      skipAuth: true, // No auth required
     }),
 
   // Interview Preparation
@@ -331,7 +346,7 @@ export const aiAPI = {
     apiRequest('/v1/interview/questions/guest', {
       method: 'POST',
       body: JSON.stringify(data),
-      headers: {}, // No auth required
+      skipAuth: true, // No auth required
     }),
 };
 

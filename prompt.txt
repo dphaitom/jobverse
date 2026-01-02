@@ -1,187 +1,174 @@
 Project Goal
 
-Debug and fix critical issues in the JobVerse automated recruitment website, focusing on messaging stability, application submission UI, and employer application status handling.
+Improve the visual quality and user experience of the JobVerse website, focusing on Light Theme animation, motion consistency, and Featured Companies UI alignment, without changing any backend APIs.
 
-Task 0 – Bug Reproduction & Log Analysis
+Task 0 – Scope & Constraints
 
-Reproduce all reported issues on both roles:
+Review the current frontend UI and animations.
 
-candidate
+Strict constraints:
 
-employer
+❗ Do NOT modify or add any backend APIs
 
-Check:
+❗ Do NOT change data contracts
 
-Browser console errors
+Allowed changes:
 
-Network requests (request / response / status codes)
+✅ UI styles (CSS / Tailwind / theme config)
 
-Backend logs
+✅ Animations (Framer Motion or existing motion system)
 
-Identify whether issues come from:
+✅ Component layout refinements (visual only)
 
-API response structure
+Task 1 – Light Theme with Dark Theme Motion Effects
+Current Situation
 
-Frontend state handling
+Light theme works functionally
 
-Missing or incorrect error handling
+Dark theme has better background motion / animation
 
-Task 1 – Fix Messaging Feature Errors (Candidate ↔ Company)
-Current Issues
-
-When sending a message:
-
-A console error appears immediately
-
-After sending a message and refreshing the page:
-
-The messaging page breaks or throws an error
-
-Conversation or messages fail to load
+Light theme feels static and visually less appealing
 
 Expected Behavior
 
-Sending a message should:
+In Light Theme:
 
-Not trigger console errors
+Keep background color white
 
-Successfully update the message list
+BUT reuse / adapt background motion effects from Dark Theme
 
-After page reload:
+Subtle gradients
 
-Conversation and message history should load correctly
+Animated blobs / waves / particles
 
-No runtime or state errors should occur
+Smooth motion transitions
 
-Required Actions
+Animations should be:
 
-Backend:
+Lightweight
 
-Verify message creation API response format
+Non-distracting
 
-Ensure conversation ID and message list are returned correctly
+Performance-friendly
 
-Frontend:
+UI Requirements
 
-Fix state update after sending a message
+Background remains readable (no low contrast)
 
-Ensure message fetching API is called on page reload
+Motion opacity should be reduced compared to dark theme
 
-Add null / undefined checks for conversation and message data
+Motion should feel consistent across pages
 
-Task 2 – Fix Job Application Submission UI Error (Candidate)
-Current Issue
-
-When applying for a job:
-
-User fills in description / additional information
-
-UI shows an error message
-
-BUT backend has successfully received and stored the application
-
-Expected Behavior
-
-If backend successfully creates the application:
-
-UI should show success feedback
-
-No error message should be displayed
-
-Required Actions
-
-Backend:
-
-Verify response status code (should be 200 / 201)
-
-Ensure response body matches frontend expectations
-
-Frontend:
-
-Fix success vs error handling logic
-
-Ensure UI relies on HTTP status or success flag correctly
-
-Prevent false-negative error messages
-
-Task 3 – Employer Application Status Update Limitation
-Current Issue
-
-When logged in as employer:
-
-Can only change application status to:
-
-Pending
-
-Reviewing
-
-Cancelled
-
-Other statuses do not work or are rejected
-
-Expected Behavior
-
-Employer should be able to update application status to all valid statuses, such as:
-
-Accepted
-
-Rejected
-
-Interview
-
-Hired
-(depending on defined business rules)
-
-Required Actions
-
-Backend:
-
-Review application status enum / validation logic
-
-Ensure all allowed statuses are:
-
-Defined
-
-Accepted by update API
-
-Frontend:
-
-Ensure status values sent match backend enum values exactly
-
-Authorization:
-
-Employer can only update applications for their own jobs
-
-Task 4 – Frontend–Backend Contract Alignment
+Task 2 – Motion Consistency Across Themes
 Goal
 
-Ensure frontend and backend are fully synchronized.
+Ensure motion language is consistent between:
+
+Dark Theme
+
+Light Theme
 
 Required Actions
 
-Validate:
+Reuse the same animation variants:
 
-API request payloads
+Fade
 
-API response schemas
+Slide
 
-Status codes and error handling
+Scale
 
-Fix any mismatch causing:
+Background motion
 
-UI errors despite backend success
+Adjust:
 
-Crashes after page reload
+Colors
 
-Task 5 – Final Stability & Regression Testing
+Opacity
+
+Blend modes
+
+Avoid duplicating animation logic
+
+Task 3 – Improve “Featured Companies” UI (Match Backend Data)
+Current Issue
+
+“Featured Companies” section UI does not fully match backend data
+
+Visual structure feels disconnected from real data meaning
+
+Expected Behavior
+
+UI should clearly reflect backend-provided fields, such as:
+
+Company logo
+
+Company name
+
+Industry / category
+
+Number of jobs (if provided)
+
+Location (if provided)
+
+Layout should feel:
+
+Clean
+
+Professional
+
+Consistent with the rest of the site
+
+UI Enhancements
+
+Use cards with:
+
+Soft shadows
+
+Rounded corners
+
+Hover animations
+
+Ensure spacing and typography hierarchy is clear
+
+Improve visual balance between logo and text
+
+Task 4 – Micro-interactions & Polish
+Enhancements
+
+Add subtle hover effects to:
+
+Company cards
+
+Buttons
+
+Links
+
+Improve transitions:
+
+Page enter / exit
+
+Card hover
+
+Theme switching
+
+Ensure animations feel:
+
+Smooth
+
+Responsive
+
+Not excessive
+
+Task 5 – Final UI Review & Consistency Check
 Checklist
 
-Messaging works without console errors
+Light theme has animated background similar to dark theme
 
-Messages persist after page reload
+Motion effects are consistent across themes
 
-Job application submission shows correct UI feedback
+Featured Companies UI accurately reflects backend data
 
-Employer can update all valid application statuses
+No API changes introduced
 
-No new regressions introduced
+UI remains performant and accessible

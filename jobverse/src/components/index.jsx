@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNotifications } from '../contexts/NotificationContext';
+import UserAvatar from './UserAvatar';
 import {
   Search, MapPin, Briefcase, Clock, DollarSign, Heart, ChevronDown,
   Bell, User, Menu, X, Rocket, Building2, LogOut, Settings,
@@ -192,17 +193,7 @@ export const Navbar = () => {
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-gray-700/50 transition-colors"
                 >
-                  {user?.profile?.avatarUrl ? (
-                    <img
-                      src={`http://localhost:8080/api${user.profile.avatarUrl}`}
-                      alt="Avatar"
-                      className="object-cover rounded-full w-9 h-9"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center text-sm font-semibold text-white rounded-full w-9 h-9 bg-gradient-to-r from-violet-500 to-indigo-600">
-                      {user?.fullName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  <UserAvatar user={user} size="sm" showBadge={user?.role === 'EMPLOYER'} />
                   <span className="hidden md:block text-sm text-white max-w-[100px] truncate">
                     {user?.fullName || user?.email}
                   </span>
@@ -214,7 +205,11 @@ export const Navbar = () => {
                     <div className="px-4 py-3 border-b border-gray-700">
                       <p className="font-medium text-white truncate">{user?.fullName}</p>
                       <p className="text-xs text-gray-400 truncate">{user?.email}</p>
-                      <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-violet-500/20 text-violet-300 rounded-full">
+                      <span className={`inline-block mt-1 px-2 py-0.5 text-xs rounded-full ${
+                        user?.role === 'EMPLOYER' 
+                          ? 'bg-emerald-500/20 text-emerald-300' 
+                          : 'bg-violet-500/20 text-violet-300'
+                      }`}>
                         {user?.role === 'ADMIN' ? 'Admin' : user?.role === 'EMPLOYER' ? 'Nhà tuyển dụng' : 'Ứng viên'}
                       </span>
                     </div>
@@ -504,43 +499,71 @@ export const CompanyCard = ({ company }) => {
   const navigate = useNavigate();
   
   return (
-    <div 
+    <motion.div 
       onClick={() => navigate(`/companies/${company.id}`)}
-      className="p-5 cursor-pointer glass-card rounded-2xl hover:bg-gray-800/40 group"
+      className="p-5 cursor-pointer glass-card rounded-2xl group transition-all duration-300"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ 
+        y: -4,
+        boxShadow: "0 20px 40px rgba(139, 92, 246, 0.1)",
+        transition: { duration: 0.2 }
+      }}
     >
       <div className="flex items-start gap-4">
-        <div className="flex items-center justify-center flex-shrink-0 w-16 h-16 text-3xl rounded-xl bg-gradient-to-br from-gray-800 to-gray-900">
+        <div className="relative flex items-center justify-center flex-shrink-0 w-16 h-16 overflow-hidden text-3xl transition-transform duration-300 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 group-hover:scale-105">
           {company.logoUrl ? (
-            <img src={company.logoUrl} alt={company.name} className="object-contain w-12 h-12" />
-          ) : (
-            '🏢'
-          )}
+            <img 
+              src={company.logoUrl.startsWith('http') ? company.logoUrl : `http://localhost:8080/api${company.logoUrl}`}
+              alt={company.name} 
+              className="object-contain w-12 h-12" 
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+          ) : null}
+          <span className={`${company.logoUrl ? 'hidden' : 'flex'} items-center justify-center w-full h-full`}>🏢</span>
+          {/* Active indicator */}
+          <div className="absolute w-3 h-3 border-2 rounded-full -bottom-0.5 -right-0.5 bg-emerald-500 border-gray-900" />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="mb-1 text-lg font-semibold text-white transition-colors group-hover:text-violet-400">
             {company.name}
           </h3>
-          <p className="mb-2 text-sm text-gray-400">{company.industry}</p>
+          <p className="mb-2 text-sm text-gray-400">{company.industry || 'Technology'}</p>
           <div className="flex flex-wrap gap-3 text-sm text-gray-500">
             <span className="flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5" />{company.headquarters || company.location}
+              <MapPin className="w-3.5 h-3.5" />{company.headquarters || company.location || 'Vietnam'}
             </span>
             <span className="flex items-center gap-1">
               <Users className="w-3.5 h-3.5" />{company.employeeCount || '100+'} nhân viên
             </span>
             {company.ratingAvg && (
-              <span className="flex items-center gap-1 text-yellow-400">
-                <Star className="w-3.5 h-3.5 fill-current" />{company.ratingAvg}
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400">
+                <Star className="w-3.5 h-3.5 fill-current" />
+                {company.ratingAvg?.toFixed ? company.ratingAvg.toFixed(1) : company.ratingAvg}
               </span>
             )}
           </div>
         </div>
       </div>
       <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-800/50">
-        <span className="text-sm text-gray-500">{company.activeJobCount || company.jobCount || 0} việc làm đang tuyển</span>
-        <ChevronRight className="w-5 h-5 text-gray-500 transition-colors group-hover:text-violet-400" />
+        <span className="flex items-center gap-1.5 text-sm text-gray-500">
+          <Briefcase className="w-4 h-4 text-violet-400" />
+          <span className="text-violet-400 font-medium">{company.activeJobCount || company.jobCount || 0}</span>
+          việc làm đang tuyển
+        </span>
+        <motion.div
+          className="flex items-center gap-1 text-sm text-violet-400 opacity-0 group-hover:opacity-100 transition-opacity"
+          initial={{ x: -10 }}
+          whileHover={{ x: 0 }}
+        >
+          Xem chi tiết
+          <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

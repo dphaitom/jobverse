@@ -6,14 +6,17 @@ import {
   Clock, DollarSign, Eye, AlertCircle, Activity, BarChart3
 } from 'lucide-react';
 import { Navbar, Footer, LoadingSpinner } from '../components';
+import AnimatedBackground from '../components/AnimatedBackground';
 import { authAPI } from '../services/api';
 import { fadeInUp, staggerContainer, staggerItem } from '../utils/animations';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isDark } = useTheme();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [recentJobs, setRecentJobs] = useState([]);
@@ -50,7 +53,7 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+      <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100`}>
         <Navbar />
         <div className="pt-24">
           <LoadingSpinner size="lg" />
@@ -149,7 +152,8 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+    <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100 transition-colors duration-500`}>
+      <AnimatedBackground />
       <Navbar />
 
       <main className="px-4 pt-24 pb-16">

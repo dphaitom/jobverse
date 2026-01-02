@@ -10,10 +10,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { userAPI } from '../services/api';
 import { Navbar, Footer, LoadingSpinner } from '../components';
+import AnimatedBackground from '../components/AnimatedBackground';
 
 const SettingsPage = () => {
   const { isAuthenticated, user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, isDark } = useTheme();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
@@ -138,7 +139,7 @@ const SettingsPage = () => {
 
   if (loading && !user) {
     return (
-      <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+      <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100`}>
         <Navbar />
         <div className="pt-24"><LoadingSpinner size="lg" /></div>
       </div>
@@ -146,7 +147,8 @@ const SettingsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+    <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100 transition-colors duration-500`}>
+      <AnimatedBackground />
       <Navbar />
 
       <main className="px-4 pt-24 pb-16">

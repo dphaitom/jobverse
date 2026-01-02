@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import AnimatedBackground from '../../components/AnimatedBackground';
 import { 
   Eye, 
   EyeOff, 
@@ -20,6 +22,7 @@ import {
 const RegisterPage = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
+  const { isDark } = useTheme();
   
   const [formData, setFormData] = useState({
     fullName: '',
@@ -108,32 +111,28 @@ const RegisterPage = () => {
   const strengthLabels = ['Yếu', 'Trung bình', 'Khá', 'Mạnh'];
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute rounded-full -top-40 -right-40 w-80 h-80 bg-purple-500/20 blur-3xl" />
-        <div className="absolute rounded-full -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 blur-3xl" />
-      </div>
+    <div className={`flex items-center justify-center min-h-screen p-4 ${isDark ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' : 'bg-gradient-to-br from-slate-100 via-white to-slate-100'} transition-colors duration-500`}>
+      <AnimatedBackground />
 
       <div className="relative w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
           <Link to="/" className="inline-flex items-center gap-2">
-            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl">
+            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-violet-500 to-indigo-600 rounded-xl">
               <Briefcase className="text-white w-7 h-7" />
             </div>
-            <span className="text-2xl font-bold text-white">JobVerse</span>
+            <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>JobVerse</span>
           </Link>
-          <p className="mt-2 text-gray-400">Tạo tài khoản để bắt đầu</p>
+          <p className={`mt-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Tạo tài khoản để bắt đầu</p>
         </div>
 
         {/* Register Form */}
-        <div className="p-8 border shadow-2xl bg-gray-800/50 backdrop-blur-xl rounded-2xl border-gray-700/50">
-          <h1 className="mb-6 text-2xl font-bold text-center text-white">Đăng Ký</h1>
+        <div className={`p-8 border shadow-2xl backdrop-blur-xl rounded-2xl ${isDark ? 'bg-gray-800/50 border-gray-700/50' : 'bg-white/80 border-gray-200'}`}>
+          <h1 className={`mb-6 text-2xl font-bold text-center ${isDark ? 'text-white' : 'text-gray-900'}`}>Đăng Ký</h1>
 
           {/* Role Selection */}
           <div className="mb-6">
-            <label className="block mb-3 text-sm font-medium text-gray-300">
+            <label className={`block mb-3 text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
               Bạn là
             </label>
             <div className="grid grid-cols-2 gap-3">
@@ -142,8 +141,8 @@ const RegisterPage = () => {
                 onClick={() => setFormData(prev => ({ ...prev, role: 'CANDIDATE' }))}
                 className={`p-4 rounded-xl border-2 transition-all ${
                   formData.role === 'CANDIDATE'
-                    ? 'border-purple-500 bg-purple-500/10'
-                    : 'border-gray-600 hover:border-gray-500'
+                    ? 'border-violet-500 bg-violet-500/10'
+                    : isDark ? 'border-gray-600 hover:border-gray-500' : 'border-gray-300 hover:border-gray-400'
                 }`}
               >
                 <UserCircle className={`w-8 h-8 mx-auto mb-2 ${

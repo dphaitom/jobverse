@@ -3,7 +3,9 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { jobsAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { Navbar, Footer, LoadingSpinner, EmptyState } from '../components';
+import AnimatedBackground from '../components/AnimatedBackground';
 import {
   Bookmark,
   MapPin,
@@ -21,6 +23,7 @@ import toast from 'react-hot-toast';
 
 const SavedJobsPage = () => {
   const { isAuthenticated } = useAuth();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const [savedJobs, setSavedJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -65,7 +68,7 @@ const SavedJobsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+      <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100`}>
         <Navbar />
         <div className="pt-24"><LoadingSpinner size="lg" /></div>
       </div>
@@ -73,7 +76,8 @@ const SavedJobsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+    <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100 transition-colors duration-500`}>
+      <AnimatedBackground />
       <Navbar />
       
       <main className="px-4 pt-24 pb-16">

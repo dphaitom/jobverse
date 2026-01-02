@@ -10,12 +10,16 @@ import {
 import { jobsAPI, categoriesAPI, skillsAPI } from '../services/api';
 import { Navbar, Footer, JobCard, SearchBar } from '../components';
 import AIChat from '../components/AIChat';
+import AnimatedBackground from '../components/AnimatedBackground';
+import FeaturedCompanies from '../components/FeaturedCompanies';
 import { fadeInUp, staggerContainer, staggerItem, scaleIn } from '../utils/animations';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const HomePage = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const { isDark } = useTheme();
   const [jobs, setJobs] = useState([]);
   const [categories, setCategories] = useState([]);
   const [trendingSkills, setTrendingSkills] = useState([]);
@@ -100,14 +104,6 @@ const HomePage = () => {
     navigate(`/jobs?q=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}`);
   };
 
-  // Featured companies (static for demo)
-  const featuredCompanies = [
-    { name: 'VNG', logo: '🎮', jobs: 45, rating: 4.8 },
-    { name: 'FPT Software', logo: '💻', jobs: 120, rating: 4.6 },
-    { name: 'Shopee', logo: '🛒', jobs: 78, rating: 4.7 },
-    { name: 'Grab', logo: '🚗', jobs: 56, rating: 4.5 },
-  ];
-
   // Default categories if API fails
   const defaultCategories = [
     { id: 'all', name: 'Tất cả', icon: Sparkles },
@@ -123,7 +119,9 @@ const HomePage = () => {
     : defaultCategories;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+    <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100 transition-colors duration-500`}>
+      {/* Animated Background */}
+      <AnimatedBackground />
       <Navbar />
 
       {/* Hero Section */}
@@ -317,34 +315,8 @@ const HomePage = () => {
                 </div>
               </div>
 
-              {/* Featured Companies */}
-              <div className="p-5 glass-card rounded-2xl">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-white">Công ty nổi bật</h3>
-                  <Link to="/companies" className="text-sm text-violet-400 hover:text-violet-300">
-                    Xem tất cả
-                  </Link>
-                </div>
-                <div className="space-y-2">
-                  {featuredCompanies.map((company) => (
-                    <div key={company.name} className="flex items-center justify-between p-3 cursor-pointer rounded-xl hover:bg-gray-800/50">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-10 h-10 text-xl bg-gray-800 rounded-xl">
-                          {company.logo}
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-medium text-white">{company.name}</h4>
-                          <p className="text-xs text-gray-500">{company.jobs} việc làm</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 text-sm text-yellow-400">
-                        <Star className="w-4 h-4 fill-current" />
-                        <span>{company.rating}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              {/* Featured Companies - Using new component */}
+              <FeaturedCompanies />
             </div>
           </div>
         </div>

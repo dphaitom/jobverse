@@ -2,13 +2,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar, Footer, LoadingSpinner } from '../components';
+import AnimatedBackground from '../components/AnimatedBackground';
 import { jobsAPI, companiesAPI, categoriesAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { ArrowLeft, Save, Loader2, Building2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const CreateJobPage = () => {
   const { user, isAuthenticated } = useAuth();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
@@ -145,7 +148,7 @@ const CreateJobPage = () => {
   // Show loading while fetching data
   if (dataLoading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+      <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100`}>
         <Navbar />
         <main className="px-4 pt-24 pb-16 flex items-center justify-center min-h-[60vh]">
           <LoadingSpinner />
@@ -158,13 +161,13 @@ const CreateJobPage = () => {
   // Show error if employer has no company
   if (user?.role === 'EMPLOYER' && companies.length === 0) {
     return (
-      <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+      <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100`}>
         <Navbar />
         <main className="px-4 pt-24 pb-16">
           <div className="max-w-2xl mx-auto text-center">
             <Building2 className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-white mb-2">Chưa có công ty</h1>
-            <p className="text-gray-400 mb-6">
+            <h1 className={`text-2xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Chưa có công ty</h1>
+            <p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               Tài khoản của bạn chưa được liên kết với công ty nào. 
               Vui lòng liên hệ admin để được hỗ trợ.
             </p>
@@ -182,7 +185,8 @@ const CreateJobPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+    <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100 transition-colors duration-500`}>
+      <AnimatedBackground />
       <Navbar />
 
       <main className="px-4 pt-24 pb-16">

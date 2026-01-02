@@ -122,10 +122,44 @@ export const swipeVariants = {
 
 // Page transition
 export const pageTransition = {
-  initial: { opacity: 0, x: -20 },
-  animate: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: 20 },
-  transition: { duration: 0.3, ease: 'easeInOut' }
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -10 },
+  transition: { duration: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }
+};
+
+// Theme switch transition
+export const themeTransition = {
+  initial: { opacity: 0, scale: 0.98 },
+  animate: { opacity: 1, scale: 1 },
+  transition: { duration: 0.5, ease: 'easeOut' }
+};
+
+// Card hover effects
+export const cardHoverEffect = {
+  rest: { 
+    scale: 1,
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
+  },
+  hover: {
+    scale: 1.02,
+    y: -4,
+    boxShadow: "0 20px 40px rgba(139, 92, 246, 0.15)",
+    transition: {
+      duration: 0.2,
+      ease: "easeOut"
+    }
+  }
+};
+
+// Button hover effect
+export const buttonHover = {
+  rest: { scale: 1 },
+  hover: { 
+    scale: 1.02,
+    transition: { duration: 0.2 }
+  },
+  tap: { scale: 0.98 }
 };
 
 // Pulse glow animation for important elements

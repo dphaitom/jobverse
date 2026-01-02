@@ -1,13 +1,20 @@
 // src/pages/CompanyListPage.jsx
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Search, Filter, Building2, MapPin, Users, Star } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Search, Building2, MapPin, Users, Star, Briefcase, ArrowRight } from 'lucide-react';
 import { companiesAPI } from '../services/api';
 import { Navbar, Footer, CompanyCard, LoadingSpinner, EmptyState } from '../components';
+import AnimatedBackground from '../components/AnimatedBackground';
+import { useTheme } from '../contexts/ThemeContext';
+import { staggerContainer, staggerItem, fadeInUp } from '../utils/animations';
 
 const CompanyListPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { isDark } = useTheme();
   const [companies, setCompanies] = useState([]);
+  const [featuredCompanies, setFeaturedCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [industry, setIndustry] = useState(searchParams.get('industry') || '');
@@ -24,7 +31,10 @@ const CompanyListPage = () => {
       if (searchParams.get('industry')) params.industry = searchParams.get('industry');
       
       const response = await companiesAPI.getCompanies(params);
-      setCompanies(response.data?.content || response.data || []);
+      const allCompanies = response.data?.content || response.data || [];
+      setCompanies(allCompanies);
+      // Set top 4 as featured
+      setFeaturedCompanies(allCompanies.slice(0, 4));
     } catch (error) {
       console.error('Error fetching companies:', error);
       setCompanies([]);
@@ -52,7 +62,8 @@ const CompanyListPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+    <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100 transition-colors duration-500`}>
+      <AnimatedBackground />
       <Navbar />
       
       <main className="pt-24 pb-16 px-4">
@@ -102,34 +113,78 @@ const CompanyListPage = () => {
             </div>
           </form>
 
-          {/* Featured Companies */}
-          <div className="mb-10">
-            <h2 className="text-xl font-semibold text-white mb-5">Công ty nổi bật</h2>
-            <div className="grid md:grid-cols-4 gap-4">
-              {[
-                { name: 'FPT Software', logo: '💻', jobs: 120, rating: 4.6 },
-                { name: 'VNG Corporation', logo: '🎮', jobs: 45, rating: 4.8 },
-                { name: 'Shopee', logo: '🛒', jobs: 78, rating: 4.5 },
-                { name: 'MoMo', logo: '💰', jobs: 32, rating: 4.3 },
-              ].map((company, idx) => (
-                <div key={idx} className="glass-card rounded-xl p-4 hover:bg-gray-800/40 cursor-pointer">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center text-2xl">
-                      {company.logo}
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-white">{company.name}</h3>
-                      <div className="flex items-center gap-1 text-sm text-yellow-400">
-                        <Star className="w-3.5 h-3.5 fill-current" />
-                        <span>{company.rating}</span>
+          {/* Featured Companies - Using real data */}
+          {featuredCompanies.length > 0 && (
+            <motion.div 
+              className="mb-10"
+              initial="initial"
+              animate="animate"
+              variants={staggerContainer}
+            >
+              <motion.h2 
+                className="text-xl font-semibold text-white mb-5 flex items-center gap-2"
+                variants={fadeInUp}
+              >
+                <Star className="w-5 h-5 text-yellow-400" />
+                Công ty nổi bật
+              </motion.h2>
+              <div className="grid md:grid-cols-4 gap-4">
+                {featuredCompanies.map((company, idx) => (
+                  <motion.div 
+                    key={company.id || idx} 
+                    variants={staggerItem}
+                    onClick={() => navigate(`/companies/${company.id}`)}
+                    className="glass-card rounded-xl p-4 cursor-pointer group transition-all duration-300 hover:shadow-lg hover:shadow-violet-500/10"
+                    whileHover={{ 
+                      y: -4,
+                      transition: { duration: 0.2 }
+                    }}
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-105">
+                        {company.logoUrl ? (
+                          <img 
+                            src={company.logoUrl.startsWith('http') ? company.logoUrl : `http://localhost:8080/api${company.logoUrl}`}
+                            alt={company.name} 
+                            className="w-10 h-10 object-contain"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <span className={`${company.logoUrl ? 'hidden' : 'flex'} text-2xl`}>🏢</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-white truncate group-hover:text-violet-400 transition-colors">
+                          {company.name}
+                        </h3>
+                        <p className="text-xs text-gray-500 truncate">{company.industry || 'Technology'}</p>
+                        {company.ratingAvg && (
+                          <div className="flex items-center gap-1 text-sm text-yellow-400 mt-0.5">
+                            <Star className="w-3.5 h-3.5 fill-current" />
+                            <span>{company.ratingAvg?.toFixed(1) || company.ratingAvg}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-                  <p className="text-sm text-gray-400">{company.jobs} việc làm đang tuyển</p>
-                </div>
-              ))}
-            </div>
-          </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-400 flex items-center gap-1">
+                        <Briefcase className="w-3.5 h-3.5" />
+                        {company.activeJobCount || company.jobCount || 0} việc làm
+                      </span>
+                      {company.headquarters && (
+                        <span className="text-gray-500 flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {company.headquarters}
+                        </span>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
 
           {/* Company List */}
           <div>

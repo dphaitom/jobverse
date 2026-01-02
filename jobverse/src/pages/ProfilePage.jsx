@@ -9,11 +9,15 @@ import {
 import toast from 'react-hot-toast';
 import { userAPI, jobsAPI, companiesAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { Navbar, Footer, LoadingSpinner } from '../components';
+import AnimatedBackground from '../components/AnimatedBackground';
+import UserAvatar from '../components/UserAvatar';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, refreshUser } = useAuth();
+  const { isDark } = useTheme();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -206,7 +210,7 @@ const ProfilePage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+      <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100`}>
         <Navbar />
         <div className="pt-24"><LoadingSpinner size="lg" /></div>
       </div>
@@ -214,7 +218,8 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0b] text-gray-100">
+    <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0b]' : 'bg-slate-50'} text-gray-100 transition-colors duration-500`}>
+      <AnimatedBackground />
       <Navbar />
       
       <main className="px-4 pt-24 pb-16">
@@ -224,17 +229,11 @@ const ProfilePage = () => {
             <div className="flex flex-col gap-6 md:flex-row">
               {/* Avatar */}
               <div className="relative">
-                {profile?.profile?.avatarUrl ? (
-                  <img
-                    src={`http://localhost:8080/api${profile.profile.avatarUrl}`}
-                    alt="Avatar"
-                    className="object-cover w-32 h-32 rounded-2xl"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center w-32 h-32 text-5xl font-bold text-white rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600">
-                    {formData.fullName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
-                  </div>
-                )}
+                <UserAvatar 
+                  user={{...user, profile: profile?.profile}} 
+                  size="2xl" 
+                  rounded="2xl"
+                />
                 <input
                   type="file"
                   id="avatar-upload"
@@ -245,7 +244,7 @@ const ProfilePage = () => {
                 />
                 <label
                   htmlFor="avatar-upload"
-                  className={`absolute p-2 text-white transition-colors -bottom-2 -right-2 bg-violet-500 rounded-xl hover:bg-violet-600 cursor-pointer ${uploadingAvatar ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`absolute p-2 text-white transition-colors -bottom-2 -right-2 ${isEmployer ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-violet-500 hover:bg-violet-600'} rounded-xl cursor-pointer ${uploadingAvatar ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <Camera className="w-4 h-4" />
                 </label>
