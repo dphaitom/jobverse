@@ -99141,3 +99141,285 @@ org.hibernate.LazyInitializationException: could not initialize proxy [com.jobve
         and j1_0.status=?
 2026-01-05 13:02:12 [http-nio-8080-exec-6] INFO  c.j.controller.CompanyController - ✅ Returning 13 companies (total: 13)
 2026-01-05 13:03:44 [MessageBroker-3] INFO  o.s.w.s.c.WebSocketMessageBrokerStats - WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 0 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], stompBrokerRelay[null], inboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], outboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], sockJsScheduler[pool size = 10, active threads = 1, queued tasks = 0, completed tasks = 9]
+2026-01-05 13:03:55 [http-nio-8080-exec-7] DEBUG o.s.security.web.FilterChainProxy - Securing GET /v1/companies
+2026-01-05 13:03:55 [http-nio-8080-exec-7] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2026-01-05 13:03:55 [http-nio-8080-exec-7] DEBUG o.s.security.web.FilterChainProxy - Secured GET /v1/companies
+2026-01-05 13:03:55 [http-nio-8080-exec-7] INFO  c.j.controller.CompanyController - 📋 GET /v1/companies - keyword=null, industry=null, page=0, size=20
+2026-01-05 13:03:55 [http-nio-8080-exec-7] INFO  com.jobverse.service.CompanyService - 🏢 Fetching all companies with pagination: page=0, size=20
+2026-01-05 13:03:55 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        c1_0.id,
+        c1_0.company_size,
+        c1_0.cover_url,
+        c1_0.created_at,
+        c1_0.description,
+        c1_0.employee_count,
+        c1_0.founded_year,
+        c1_0.headquarters,
+        c1_0.industry,
+        c1_0.is_featured,
+        c1_0.logo_url,
+        c1_0.name,
+        c1_0.owner_id,
+        c1_0.rating_avg,
+        c1_0.review_count,
+        c1_0.slug,
+        c1_0.tax_code,
+        c1_0.updated_at,
+        c1_0.verification_status,
+        c1_0.website 
+    from
+        public.companies c1_0 
+    order by
+        c1_0.created_at desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+2026-01-05 13:03:55 [http-nio-8080-exec-7] INFO  com.jobverse.service.CompanyService - ✅ Found 13 companies
+2026-01-05 13:03:55 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-7] INFO  c.j.controller.CompanyController - ✅ Returning 13 companies (total: 13)
+2026-01-05 13:03:55 [http-nio-8080-exec-2] DEBUG o.s.security.web.FilterChainProxy - Securing GET /v1/companies
+2026-01-05 13:03:55 [http-nio-8080-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2026-01-05 13:03:55 [http-nio-8080-exec-2] DEBUG o.s.security.web.FilterChainProxy - Secured GET /v1/companies
+2026-01-05 13:03:55 [http-nio-8080-exec-2] INFO  c.j.controller.CompanyController - 📋 GET /v1/companies - keyword=null, industry=null, page=0, size=20
+2026-01-05 13:03:55 [http-nio-8080-exec-2] INFO  com.jobverse.service.CompanyService - 🏢 Fetching all companies with pagination: page=0, size=20
+2026-01-05 13:03:55 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        c1_0.id,
+        c1_0.company_size,
+        c1_0.cover_url,
+        c1_0.created_at,
+        c1_0.description,
+        c1_0.employee_count,
+        c1_0.founded_year,
+        c1_0.headquarters,
+        c1_0.industry,
+        c1_0.is_featured,
+        c1_0.logo_url,
+        c1_0.name,
+        c1_0.owner_id,
+        c1_0.rating_avg,
+        c1_0.review_count,
+        c1_0.slug,
+        c1_0.tax_code,
+        c1_0.updated_at,
+        c1_0.verification_status,
+        c1_0.website 
+    from
+        public.companies c1_0 
+    order by
+        c1_0.created_at desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+2026-01-05 13:03:55 [http-nio-8080-exec-2] INFO  com.jobverse.service.CompanyService - ✅ Found 13 companies
+2026-01-05 13:03:55 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        count(j1_0.id) 
+    from
+        public.jobs j1_0 
+    where
+        j1_0.company_id=? 
+        and j1_0.status=?
+2026-01-05 13:03:55 [http-nio-8080-exec-2] INFO  c.j.controller.CompanyController - ✅ Returning 13 companies (total: 13)

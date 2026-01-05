@@ -47,3 +47,5 @@ coverage
 *.pem
 .vercel
 .netlify
+
+.txt
