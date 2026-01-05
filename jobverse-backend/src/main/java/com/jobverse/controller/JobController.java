@@ -85,21 +85,20 @@ public class JobController {
     @Operation(summary = "Full-text search jobs")
     public ResponseEntity<ApiResponse<Page<JobResponse>>> searchJobs(
             @RequestParam(required = false, defaultValue = "") String q,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Job.JobType jobType,
+            @RequestParam(required = false) Job.ExperienceLevel experienceLevel,
+            @RequestParam(required = false) Boolean isRemote,
             @PageableDefault(size = 20) Pageable pageable,
             @CurrentUser UserPrincipal currentUser
     ) {
-        // If no query provided, return all jobs
-        if (q == null || q.trim().isEmpty()) {
-            Page<JobResponse> jobs = jobService.searchJobs(
-                    null, null, null, null, null,
-                    null, null, null, null, pageable,
-                    currentUser != null ? currentUser.getId() : null
-            );
-            return ResponseEntity.ok(ApiResponse.success(jobs));
-        }
-
-        Page<JobResponse> jobs = jobService.fullTextSearch(
-                q, pageable,
+        // Use the full searchJobs method with all filters
+        String keyword = (q != null && !q.trim().isEmpty()) ? q : null;
+        
+        Page<JobResponse> jobs = jobService.searchJobs(
+                keyword, location, categoryId, jobType, experienceLevel,
+                null, null, isRemote, null, pageable,
                 currentUser != null ? currentUser.getId() : null
         );
         return ResponseEntity.ok(ApiResponse.success(jobs));

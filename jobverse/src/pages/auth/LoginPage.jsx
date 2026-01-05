@@ -68,13 +68,20 @@ const LoginPage = () => {
       console.error('Login error:', err);
       const errorMessage = err.message || 'Có lỗi xảy ra. Vui lòng thử lại.';
       
+      // Check for invalid credentials or wrong password
       if (errorMessage.toLowerCase().includes('credentials') || 
-          errorMessage.toLowerCase().includes('password')) {
+          errorMessage.toLowerCase().includes('password') ||
+          errorMessage.toLowerCase().includes('invalid') ||
+          errorMessage.toLowerCase().includes('401') ||
+          errorMessage.toLowerCase().includes('unauthorized')) {
         setError('Email hoặc mật khẩu không đúng');
       } else if (errorMessage.toLowerCase().includes('verified')) {
         setError('Tài khoản chưa được xác thực. Vui lòng kiểm tra email.');
+      } else if (errorMessage.toLowerCase().includes('network') ||
+                 errorMessage.toLowerCase().includes('fetch')) {
+        setError('Lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.');
       } else {
-        setError(errorMessage);
+        setError('Email hoặc mật khẩu không đúng');
       }
     } finally {
       setLoading(false);
@@ -87,10 +94,10 @@ const LoginPage = () => {
       
       <div className="relative w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="mb-8 text-center">
           <Link to="/" className="inline-flex items-center gap-2">
-            <div className="w-12 h-12 bg-gradient-to-r from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center">
-              <Briefcase className="w-7 h-7 text-white" />
+            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-violet-500 to-indigo-600 rounded-xl">
+              <Briefcase className="text-white w-7 h-7" />
             </div>
             <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>JobVerse</span>
           </Link>
@@ -103,8 +110,12 @@ const LoginPage = () => {
 
           {/* Error Message */}
           {error && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg flex items-center gap-2 text-red-400">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <div className={`mb-4 p-3 rounded-lg flex items-center gap-2 ${
+              isDark 
+                ? 'bg-red-500/10 border border-red-500/50 text-red-400' 
+                : 'bg-red-50 border border-red-200 text-red-600'
+            }`}>
+              <AlertCircle className="flex-shrink-0 w-5 h-5" />
               <span className="text-sm">{error}</span>
             </div>
           )}
@@ -174,7 +185,7 @@ const LoginPage = () => {
               </label>
               <Link
                 to="/forgot-password"
-                className="text-sm text-violet-500 hover:text-violet-400 transition-colors"
+                className="text-sm transition-colors text-violet-500 hover:text-violet-400"
               >
                 Quên mật khẩu?
               </Link>
@@ -184,7 +195,7 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-violet-500 to-indigo-600 hover:from-violet-600 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-violet-500/25 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex items-center justify-center w-full gap-2 py-3 font-semibold text-white transition-all duration-300 shadow-lg bg-gradient-to-r from-violet-500 to-indigo-600 hover:from-violet-600 hover:to-indigo-700 rounded-xl shadow-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
@@ -217,21 +228,11 @@ const LoginPage = () => {
             Chưa có tài khoản?{' '}
             <Link
               to="/register"
-              className="text-violet-500 hover:text-violet-400 font-medium transition-colors"
+              className="font-medium transition-colors text-violet-500 hover:text-violet-400"
             >
               Đăng ký ngay
             </Link>
           </p>
-        </div>
-
-        {/* Demo accounts */}
-        <div className="mt-6 p-4 bg-gray-800/30 rounded-xl border border-gray-700/50">
-          <p className="text-sm text-gray-400 text-center mb-2">Tài khoản demo:</p>
-          <div className="text-xs text-gray-500 space-y-1">
-            <p>👤 Candidate: <span className="text-gray-300">candidate1@gmail.com</span> / password123</p>
-            <p>🏢 Employer: <span className="text-gray-300">hr@fpt.com</span> / password123</p>
-            <p>⚙️ Admin: <span className="text-gray-300">admin@jobverse.com</span> / password123</p>
-          </div>
         </div>
       </div>
     </div>

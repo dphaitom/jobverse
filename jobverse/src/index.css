@@ -356,6 +356,43 @@ input[type="checkbox"]:checked {
   overflow: hidden;
 }
 
+/* ==================== TEXT OVERFLOW FIX ==================== */
+/* Prevent long text from breaking layout */
+.break-words {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* Apply text overflow handling globally to common containers */
+.job-card,
+.glass-card,
+.skill-pill,
+p, h1, h2, h3, h4, h5, h6, span, div {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Force text wrapping for job descriptions and cards */
+.job-card h3,
+.job-card p,
+.job-card span,
+.glass-card h3,
+.glass-card p,
+.glass-card span {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Skill pills should truncate */
+.skill-pill {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ==================== LIGHT MODE ==================== */
 :root:not(.dark) {
   --color-bg: #f8fafc;

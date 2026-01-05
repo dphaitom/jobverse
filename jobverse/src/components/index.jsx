@@ -45,7 +45,6 @@ export const Navbar = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
     setIsUserMenuOpen(false);
   };
 

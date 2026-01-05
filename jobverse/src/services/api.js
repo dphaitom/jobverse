@@ -113,7 +113,8 @@ export const jobsAPI = {
 
   searchJobs: (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
-    return apiRequest(`/v1/jobs/search${queryString ? `?${queryString}` : ''}`);
+    // Sử dụng /v1/jobs endpoint để hỗ trợ đầy đủ filter (keyword, location, categoryId, jobType, experienceLevel, salaryMin, isRemote)
+    return apiRequest(`/v1/jobs${queryString ? `?${queryString}` : ''}`);
   },
 
   getTrendingJobs: () =>

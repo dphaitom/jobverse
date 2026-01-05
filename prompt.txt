@@ -1,174 +1,336 @@
 Project Goal
 
-Improve the visual quality and user experience of the JobVerse website, focusing on Light Theme animation, motion consistency, and Featured Companies UI alignment, without changing any backend APIs.
+Fix UI and data consistency issues in JobVerse, improve filtering accuracy, ensure database-driven statistics, and crawl + generate realistic job data to enrich employer accounts and overall system depth.
 
-Task 0 – Scope & Constraints
+Task 0 – Scope & System Review
 
-Review the current frontend UI and animations.
+Review:
 
-Strict constraints:
+Frontend UI (Light theme, layout, text rendering)
 
-❗ Do NOT modify or add any backend APIs
+Backend filtering APIs
 
-❗ Do NOT change data contracts
+Database schema (jobs, companies, skills, locations)
 
 Allowed changes:
 
-✅ UI styles (CSS / Tailwind / theme config)
+✅ UI fixes (CSS / Tailwind / layout handling)
 
-✅ Animations (Framer Motion or existing motion system)
+✅ Backend logic fixes
 
-✅ Component layout refinements (visual only)
+✅ Data crawling & seeding
 
-Task 1 – Light Theme with Dark Theme Motion Effects
-Current Situation
+Goal:
 
-Light theme works functionally
+Improve correctness
 
-Dark theme has better background motion / animation
+Improve data depth
 
-Light theme feels static and visually less appealing
+Improve UX consistency
+
+Task 1 – Fix Text Color Issue on AI Interview Page (Light Theme)
+Current Issue
+
+On AI Interview page (Light Theme):
+
+Question text color is black
+
+Background / question card is also dark
+
+Text blends into the question container
 
 Expected Behavior
 
-In Light Theme:
+Question text must:
 
-Keep background color white
+Be clearly readable in light theme
 
-BUT reuse / adapt background motion effects from Dark Theme
-
-Subtle gradients
-
-Animated blobs / waves / particles
-
-Smooth motion transitions
-
-Animations should be:
-
-Lightweight
-
-Non-distracting
-
-Performance-friendly
-
-UI Requirements
-
-Background remains readable (no low contrast)
-
-Motion opacity should be reduced compared to dark theme
-
-Motion should feel consistent across pages
-
-Task 2 – Motion Consistency Across Themes
-Goal
-
-Ensure motion language is consistent between:
-
-Dark Theme
-
-Light Theme
+Have sufficient contrast with question card background
 
 Required Actions
 
-Reuse the same animation variants:
+Frontend:
 
-Fade
+Fix text color specifically for:
 
-Slide
+AI Interview questions
 
-Scale
+Light theme only
 
-Background motion
+Ensure theme-based color variables are applied correctly
 
-Adjust:
+Do NOT affect dark theme styling.
 
-Colors
-
-Opacity
-
-Blend modes
-
-Avoid duplicating animation logic
-
-Task 3 – Improve “Featured Companies” UI (Match Backend Data)
+Task 2 – Fix Job & Company Filter by Location
 Current Issue
 
-“Featured Companies” section UI does not fully match backend data
+On job listing & company pages:
 
-Visual structure feels disconnected from real data meaning
+Location filter does not return correct results
+
+Filtered data does not match selected location
 
 Expected Behavior
 
-UI should clearly reflect backend-provided fields, such as:
+Location filter should:
 
-Company logo
+Accurately return jobs / companies by:
 
-Company name
+City
 
-Industry / category
+Province
 
-Number of jobs (if provided)
+Country (depending on system design)
 
-Location (if provided)
+Required Actions
 
-Layout should feel:
+Backend:
+
+Review filter logic (query, JOIN, LIKE, normalization)
+
+Ensure location values are:
+
+Normalized
+
+Consistent between DB and filter input
+
+Frontend:
+
+Ensure correct filter parameters are sent to API
+
+Task 3 – Fix Long Text Overflow in Job Description & Cards
+Current Issue
+
+In job description and other cards:
+
+A single very long word/string
+
+Causes content to overflow outside its container
+
+Breaks layout
+
+Expected Behavior
+
+Long text should:
+
+Wrap correctly
+
+Or be truncated gracefully
+
+Never break layout
+
+Required Actions
+
+Frontend:
+
+Apply proper CSS rules:
+
+word-break
+
+overflow-wrap
+
+truncate / line-clamp where appropriate
+
+Apply fix consistently to:
+
+Job description
+
+Company cards
+
+Skill tags
+
+Other text containers
+
+Task 4 – Sync “Hot Skills” Section with Database (Homepage)
+Current Issue
+
+On JobVerse homepage:
+
+“Hot Skills” section uses static or incorrect data
+
+Does not reflect real database statistics
+
+Expected Behavior
+
+“Hot Skills” should:
+
+Be calculated from database
+
+Reflect:
+
+Skills most frequently required in job postings
+
+Real usage frequency
+
+Required Actions
+
+Backend:
+
+Implement query to:
+
+Count skill usage across jobs
+
+Sort by popularity
+
+Frontend:
+
+Display returned data dynamically
+
+Ensure:
+
+Data updates automatically when jobs change
+
+Task 5 – Crawl & Generate Job Data for Employers (Data Enrichment)
+Goal
+
+Increase data depth and realism of the system
+
+Automatically generate job postings for employer accounts
+
+Expected Outcome
+
+Employer accounts have:
+
+Multiple realistic job postings
+
+Diverse roles, skills, locations
+
+System looks “alive” and production-like
+
+Required Actions
+
+Data Crawling:
+
+Crawl job data from public job sites (title, skills, description, location)
+
+Clean and normalize crawled data
+
+Data Generation:
+
+Map crawled jobs to existing employer accounts
+
+Randomize:
+
+Salary
+
+Experience level
+
+Skills
+
+Database Seeding:
+
+Insert jobs safely
+
+Avoid duplicates
+
+Maintain referential integrity
+
+⚠️ Ensure crawling respects:
+
+Public data only
+
+No private or restricted content
+
+Task 6 – Final Validation & UX Review
+Checklist
+
+AI Interview text readable in light theme
+
+Location filter works correctly
+
+Long text no longer breaks layout
+
+Hot Skills reflect real database data
+
+Employers have rich, realistic job listings
+
+Task 7 – Improve Sign In / Sign Out UI & Authentication UX
+Current Issues
+
+On Sign In / Sign Up pages:
+
+There is a “demo account” section displayed at the bottom.
+
+This section is no_attach longer needed and should be removed.
+
+When a user enters an incorrect password:
+
+The UI does not show a clear or user-friendly error message.
+
+When a user logs out:
+
+The system does not redirect the user properly.
+
+Expected Behavior
+
+Sign In / Sign Up UI
+
+Remove the demo account section completely.
+
+Keep the UI:
 
 Clean
 
 Professional
 
-Consistent with the rest of the site
+Consistent with the rest of JobVerse design system
 
-UI Enhancements
+Login Error Handling
 
-Use cards with:
+When login fails due to:
 
-Soft shadows
+Wrong password
 
-Rounded corners
+Invalid credentials
 
-Hover animations
+The user should see a clear error message, such as:
 
-Ensure spacing and typography hierarchy is clear
+“Incorrect email or password”
 
-Improve visual balance between logo and text
+Error message should:
 
-Task 4 – Micro-interactions & Polish
-Enhancements
+Be visible
 
-Add subtle hover effects to:
+Not require page refresh
 
-Company cards
+Not expose sensitive backend details
 
-Buttons
+Logout Behavior
 
-Links
+When a user logs out successfully:
 
-Improve transitions:
+Clear authentication state (token, user context)
 
-Page enter / exit
+Redirect user to the homepage (/)
 
-Card hover
+Ensure:
 
-Theme switching
+Protected pages are no longer accessible after logout
 
-Ensure animations feel:
+Required Actions
 
-Smooth
+Frontend:
 
-Responsive
+Remove demo account UI section
 
-Not excessive
+Improve error message display on login failure
 
-Task 5 – Final UI Review & Consistency Check
-Checklist
+Handle logout redirect logic
 
-Light theme has animated background similar to dark theme
+Backend:
 
-Motion effects are consistent across themes
+Ensure authentication API returns:
 
-Featured Companies UI accurately reflects backend data
+Proper HTTP status codes (e.g. 401 for invalid credentials)
 
-No API changes introduced
+Clear error messages consumable by frontend
 
-UI remains performant and accessible
+Validation Checklist
+
+Demo account section is fully removed
+
+Wrong password shows correct error message
+
+Successful logout redirects to homepage
+
+No regression in authentication flow

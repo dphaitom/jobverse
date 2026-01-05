@@ -297,21 +297,23 @@ const HomePage = () => {
                   <h3 className="font-semibold text-white">Kỹ năng đang hot</h3>
                 </div>
                 <div className="space-y-2">
-                  {(trendingSkills.length > 0 ? trendingSkills : [
-                    { name: 'React', growth: '+45%', hot: true },
-                    { name: 'AI/ML', growth: '+120%', hot: true },
-                    { name: 'Cloud', growth: '+38%', hot: false },
-                    { name: 'DevOps', growth: '+52%', hot: true },
-                    { name: 'UI/UX', growth: '+28%', hot: false },
-                  ]).map((skill, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 cursor-pointer rounded-xl bg-gray-800/30 hover:bg-gray-800/50">
-                      <div className="flex items-center gap-3">
-                        {skill.hot && <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />}
-                        <span className="text-gray-300">{skill.name}</span>
+                  {trendingSkills.length > 0 ? (
+                    trendingSkills.map((skill, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-3 cursor-pointer rounded-xl bg-gray-800/30 hover:bg-gray-800/50">
+                        <div className="flex items-center gap-3">
+                          {skill.isTrending && <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />}
+                          <span className="text-gray-300">{skill.name}</span>
+                        </div>
+                        <span className="text-sm text-green-400">
+                          {skill.jobCount ? `${skill.jobCount} jobs` : '+N/A'}
+                        </span>
                       </div>
-                      <span className="text-sm text-green-400">{skill.growth || '+N/A'}</span>
+                    ))
+                  ) : (
+                    <div className="py-4 text-center text-gray-500">
+                      Đang tải kỹ năng...
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
 

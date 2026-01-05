@@ -37,11 +37,21 @@ public class SkillService {
         log.info("🔥 Fetching trending skills");
 
         List<Skill> skills = skillRepository.findTrendingSkills();
+        
+        // If no skills have isTrending flag, fall back to top skills by job count
+        if (skills.isEmpty()) {
+            log.info("No trending skills found, falling back to top skills by job count");
+            skills = skillRepository.findTopSkillsByJobCount();
+            // Limit to top 10
+            if (skills.size() > 10) {
+                skills = skills.subList(0, 10);
+            }
+        }
 
         log.info("✅ Found {} trending skills", skills.size());
 
         return skills.stream()
-                .map(this::mapToResponse)
+                .map(skill -> mapToResponseWithJobCount(skill))
                 .collect(Collectors.toList());
     }
 
@@ -70,6 +80,19 @@ public class SkillService {
                 .slug(skill.getSlug())
                 .isTrending(skill.getIsTrending())
                 .jobCount(skill.getJobCount())
+                .candidateCount(skill.getCandidateCount())
+                .build();
+    }
+    
+    // Map to response with dynamic job count from database
+    private SkillResponse mapToResponseWithJobCount(Skill skill) {
+        Integer actualJobCount = skillRepository.countActiveJobsBySkillId(skill.getId());
+        return SkillResponse.builder()
+                .id(skill.getId())
+                .name(skill.getName())
+                .slug(skill.getSlug())
+                .isTrending(actualJobCount != null && actualJobCount > 0)
+                .jobCount(actualJobCount != null ? actualJobCount : 0)
                 .candidateCount(skill.getCandidateCount())
                 .build();
     }

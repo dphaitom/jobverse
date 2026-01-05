@@ -22,14 +22,32 @@ export const LoginPage = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
-    const result = await login(email, password);
-    if (result.success) {
-      navigate('/');
-    } else {
-      setError(result.error);
+
+    try {
+      const result = await login(email, password);
+      if (result.success) {
+        navigate('/');
+      } else {
+        // Hiển thị thông báo lỗi rõ ràng
+        if (result.error?.toLowerCase().includes('credentials') ||
+            result.error?.toLowerCase().includes('password') ||
+            result.error?.toLowerCase().includes('invalid') ||
+            result.error?.toLowerCase().includes('401') ||
+            result.error?.toLowerCase().includes('unauthorized')) {
+          setError('Email hoặc mật khẩu không đúng');
+        } else if (result.error?.toLowerCase().includes('not found') ||
+                   result.error?.toLowerCase().includes('user')) {
+          setError('Tài khoản không tồn tại');
+        } else {
+          setError(result.error || 'Email hoặc mật khẩu không đúng');
+        }
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Email hoặc mật khẩu không đúng');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -115,16 +133,6 @@ export const LoginPage = () => {
               Đăng ký ngay
             </Link>
           </p>
-        </div>
-
-        {/* Demo accounts */}
-        <div className="p-4 mt-6 glass-card rounded-xl">
-          <p className="mb-2 text-sm text-center text-gray-400">Tài khoản demo:</p>
-          <div className="space-y-1 text-xs text-gray-500">
-            <p>👤 Ứng viên: <span className="text-gray-300">candidate1@gmail.com</span> / password123</p>
-            <p>🏢 NTD: <span className="text-gray-300">hr@fpt.com</span> / password123</p>
-            <p>⚙️ Admin: <span className="text-gray-300">admin@jobverse.com</span> / password123</p>
-          </div>
         </div>
       </div>
     </div>

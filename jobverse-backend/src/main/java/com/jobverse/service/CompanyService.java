@@ -38,6 +38,30 @@ public class CompanyService {
 
         return companies.map(this::mapToResponse);
     }
+    
+    // Search companies with keyword and industry filter
+    public Page<CompanyResponse> searchCompanies(String keyword, String industry, Pageable pageable) {
+        log.info("🔍 Searching companies - keyword={}, industry={}", keyword, industry);
+        
+        Page<Company> companies;
+        
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        boolean hasIndustry = industry != null && !industry.trim().isEmpty();
+        
+        if (hasKeyword && hasIndustry) {
+            companies = companyRepository.searchByKeywordAndIndustry(keyword.trim(), industry.trim(), pageable);
+        } else if (hasKeyword) {
+            companies = companyRepository.searchByKeyword(keyword.trim(), pageable);
+        } else if (hasIndustry) {
+            companies = companyRepository.findByIndustry(industry.trim(), pageable);
+        } else {
+            companies = companyRepository.findAll(pageable);
+        }
+        
+        log.info("✅ Found {} companies matching search criteria", companies.getTotalElements());
+        
+        return companies.map(this::mapToResponse);
+    }
 
     public CompanyResponse getCompanyById(Long id) {
         log.info("🔍 Fetching company by ID: {}", id);

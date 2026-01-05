@@ -101,6 +101,13 @@ public class Company {
     private Set<CompanyReview> reviews = new HashSet<>();
     
     public enum CompanySize {
+        // Legacy values for backward compatibility
+        SMALL,
+        MEDIUM,
+        LARGE,
+        ENTERPRISE,
+        
+        // New detailed values
         STARTUP_1_10,
         SMALL_11_50,
         MEDIUM_51_200,

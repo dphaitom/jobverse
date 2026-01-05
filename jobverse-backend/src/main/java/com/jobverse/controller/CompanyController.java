@@ -33,13 +33,23 @@ public class CompanyController {
     private final JobRepository jobRepository;
 
     @GetMapping
-    @Operation(summary = "Get all companies with pagination")
+    @Operation(summary = "Get all companies with pagination and optional search")
     public ResponseEntity<ApiResponse<Page<CompanyResponse>>> getAllCompanies(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String industry,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        log.info("📋 GET /v1/companies - page={}, size={}", pageable.getPageNumber(), pageable.getPageSize());
+        log.info("📋 GET /v1/companies - keyword={}, industry={}, page={}, size={}", 
+                keyword, industry, pageable.getPageNumber(), pageable.getPageSize());
 
-        Page<CompanyResponse> companies = companyService.getAllCompanies(pageable);
+        Page<CompanyResponse> companies;
+        
+        // Use search if filters provided, otherwise get all
+        if ((keyword != null && !keyword.trim().isEmpty()) || (industry != null && !industry.trim().isEmpty())) {
+            companies = companyService.searchCompanies(keyword, industry, pageable);
+        } else {
+            companies = companyService.getAllCompanies(pageable);
+        }
 
         log.info("✅ Returning {} companies (total: {})", companies.getNumberOfElements(), companies.getTotalElements());
 

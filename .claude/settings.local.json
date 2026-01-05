@@ -32,7 +32,12 @@
       "Bash(dir:*)",
       "Bash(powershell -Command:*)",
       "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LmNhbmRpZGF0ZUBqb2J2ZXJzZS5jb20iLCJpYXQiOjE3NjYzMzA3NzQsImV4cCI6MTc2NjQxNzE3NH0.aZGN9h8CV-LEEpQreX_ELMgqQTmDZz1zkezaKonM4Kk\")",
-      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LmNhbmRpZGF0ZUBqb2J2ZXJzZS5jb20iLCJpYXQiOjE3NjYzNjM3MjUsImV4cCI6MTc2NjQ1MDEyNX0.ygzKwLHhOML0Sh-zCzcfv69Cht7aS1_UrqYHEzESotQ\")"
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LmNhbmRpZGF0ZUBqb2J2ZXJzZS5jb20iLCJpYXQiOjE3NjYzNjM3MjUsImV4cCI6MTc2NjQ1MDEyNX0.ygzKwLHhOML0Sh-zCzcfv69Cht7aS1_UrqYHEzESotQ\")",
+      "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch -f --msg-filter 'sed -e \"\"/Co-Authored-By.*[Cc]laude/d\"\" -e \"\"/Co-Authored-By.*Sonnet/d\"\" -e \"\"/Co-Authored-By.*Opus/d\"\" -e \"\"/Generated with.*[Cc]laude/d\"\" -e \"\"/🤖/d\"\"' -- --all)",
+      "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch:*)",
+      "Bash(git push:*)",
+      "Bash(git reflog:*)",
+      "Bash(git gc:*)"
     ]
   }
 }

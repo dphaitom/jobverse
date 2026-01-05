@@ -24,7 +24,8 @@ const QuestionCard = memo(({
   setUserAnswers,
   evaluations,
   evaluating,
-  handleEvaluate
+  handleEvaluate,
+  isDark
 }) => {
   const questionKey = `${category}-${index}`;
   const isExpanded = expandedQuestion === questionKey;
@@ -51,46 +52,46 @@ const QuestionCard = memo(({
   };
 
   return (
-    <div className="bg-nike-black-light border border-gray-800 rounded-xl overflow-hidden hover:border-ai-purple/30 transition-all duration-300">
+    <div className={`${isDark ? 'bg-nike-black-light border-gray-800' : 'bg-white border-gray-200 shadow-sm'} border rounded-xl overflow-hidden hover:border-ai-purple/30 transition-all duration-300`}>
       <button
         onClick={() => toggleQuestion(category, index)}
-        className="w-full px-6 py-4 flex items-start justify-between text-left hover:bg-white/5 transition-colors"
+        className={`w-full px-6 py-4 flex items-start justify-between text-left ${isDark ? 'hover:bg-white/5' : 'hover:bg-gray-50'} transition-colors`}
       >
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
             <span className={`px-2 py-1 rounded text-xs font-medium border ${getDifficultyColor(question.difficulty)}`}>
               {question.difficulty}
             </span>
-            <span className="flex items-center gap-1 text-xs text-gray-400">
+            <span className={`flex items-center gap-1 text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
               {getTypeIcon(question.type)}
               {question.type}
             </span>
           </div>
-          <p className="text-white font-medium pr-4">{question.question}</p>
+          <p className={`${isDark ? 'text-white' : 'text-gray-900'} font-medium pr-4`}>{question.question}</p>
         </div>
         {isExpanded ? (
-          <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0" />
+          <ChevronUp className={`w-5 h-5 ${isDark ? 'text-gray-400' : 'text-gray-500'} flex-shrink-0`} />
         ) : (
-          <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
+          <ChevronDown className={`w-5 h-5 ${isDark ? 'text-gray-400' : 'text-gray-500'} flex-shrink-0`} />
         )}
       </button>
 
       {isExpanded && (
-        <div className="px-6 pb-6 space-y-4 border-t border-gray-800">
+        <div className={`px-6 pb-6 space-y-4 border-t ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
           {/* Tips */}
           {question.tips && (
             <div className="pt-4">
-              <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+              <h4 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2 flex items-center gap-2`}>
                 <Lightbulb className="w-4 h-4 text-yellow-500" />
                 Tips:
               </h4>
-              <p className="text-sm text-gray-400">{question.tips}</p>
+              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{question.tips}</p>
             </div>
           )}
 
           {/* Your Answer */}
           <div>
-            <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+            <h4 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2 flex items-center gap-2`}>
               <MessageSquare className="w-4 h-4 text-ai-purple" />
               Câu trả lời của bạn:
             </h4>
@@ -101,7 +102,11 @@ const QuestionCard = memo(({
                 setUserAnswers(prev => ({ ...prev, [questionKey]: newValue }));
               }}
               placeholder="Nhập câu trả lời của bạn..."
-              className="w-full px-4 py-3 bg-nike-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-ai-purple/50 focus:border-ai-purple/50 transition-all resize-none"
+              className={`w-full px-4 py-3 border rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-ai-purple/50 focus:border-ai-purple/50 transition-all resize-none ${
+                isDark 
+                  ? 'bg-nike-black border-gray-700 text-white' 
+                  : 'bg-gray-50 border-gray-300 text-gray-900'
+              }`}
               rows={4}
             />
             <button
@@ -125,28 +130,28 @@ const QuestionCard = memo(({
 
           {/* Evaluation */}
           {evaluation && (
-            <div className="bg-gradient-to-br from-ai-purple/10 to-ai-blue/10 border border-ai-purple/20 rounded-lg p-4">
-              <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <div className={`${isDark ? 'bg-gradient-to-br from-ai-purple/10 to-ai-blue/10 border-ai-purple/20' : 'bg-gradient-to-br from-violet-50 to-indigo-50 border-violet-200'} border rounded-lg p-4`}>
+              <h4 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-3 flex items-center gap-2`}>
                 <Award className="w-4 h-4 text-ai-purple" />
                 Đánh giá của AI:
               </h4>
               <div className="space-y-3 text-sm">
                 <div>
-                  <span className="text-gray-400">Score: </span>
+                  <span className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Score: </span>
                   <span className="text-ai-purple font-bold">{evaluation.score}/100</span>
                 </div>
                 <div>
-                  <span className="text-gray-400">Feedback: </span>
-                  <p className="text-white mt-1">{evaluation.feedback}</p>
+                  <span className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Feedback: </span>
+                  <p className={`${isDark ? 'text-white' : 'text-gray-900'} mt-1`}>{evaluation.feedback}</p>
                 </div>
                 {evaluation.suggestions && evaluation.suggestions.length > 0 && (
                   <div>
-                    <span className="text-gray-400 block mb-2">Suggestions:</span>
+                    <span className={`${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-2`}>Suggestions:</span>
                     <ul className="space-y-1">
                       {evaluation.suggestions.map((suggestion, idx) => (
                         <li key={idx} className="flex items-start gap-2">
                           <CheckCircle2 className="w-4 h-4 text-ai-purple flex-shrink-0 mt-0.5" />
-                          <span>{suggestion}</span>
+                          <span className={`${isDark ? 'text-white' : 'text-gray-900'}`}>{suggestion}</span>
                         </li>
                       ))}
                     </ul>
@@ -158,12 +163,12 @@ const QuestionCard = memo(({
 
           {/* Sample Answer */}
           {question.sampleAnswer && (
-            <div className="bg-nike-black border border-gray-700 rounded-lg p-4">
-              <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+            <div className={`${isDark ? 'bg-nike-black border-gray-700' : 'bg-gray-50 border-gray-200'} border rounded-lg p-4`}>
+              <h4 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2 flex items-center gap-2`}>
                 <BookOpen className="w-4 h-4 text-green-500" />
                 Câu trả lời mẫu:
               </h4>
-              <p className="text-sm text-gray-400 whitespace-pre-line">{question.sampleAnswer}</p>
+              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} whitespace-pre-line`}>{question.sampleAnswer}</p>
             </div>
           )}
         </div>
@@ -187,7 +192,8 @@ const QuestionSection = memo(({
   setUserAnswers,
   evaluations,
   evaluating,
-  handleEvaluate
+  handleEvaluate,
+  isDark
 }) => {
   if (!questions || questions.length === 0) return null;
 
@@ -197,7 +203,7 @@ const QuestionSection = memo(({
         <div className={`p-2 ${color} rounded-lg`}>
           <Icon className="w-5 h-5" />
         </div>
-        <h3 className="text-xl font-bold text-white">
+        <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
           {title} ({questions.length})
         </h3>
       </div>
@@ -215,6 +221,7 @@ const QuestionSection = memo(({
             evaluations={evaluations}
             evaluating={evaluating}
             handleEvaluate={handleEvaluate}
+            isDark={isDark}
           />
         ))}
       </div>
@@ -424,6 +431,7 @@ const InterviewPrepPage = () => {
                 evaluations={evaluations}
                 evaluating={evaluating}
                 handleEvaluate={handleEvaluate}
+                isDark={isDark}
               />
 
               <QuestionSection
@@ -439,6 +447,7 @@ const InterviewPrepPage = () => {
                 evaluations={evaluations}
                 evaluating={evaluating}
                 handleEvaluate={handleEvaluate}
+                isDark={isDark}
               />
 
               <QuestionSection
@@ -454,6 +463,7 @@ const InterviewPrepPage = () => {
                 evaluations={evaluations}
                 evaluating={evaluating}
                 handleEvaluate={handleEvaluate}
+                isDark={isDark}
               />
 
               <QuestionSection
@@ -469,6 +479,7 @@ const InterviewPrepPage = () => {
                 evaluations={evaluations}
                 evaluating={evaluating}
                 handleEvaluate={handleEvaluate}
+                isDark={isDark}
               />
 
               <QuestionSection
@@ -484,19 +495,20 @@ const InterviewPrepPage = () => {
                 evaluations={evaluations}
                 evaluating={evaluating}
                 handleEvaluate={handleEvaluate}
+                isDark={isDark}
               />
             </div>
           )}
 
           {!questions && (
-            <div className="bg-nike-black-light border border-gray-800 rounded-2xl p-12 text-center">
+            <div className={`${isDark ? 'bg-nike-black-light border-gray-800' : 'bg-white border-gray-200 shadow-sm'} border rounded-2xl p-12 text-center`}>
               <div className="w-20 h-20 mx-auto mb-6 bg-ai-purple/10 rounded-full flex items-center justify-center">
                 <MessageSquare className="w-10 h-10 text-ai-purple" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">
+              <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-3`}>
                 Chưa có câu hỏi
               </h3>
-              <p className="text-gray-400">
+              <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Chọn role và level, sau đó nhấn "Tạo Câu Hỏi Phỏng Vấn"
               </p>
             </div>
