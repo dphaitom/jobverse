@@ -4,7 +4,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   MapPin, Globe, Users, Star, Building2, Calendar, Briefcase,
-  ArrowLeft, ExternalLink, ChevronRight
+  ArrowLeft, ExternalLink, ChevronRight, ThumbsUp, ThumbsDown, User
 } from 'lucide-react';
 import { companiesAPI, jobsAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,10 +21,24 @@ const CompanyDetailPage = () => {
   const { isDark } = useTheme();
   const [company, setCompany] = useState(null);
   const [jobs, setJobs] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [savedJobs, setSavedJobs] = useState(new Set());
   const [appliedJobs, setAppliedJobs] = useState(new Set());
+  
+  // Review form state
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewEligibility, setReviewEligibility] = useState({ canReview: false, hasApplied: false, hasReviewed: false });
+  const [reviewFormData, setReviewFormData] = useState({
+    rating: 5,
+    title: '',
+    pros: '',
+    cons: '',
+    isCurrentEmployee: false,
+    jobTitle: ''
+  });
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   const isCandidate = user?.role === 'CANDIDATE';
 
@@ -42,9 +56,10 @@ const CompanyDetailPage = () => {
   const fetchCompanyData = async () => {
     setLoading(true);
     try {
-      const [companyRes, jobsRes] = await Promise.all([
+      const [companyRes, jobsRes, reviewsRes] = await Promise.all([
         companiesAPI.getCompanyById(id),
         jobsAPI.getJobsByCompany(id),
+        companiesAPI.getCompanyReviews(id).catch(() => ({ data: { content: [] } })),
       ]);
       
       setCompany(companyRes.data);
@@ -52,11 +67,85 @@ const CompanyDetailPage = () => {
       // Handle different response formats
       const jobsData = jobsRes.data?.content || jobsRes.data || [];
       setJobs(Array.isArray(jobsData) ? jobsData : []);
+      
+      // Set reviews
+      const reviewsData = reviewsRes.data?.content || reviewsRes.data || [];
+      setReviews(Array.isArray(reviewsData) ? reviewsData : []);
     } catch (error) {
       console.error('Error fetching company:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Check review eligibility when authenticated
+  const checkReviewEligibility = async () => {
+    if (!isAuthenticated || !isCandidate) return;
+    try {
+      const res = await companiesAPI.checkReviewEligibility(id);
+      setReviewEligibility(res.data || { canReview: false, hasApplied: false, hasReviewed: false });
+    } catch (error) {
+      console.error('Error checking review eligibility:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated && isCandidate) {
+      checkReviewEligibility();
+    }
+  }, [isAuthenticated, user?.role, id]);
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    if (!reviewFormData.pros.trim()) {
+      toast.error('Vui lòng nhập ưu điểm của công ty');
+      return;
+    }
+    
+    setSubmittingReview(true);
+    try {
+      await companiesAPI.submitReview({
+        ...reviewFormData,
+        companyId: parseInt(id)
+      });
+      toast.success('Đánh giá của bạn đã được gửi thành công!');
+      setShowReviewForm(false);
+      setReviewFormData({
+        rating: 5,
+        title: '',
+        pros: '',
+        cons: '',
+        isCurrentEmployee: false,
+        jobTitle: ''
+      });
+      // Refresh data
+      fetchCompanyData();
+      checkReviewEligibility();
+    } catch (error) {
+      toast.error(error.message || 'Không thể gửi đánh giá');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const renderStars = (rating, interactive = false) => {
+    return (
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            disabled={!interactive}
+            onClick={() => interactive && setReviewFormData({ ...reviewFormData, rating: star })}
+            className={interactive ? "transition-transform hover:scale-110" : ""}
+          >
+            <Star
+              className={`w-5 h-5 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-600'}`}
+            />
+          </button>
+        ))}
+      </div>
+    );
   };
 
   // Hydrate saved/applied state from backend
@@ -214,7 +303,7 @@ const CompanyDetailPage = () => {
               >
                 {tab === 'overview' && 'Tổng quan'}
                 {tab === 'jobs' && `Việc làm (${jobs.length})`}
-                {tab === 'reviews' && 'Đánh giá'}
+                {tab === 'reviews' && `Đánh giá (${reviews.length})`}
               </button>
             ))}
           </div>
@@ -324,15 +413,211 @@ const CompanyDetailPage = () => {
 
               {/* Reviews Tab */}
               {activeTab === 'reviews' && (
-                <div className="glass-card rounded-2xl p-6">
-                  <EmptyState
-                    icon={Star}
-                    title="Chưa có đánh giá"
-                    description="Hãy là người đầu tiên đánh giá công ty này."
-                    action={
-                      <button className="btn-primary">Viết đánh giá</button>
-                    }
-                  />
+                <div className="space-y-6">
+                  {/* Review Form */}
+                  {isAuthenticated && isCandidate && (
+                    <div className="glass-card rounded-2xl p-6">
+                      {reviewEligibility.hasReviewed ? (
+                        <div className="text-center text-gray-400">
+                          <Star className="w-12 h-12 mx-auto mb-2 text-yellow-400" />
+                          <p>Bạn đã đánh giá công ty này rồi</p>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold text-white">Viết đánh giá</h3>
+                            <button
+                              onClick={() => setShowReviewForm(!showReviewForm)}
+                              className="btn-primary text-sm"
+                            >
+                              {showReviewForm ? 'Hủy' : 'Viết đánh giá'}
+                            </button>
+                          </div>
+                          
+                          {showReviewForm && (
+                            <form onSubmit={handleSubmitReview} className="space-y-4">
+                              {/* Rating */}
+                              <div>
+                                <label className="block text-gray-300 mb-2">Đánh giá *</label>
+                                {renderStars(reviewFormData.rating, true)}
+                              </div>
+                              
+                              {/* Title */}
+                              <div>
+                                <label className="block text-gray-300 mb-2">Tiêu đề</label>
+                                <input
+                                  type="text"
+                                  value={reviewFormData.title}
+                                  onChange={(e) => setReviewFormData({ ...reviewFormData, title: e.target.value })}
+                                  className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2 text-white"
+                                  placeholder="Tóm tắt trải nghiệm của bạn"
+                                  maxLength={200}
+                                />
+                              </div>
+                              
+                              {/* Job Title */}
+                              <div>
+                                <label className="block text-gray-300 mb-2">Vị trí công việc</label>
+                                <input
+                                  type="text"
+                                  value={reviewFormData.jobTitle}
+                                  onChange={(e) => setReviewFormData({ ...reviewFormData, jobTitle: e.target.value })}
+                                  className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2 text-white"
+                                  placeholder="Ví dụ: Senior Backend Developer"
+                                />
+                              </div>
+                              
+                              {/* Current Employee */}
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  id="currentEmployee"
+                                  checked={reviewFormData.isCurrentEmployee}
+                                  onChange={(e) => setReviewFormData({ ...reviewFormData, isCurrentEmployee: e.target.checked })}
+                                  className="w-4 h-4 rounded"
+                                />
+                                <label htmlFor="currentEmployee" className="text-gray-300">
+                                  Tôi hiện đang làm việc tại đây
+                                </label>
+                              </div>
+                              
+                              {/* Pros */}
+                              <div>
+                                <label className="block text-gray-300 mb-2">Ưu điểm *</label>
+                                <textarea
+                                  value={reviewFormData.pros}
+                                  onChange={(e) => setReviewFormData({ ...reviewFormData, pros: e.target.value })}
+                                  className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2 text-white h-24"
+                                  placeholder="Những điểm tốt khi làm việc tại đây..."
+                                  required
+                                  maxLength={2000}
+                                />
+                              </div>
+                              
+                              {/* Cons */}
+                              <div>
+                                <label className="block text-gray-300 mb-2">Nhược điểm</label>
+                                <textarea
+                                  value={reviewFormData.cons}
+                                  onChange={(e) => setReviewFormData({ ...reviewFormData, cons: e.target.value })}
+                                  className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2 text-white h-24"
+                                  placeholder="Những điểm cần cải thiện..."
+                                  maxLength={2000}
+                                />
+                              </div>
+                              
+                              <button 
+                                type="submit" 
+                                disabled={submittingReview}
+                                className="btn-primary w-full"
+                              >
+                                {submittingReview ? 'Đang gửi...' : 'Gửi đánh giá'}
+                              </button>
+                            </form>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                  
+                  {!isAuthenticated && (
+                    <div className="glass-card rounded-2xl p-6 text-center">
+                      <User className="w-12 h-12 mx-auto mb-2 text-gray-500" />
+                      <p className="text-gray-400 mb-2">Đăng nhập để viết đánh giá</p>
+                      <Link to="/login" className="text-violet-400 hover:text-violet-300">
+                        Đăng nhập →
+                      </Link>
+                    </div>
+                  )}
+                  
+                  {isAuthenticated && !isCandidate && (
+                    <div className="glass-card rounded-2xl p-6 text-center">
+                      <User className="w-12 h-12 mx-auto mb-2 text-gray-500" />
+                      <p className="text-gray-400">Chỉ ứng viên mới có thể viết đánh giá</p>
+                    </div>
+                  )}
+                  
+                  {/* Reviews List */}
+                  {reviews.length > 0 ? (
+                    <div className="space-y-4">
+                      {reviews.map((review) => (
+                        <div key={review.id} className="glass-card rounded-2xl p-6">
+                          <div className="flex items-start gap-4 mb-4">
+                            <Link 
+                              to={`/profile/${review.userId}`}
+                              className="w-12 h-12 rounded-full bg-gradient-to-r from-violet-500 to-purple-500 flex items-center justify-center flex-shrink-0 overflow-hidden hover:ring-2 hover:ring-violet-400 transition-all"
+                            >
+                              {review.userAvatar ? (
+                                <img src={review.userAvatar} alt="" className="w-full h-full object-cover" />
+                              ) : (
+                                <User className="w-6 h-6 text-white" />
+                              )}
+                            </Link>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-1">
+                                {renderStars(review.rating)}
+                                {review.isCurrentEmployee && (
+                                  <span className="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400">
+                                    Nhân viên hiện tại
+                                  </span>
+                                )}
+                              </div>
+                              <Link 
+                                to={`/profile/${review.userId}`}
+                                className="text-white font-medium hover:text-violet-400 transition-colors"
+                              >
+                                {review.userName || 'Ẩn danh'}
+                              </Link>
+                              {review.jobTitle && (
+                                <div className="flex items-center gap-2 text-gray-400 text-sm">
+                                  <Briefcase className="w-4 h-4" />
+                                  {review.jobTitle}
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2 text-gray-500 text-sm mt-1">
+                                <Calendar className="w-4 h-4" />
+                                {review.createdAt ? new Date(review.createdAt).toLocaleDateString('vi-VN') : ''}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {review.title && (
+                            <h4 className="text-lg font-semibold text-white mb-3">{review.title}</h4>
+                          )}
+                          
+                          <div className="space-y-3">
+                            {review.pros && (
+                              <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <ThumbsUp className="w-4 h-4 text-green-400" />
+                                  <span className="font-medium text-green-400">Ưu điểm</span>
+                                </div>
+                                <p className="text-gray-300 ml-6">{review.pros}</p>
+                              </div>
+                            )}
+                            
+                            {review.cons && (
+                              <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <ThumbsDown className="w-4 h-4 text-red-400" />
+                                  <span className="font-medium text-red-400">Nhược điểm</span>
+                                </div>
+                                <p className="text-gray-300 ml-6">{review.cons}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="glass-card rounded-2xl p-6">
+                      <EmptyState
+                        icon={Star}
+                        title="Chưa có đánh giá"
+                        description="Hãy là người đầu tiên đánh giá công ty này."
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>

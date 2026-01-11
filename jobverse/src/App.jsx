@@ -14,6 +14,7 @@ import JobDetailPage from './pages/JobDetailPage';
 import CompanyListPage from './pages/CompanyListPage';
 import CompanyDetailPage from './pages/CompanyDetailPage';
 import ProfilePage from './pages/ProfilePage';
+import PublicProfilePage from './pages/PublicProfilePage';
 import SavedJobsPage from './pages/SavedJobsPage';
 import MyApplicationsPage from './pages/MyApplicationsPage';
 import SettingsPage from './pages/SettingsPage';
@@ -47,6 +48,7 @@ function AnimatedRoutes() {
           <Route path="/companies/:companyId/reviews" element={<CompanyReviewsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/profile/:userId" element={<PublicProfilePage />} />
 
           {/* AI Features - Public access */}
           <Route path="/resume-analysis" element={<ResumeAnalysisPage />} />

@@ -252,4 +252,45 @@ public class UserController {
                     .body(ApiResponse.error("UPLOAD_FAILED", "Failed to upload avatar: " + e.getMessage()));
         }
     }
+
+    @GetMapping("/{userId}/public-profile")
+    @Operation(summary = "Get public user profile", description = "Get publicly visible profile information for a user")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getPublicProfile(
+            @PathVariable Long userId
+    ) {
+        log.info("📋 Getting public profile for user ID: {}", userId);
+
+        User user = userRepository.findByIdWithProfile(userId).orElse(null);
+        
+        if (user == null) {
+            return ResponseEntity.status(404)
+                    .body(ApiResponse.error("NOT_FOUND", "User not found"));
+        }
+
+        UserProfile profile = user.getProfile();
+        
+        // Build public profile response (only public information)
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", user.getId());
+        
+        if (profile != null) {
+            response.put("fullName", profile.getFullName() != null ? profile.getFullName() : user.getEmail().split("@")[0]);
+            response.put("avatarUrl", profile.getAvatarUrl());
+            response.put("city", profile.getCity());
+            response.put("bio", profile.getBio());
+            response.put("currentPosition", profile.getCurrentPosition());
+            response.put("experienceYears", profile.getExperienceYears());
+            response.put("linkedinUrl", profile.getLinkedinUrl());
+            response.put("githubUrl", profile.getGithubUrl());
+            response.put("portfolioUrl", profile.getPortfolioUrl());
+            response.put("openToWork", profile.getOpenToWork());
+            response.put("openToRemote", profile.getOpenToRemote());
+        } else {
+            response.put("fullName", user.getEmail().split("@")[0]);
+            response.put("avatarUrl", null);
+        }
+
+        log.info("✅ Public profile retrieved for user ID: {}", userId);
+        return ResponseEntity.ok(ApiResponse.success("Public profile retrieved", response));
+    }
 }

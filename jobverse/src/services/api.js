@@ -218,8 +218,19 @@ export const companiesAPI = {
   getCompanyById: (id) =>
     apiRequest(`/v1/companies/${id}`),
 
-  getCompanyReviews: (companyId) =>
-    apiRequest(`/v1/companies/${companyId}/reviews`),
+  getCompanyReviews: (companyId, params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return apiRequest(`/v1/company-reviews/company/${companyId}${queryString ? `?${queryString}` : ''}`);
+  },
+
+  checkReviewEligibility: (companyId) =>
+    apiRequest(`/v1/company-reviews/eligibility/${companyId}`),
+
+  submitReview: (reviewData) =>
+    apiRequest('/v1/company-reviews', {
+      method: 'POST',
+      body: JSON.stringify(reviewData),
+    }),
 
   // Get companies owned by the current employer
   getMyCompanies: () =>

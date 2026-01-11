@@ -13,6 +13,36 @@ import psycopg2
 from datetime import datetime, timedelta
 import os
 import random
+import unicodedata
+import re
+
+def normalize_vietnamese(text):
+    """
+    Normalize Vietnamese text by removing diacritics and converting to lowercase.
+    Similar to VietnameseTextNormalizer.java
+    Examples:
+    "Hồ Chí Minh" → "ho chi minh"
+    "Đà Nẵng" → "da nang"
+    """
+    if not text:
+        return text
+
+    # Convert to lowercase
+    normalized = text.lower()
+
+    # Replace Vietnamese đ/Đ
+    normalized = normalized.replace('đ', 'd').replace('Đ', 'd')
+
+    # Normalize using NFD (Canonical Decomposition)
+    normalized = unicodedata.normalize('NFD', normalized)
+
+    # Remove diacritics (combining characters)
+    normalized = ''.join(c for c in normalized if unicodedata.category(c) != 'Mn')
+
+    # Remove extra whitespace
+    normalized = re.sub(r'\s+', ' ', normalized).strip()
+
+    return normalized
 
 # Database config
 DB_CONFIG = {
@@ -1269,15 +1299,21 @@ def seed_jobs(conn, cursor):
         deadline = datetime.now() + timedelta(days=random.randint(30, 60))
 
         try:
+            # Normalize fields for Vietnamese accent-insensitive search
+            title_normalized = normalize_vietnamese(job_data['title'])
+            description_normalized = normalize_vietnamese(job_data['description'])
+            location_normalized = normalize_vietnamese(job_data['location'])
+
             cursor.execute("""
                 INSERT INTO jobs (
                     title, slug, description, requirements, location,
                     salary_min, salary_max, job_type, experience_level,
                     deadline, status, company_id, category_id, posted_by,
                     is_featured, is_urgent, view_count, application_count,
+                    title_normalized, description_normalized, location_normalized,
                     created_at, updated_at
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
             """, (
                 job_data['title'],
@@ -1298,6 +1334,9 @@ def seed_jobs(conn, cursor):
                 random.choice([True, False, False]),  # is_urgent (less likely)
                 random.randint(50, 500),  # view_count
                 random.randint(5, 30),  # application_count
+                title_normalized,
+                description_normalized,
+                location_normalized,
                 datetime.now(),
                 datetime.now()
             ))
@@ -1323,6 +1362,44 @@ def seed_jobs(conn, cursor):
 
     print(f"\n🎉 Total jobs created: {jobs_created}")
 
+def update_normalized_fields(conn, cursor):
+    """Update normalized fields for existing jobs that have NULL values"""
+    print("\n🔄 Updating normalized fields for existing jobs...")
+
+    # Get all jobs with NULL normalized fields
+    cursor.execute("""
+        SELECT id, title, description, location
+        FROM jobs
+        WHERE title_normalized IS NULL
+           OR description_normalized IS NULL
+           OR location_normalized IS NULL
+    """)
+
+    jobs_to_update = cursor.fetchall()
+    updated_count = 0
+
+    for job in jobs_to_update:
+        job_id, title, description, location = job
+        try:
+            title_normalized = normalize_vietnamese(title) if title else None
+            description_normalized = normalize_vietnamese(description) if description else None
+            location_normalized = normalize_vietnamese(location) if location else None
+
+            cursor.execute("""
+                UPDATE jobs
+                SET title_normalized = %s,
+                    description_normalized = %s,
+                    location_normalized = %s
+                WHERE id = %s
+            """, (title_normalized, description_normalized, location_normalized, job_id))
+
+            updated_count += 1
+        except Exception as e:
+            print(f"  ❌ Error updating job {job_id}: {e}")
+
+    conn.commit()
+    print(f"  ✅ Updated {updated_count} jobs with normalized fields")
+
 def main():
     print("=" * 60)
     print("🌱 JobVerse - Employer Jobs Seeder")
@@ -1333,6 +1410,10 @@ def main():
     cursor = conn.cursor()
 
     try:
+        # First, update normalized fields for existing jobs
+        update_normalized_fields(conn, cursor)
+
+        # Then seed new jobs
         seed_jobs(conn, cursor)
         print("\n✅ Seeding completed successfully!")
     except Exception as e:
