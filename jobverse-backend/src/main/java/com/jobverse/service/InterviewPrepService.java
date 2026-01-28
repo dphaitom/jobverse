@@ -334,33 +334,10 @@ public class InterviewPrepService {
      * Get AI-powered answer evaluation
      */
     public AnswerEvaluation evaluateAnswer(String question, String userAnswer) {
-        String context = "User is practicing interview. Question: " + question + "\nUser's answer: " + userAnswer;
+        log.info("Evaluating answer for question: {}", question.substring(0, Math.min(50, question.length())));
 
-        // Cải thiện prompt để có feedback cụ thể hơn
-        String aiEvaluation = aiService.chat(
-            String.format("""
-                Bạn là một interviewer chuyên nghiệp. Hãy đánh giá câu trả lời phỏng vấn sau:
-
-                Câu hỏi: %s
-                Câu trả lời: %s
-
-                Cho feedback theo format:
-                ⭐ ĐIỂM MẠNH:
-                • [liệt kê 2-3 điểm tốt]
-
-                ⚠️ CẦN CẢI THIỆN:
-                • [liệt kê 2-3 điểm cần cải thiện]
-
-                💡 GỢI Ý:
-                • [đưa ra 2-3 gợi ý cụ thể để cải thiện]
-
-                📊 ĐÁNH GIÁ TỔNG THỂ:
-                [1-2 câu tổng kết, cho điểm từ 1-10]
-
-                Trả lời bằng tiếng Việt, ngắn gọn, thực tế.
-                """, question, userAnswer),
-            context
-        );
+        // Use dedicated evaluation method that bypasses intent matching
+        String aiEvaluation = aiService.evaluateInterviewAnswer(question, userAnswer);
 
         // Tính điểm dựa trên độ dài và keywords
         int score = calculateAnswerScore(question, userAnswer);
@@ -409,6 +386,22 @@ public class InterviewPrepService {
         if (answerLower.contains("second") || answerLower.contains("thứ hai")) score += 3;
 
         return Math.min(Math.max(score, 0), 100); // Clamp to 0-100
+    }
+
+    /**
+     * Generate AI-powered sample answer for interview question
+     */
+    public GeneratedAnswer generateSampleAnswer(String question, String role, String experienceLevel) {
+        log.info("Generating sample answer for question: {}", question.substring(0, Math.min(50, question.length())));
+
+        String aiAnswer = aiService.generateInterviewAnswer(question, role, experienceLevel);
+
+        return GeneratedAnswer.builder()
+            .question(question)
+            .role(role)
+            .experienceLevel(experienceLevel)
+            .generatedAnswer(aiAnswer)
+            .build();
     }
 
     /**
@@ -485,5 +478,14 @@ public class InterviewPrepService {
         private String userAnswer;
         private String feedback;
         private Integer score;
+    }
+
+    @lombok.Data
+    @lombok.Builder
+    public static class GeneratedAnswer {
+        private String question;
+        private String role;
+        private String experienceLevel;
+        private String generatedAnswer;
     }
 }

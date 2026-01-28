@@ -133,7 +133,7 @@ aws:
 openai:
   api-key: ${OPENAI_API_KEY:}
   model: ${OPENAI_MODEL:gpt-3.5-turbo}
-  enabled: ${OPENAI_ENABLED:false}
+  enabled: ${OPENAI_ENABLED:true}
 
 # Application Settings
 app:

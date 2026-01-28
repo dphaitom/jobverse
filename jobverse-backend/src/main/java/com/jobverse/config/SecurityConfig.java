@@ -41,6 +41,10 @@ public class SecurityConfig {
     private static final String[] PUBLIC_URLS = {
         "/v1/auth/**",
         "/v1/ai/chat/guest",
+        "/v1/interview/questions/guest",
+        "/v1/interview/generate-answer/guest",
+        "/v1/interview/tips",
+        "/v1/interview/tips/categories",
         "/v1/jobs",
         "/v1/jobs/{id}",
         "/v1/jobs/search",

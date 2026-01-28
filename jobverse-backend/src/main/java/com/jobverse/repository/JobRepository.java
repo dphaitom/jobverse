@@ -35,6 +35,12 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
            "LEFT JOIN FETCH js.skill " +
            "WHERE j.id = :id")
     Optional<Job> findByIdWithDetails(Long id);
+
+    @Query("SELECT j FROM Job j " +
+           "LEFT JOIN FETCH j.company " +
+           "LEFT JOIN FETCH j.postedBy " +
+           "WHERE j.id = :id")
+    Optional<Job> findByIdWithCompanyAndPostedBy(@Param("id") Long id);
     
     @Query("SELECT j FROM Job j WHERE j.status = :status ORDER BY j.createdAt DESC")
     Page<Job> findByStatus(Job.JobStatus status, Pageable pageable);

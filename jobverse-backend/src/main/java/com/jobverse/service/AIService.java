@@ -54,6 +54,296 @@ public class AIService {
         }
     }
 
+    /**
+     * Direct OpenAI call for interview evaluation - bypasses intent matching
+     * This ensures user answers are properly evaluated by AI
+     */
+    public String evaluateInterviewAnswer(String question, String userAnswer) {
+        log.info("Interview Evaluation Request - Question: '{}'", 
+            question.substring(0, Math.min(50, question.length())));
+
+        boolean canUseOpenAI = apiKey != null && !apiKey.isBlank() &&
+                               openaiEnabled && !apiKey.contains("your-api-key");
+
+        String prompt = String.format("""
+            Bạn là một interviewer chuyên nghiệp. Hãy đánh giá câu trả lời phỏng vấn sau:
+
+            📝 CÂU HỎI: %s
+
+            💬 CÂU TRẢ LỜI CỦA ỨNG VIÊN: %s
+
+            Hãy đánh giá chi tiết theo format sau:
+
+            ⭐ ĐIỂM MẠNH:
+            • [liệt kê 2-3 điểm tốt trong câu trả lời]
+
+            ⚠️ CẦN CẢI THIỆN:
+            • [liệt kê 2-3 điểm cần cải thiện cụ thể]
+
+            💡 GỢI Ý CÂU TRẢ LỜI TỐT HƠN:
+            • [đưa ra gợi ý cụ thể để cải thiện câu trả lời]
+
+            📊 ĐÁNH GIÁ TỔNG THỂ: [X/10 điểm]
+            [1-2 câu tổng kết ngắn gọn]
+
+            Lưu ý: Đánh giá dựa trên nội dung thực tế của câu trả lời, không đánh giá chung chung.
+            Trả lời bằng tiếng Việt, thực tế và hữu ích.
+            """, question, userAnswer);
+
+        if (!canUseOpenAI) {
+            log.info("OpenAI not available - using mock evaluation");
+            return getMockEvaluation(question, userAnswer);
+        }
+
+        try {
+            log.info("Calling OpenAI for interview evaluation...");
+            String response = callOpenAIDirectly(prompt);
+            log.info("OpenAI evaluation successful");
+            return response;
+        } catch (Exception e) {
+            log.error("OpenAI evaluation failed: {} - Using mock evaluation", e.getMessage());
+            return getMockEvaluation(question, userAnswer);
+        }
+    }
+
+    /**
+     * Direct OpenAI API call without career coach system prompt
+     */
+    private String callOpenAIDirectly(String prompt) {
+        Map<String, Object> request = Map.of(
+            "model", model,
+            "messages", List.of(
+                Map.of("role", "system", "content", "Bạn là một chuyên gia phỏng vấn IT với nhiều năm kinh nghiệm. Hãy đánh giá câu trả lời một cách công bằng, chi tiết và hữu ích."),
+                Map.of("role", "user", "content", prompt)
+            ),
+            "max_tokens", 1000,
+            "temperature", 0.7
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(apiKey);
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<Map> response = restTemplate.postForEntity(
+            "https://api.openai.com/v1/chat/completions",
+            entity,
+            Map.class
+        );
+
+        Map<String, Object> body = response.getBody();
+        List<Map<String, Object>> choices = (List<Map<String, Object>>) body.get("choices");
+        Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+
+        return (String) message.get("content");
+    }
+
+    /**
+     * Generate AI-powered sample answer for interview question
+     */
+    public String generateInterviewAnswer(String question, String role, String experienceLevel) {
+        log.info("Generating AI answer for question: {}", question.substring(0, Math.min(50, question.length())));
+
+        boolean canUseOpenAI = apiKey != null && !apiKey.isBlank() &&
+                               openaiEnabled && !apiKey.contains("your-api-key");
+
+        String prompt = String.format("""
+            Bạn là một ứng viên IT đang phỏng vấn cho vị trí %s với level %s.
+            
+            📝 CÂU HỎI PHỎNG VẤN: %s
+
+            Hãy đưa ra một câu trả lời mẫu xuất sắc theo format sau:
+
+            💬 CÂU TRẢ LỜI MẪU:
+            [Viết câu trả lời hoàn chỉnh, tự nhiên như đang nói chuyện với interviewer]
+
+            🎯 PHÂN TÍCH CẤU TRÚC:
+            • Mở đầu: [giải thích cách mở đầu]
+            • Thân bài: [giải thích các điểm chính]
+            • Kết thúc: [giải thích cách kết thúc ấn tượng]
+
+            💡 MẸO GHI NHỚ:
+            • [2-3 tips ngắn gọn để nhớ cách trả lời]
+
+            Lưu ý:
+            - Câu trả lời phải phù hợp với level %s
+            - Sử dụng phương pháp STAR nếu là câu hỏi behavioral
+            - Đưa ra ví dụ cụ thể và thực tế
+            - Trả lời bằng tiếng Việt, tự nhiên và chuyên nghiệp
+            """, role, experienceLevel, question, experienceLevel);
+
+        if (!canUseOpenAI) {
+            log.info("OpenAI not available - using mock answer generation");
+            return getMockGeneratedAnswer(question, role, experienceLevel);
+        }
+
+        try {
+            log.info("Calling OpenAI to generate interview answer...");
+            
+            Map<String, Object> request = Map.of(
+                "model", model,
+                "messages", List.of(
+                    Map.of("role", "system", "content", "Bạn là một chuyên gia coaching phỏng vấn IT. Hãy đưa ra câu trả lời mẫu xuất sắc, thực tế và có thể áp dụng ngay."),
+                    Map.of("role", "user", "content", prompt)
+                ),
+                "max_tokens", 1200,
+                "temperature", 0.8
+            );
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(apiKey);
+
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
+
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                "https://api.openai.com/v1/chat/completions",
+                entity,
+                Map.class
+            );
+
+            Map<String, Object> body = response.getBody();
+            List<Map<String, Object>> choices = (List<Map<String, Object>>) body.get("choices");
+            Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+
+            log.info("OpenAI answer generation successful");
+            return (String) message.get("content");
+        } catch (Exception e) {
+            log.error("OpenAI answer generation failed: {} - Using mock", e.getMessage());
+            return getMockGeneratedAnswer(question, role, experienceLevel);
+        }
+    }
+
+    /**
+     * Mock generated answer when OpenAI is not available
+     */
+    private String getMockGeneratedAnswer(String question, String role, String experienceLevel) {
+        String questionLower = question.toLowerCase();
+        
+        if (questionLower.contains("yourself") || questionLower.contains("bản thân")) {
+            return String.format("""
+                💬 CÂU TRẢ LỜI MẪU:
+                "Xin chào, tôi là một %s với kinh nghiệm ở level %s. Trong thời gian qua, tôi đã làm việc với các công nghệ như [tech stack phù hợp với role]. 
+                
+                Điểm mạnh của tôi là khả năng giải quyết vấn đề và làm việc nhóm hiệu quả. Tôi đã từng tham gia dự án [mô tả dự án] và đạt được kết quả [kết quả cụ thể].
+                
+                Tôi rất hào hứng với cơ hội này vì [lý do phù hợp với công ty]."
+
+                🎯 PHÂN TÍCH CẤU TRÚC:
+                • Mở đầu: Giới thiệu ngắn gọn về bản thân và vị trí hiện tại
+                • Thân bài: Nêu điểm mạnh + ví dụ cụ thể từ kinh nghiệm
+                • Kết thúc: Liên kết với vị trí đang ứng tuyển
+
+                💡 MẸO GHI NHỚ:
+                • Chuẩn bị script 2 phút, luyện tập trước gương
+                • Focus vào achievements, không chỉ responsibilities
+                • Customize theo từng công ty bạn phỏng vấn
+                """, role, experienceLevel);
+        }
+        
+        if (questionLower.contains("why") || questionLower.contains("tại sao")) {
+            return """
+                💬 CÂU TRẢ LỜI MẪU:
+                "Tôi đã tìm hiểu về công ty và rất ấn tượng với [sản phẩm/văn hóa/giá trị của công ty]. 
+                
+                Đặc biệt, tôi thấy [điểm cụ thể về công ty] rất phù hợp với định hướng phát triển của tôi. 
+                
+                Với kinh nghiệm của mình trong [lĩnh vực liên quan], tôi tin rằng tôi có thể đóng góp vào [mục tiêu của công ty]."
+
+                🎯 PHÂN TÍCH CẤU TRÚC:
+                • Mở đầu: Cho thấy bạn đã research về công ty
+                • Thân bài: Liên kết giữa công ty và bản thân
+                • Kết thúc: Nêu giá trị bạn có thể mang lại
+
+                💡 MẸO GHI NHỚ:
+                • Research kỹ về công ty trước khi phỏng vấn
+                • Nêu điểm cụ thể, không nói chung chung
+                • Tránh nói về lương/benefits ở câu hỏi này
+                """;
+        }
+
+        return String.format("""
+            💬 CÂU TRẢ LỜI MẪU:
+            Đây là câu hỏi về: "%s"
+            
+            Một câu trả lời tốt cho vị trí %s level %s nên bao gồm:
+            1. Trả lời trực tiếp vào câu hỏi
+            2. Đưa ra ví dụ cụ thể từ kinh nghiệm
+            3. Liên kết với vị trí đang ứng tuyển
+
+            🎯 PHÂN TÍCH CẤU TRÚC:
+            • Sử dụng phương pháp STAR cho câu hỏi behavioral
+            • Nêu số liệu cụ thể nếu có thể
+            • Kết thúc bằng việc liên kết với role
+
+            💡 MẸO GHI NHỚ:
+            • Chuẩn bị 3-5 stories có thể dùng cho nhiều câu hỏi
+            • Practice với bạn bè hoặc trước gương
+            • Đăng nhập và bật OpenAI để nhận câu trả lời chi tiết hơn!
+            """, question, role, experienceLevel);
+    }
+
+    /**
+     * Mock evaluation when OpenAI is not available
+     */
+    private String getMockEvaluation(String question, String userAnswer) {
+        int wordCount = userAnswer.split("\\s+").length;
+        String lengthFeedback;
+        int baseScore;
+
+        if (wordCount < 10) {
+            lengthFeedback = "Câu trả lời quá ngắn, cần mở rộng thêm";
+            baseScore = 4;
+        } else if (wordCount < 30) {
+            lengthFeedback = "Độ dài câu trả lời ở mức trung bình";
+            baseScore = 6;
+        } else if (wordCount < 60) {
+            lengthFeedback = "Câu trả lời có độ dài tốt";
+            baseScore = 7;
+        } else {
+            lengthFeedback = "Câu trả lời chi tiết và đầy đủ";
+            baseScore = 8;
+        }
+
+        boolean hasExample = userAnswer.toLowerCase().contains("ví dụ") || 
+                            userAnswer.toLowerCase().contains("example") ||
+                            userAnswer.toLowerCase().contains("project");
+        boolean hasStructure = userAnswer.toLowerCase().contains("đầu tiên") || 
+                              userAnswer.toLowerCase().contains("first") ||
+                              userAnswer.toLowerCase().contains("thứ hai");
+
+        if (hasExample) baseScore += 1;
+        if (hasStructure) baseScore += 1;
+        baseScore = Math.min(baseScore, 10);
+
+        return String.format("""
+            ⭐ ĐIỂM MẠNH:
+            • %s
+            • Bạn đã trả lời đúng trọng tâm câu hỏi
+            %s
+
+            ⚠️ CẦN CẢI THIỆN:
+            • %s
+            • Nên thêm ví dụ cụ thể từ kinh nghiệm thực tế
+            • Sử dụng phương pháp STAR (Situation, Task, Action, Result) để trả lời có cấu trúc hơn
+
+            💡 GỢI Ý CÂU TRẢ LỜI TỐT HƠN:
+            • Bắt đầu bằng việc nêu bối cảnh cụ thể
+            • Mô tả hành động bạn đã thực hiện
+            • Kết thúc bằng kết quả đạt được (có số liệu nếu có thể)
+
+            📊 ĐÁNH GIÁ TỔNG THỂ: %d/10 điểm
+            %s. Hãy luyện tập thêm với các câu hỏi tương tự để cải thiện kỹ năng phỏng vấn!
+            """,
+            lengthFeedback,
+            hasExample ? "• Có đưa ra ví dụ minh họa" : "",
+            wordCount < 30 ? "Câu trả lời cần chi tiết hơn" : "Có thể tóm gọn hơn ở một số phần",
+            baseScore,
+            baseScore >= 7 ? "Câu trả lời khá tốt" : "Câu trả lời cần cải thiện thêm"
+        );
+    }
+
     private String chatWithOpenAI(String userMessage, String context) {
         String systemPrompt = """
             Bạn là AI Career Coach chuyên nghiệp của JobVerse - nền tảng tuyển dụng IT hàng đầu Việt Nam.
@@ -188,7 +478,11 @@ public class AIService {
     }
 
     private boolean matches(String text, String... keywords) {
-        return Arrays.stream(keywords).anyMatch(text::contains);
+        // Use word boundary matching to avoid partial matches (e.g., "help" matching "hey")
+        return Arrays.stream(keywords).anyMatch(keyword -> {
+            String pattern = "(?i)\\b" + java.util.regex.Pattern.quote(keyword) + "\\b";
+            return java.util.regex.Pattern.compile(pattern).matcher(text).find();
+        });
     }
 
     private String extractContextInsight(String context) {

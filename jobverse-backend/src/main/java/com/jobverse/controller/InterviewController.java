@@ -5,6 +5,7 @@ import com.jobverse.security.CurrentUser;
 import com.jobverse.security.UserPrincipal;
 import com.jobverse.service.InterviewPrepService;
 import com.jobverse.service.InterviewPrepService.AnswerEvaluation;
+import com.jobverse.service.InterviewPrepService.GeneratedAnswer;
 import com.jobverse.service.InterviewPrepService.InterviewQuestions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -82,6 +83,53 @@ public class InterviewController {
         AnswerEvaluation evaluation = interviewPrepService.evaluateAnswer(question, userAnswer);
 
         return ResponseEntity.ok(ApiResponse.success("Answer evaluated successfully", evaluation));
+    }
+
+    /**
+     * Generate AI-powered sample answer for an interview question
+     * POST /api/v1/interview/generate-answer
+     * Request body: { "question": "...", "role": "Frontend Developer", "experienceLevel": "MID" }
+     */
+    @PostMapping("/generate-answer")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<GeneratedAnswer>> generateAnswer(
+            @CurrentUser UserPrincipal currentUser,
+            @RequestBody Map<String, String> request
+    ) {
+        String question = request.get("question");
+        String role = request.getOrDefault("role", "Software Developer");
+        String experienceLevel = request.getOrDefault("experienceLevel", "JUNIOR");
+
+        if (question == null || question.trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("INVALID_INPUT", "Question is required"));
+        }
+
+        GeneratedAnswer generatedAnswer = interviewPrepService.generateSampleAnswer(question, role, experienceLevel);
+
+        return ResponseEntity.ok(ApiResponse.success("Sample answer generated successfully", generatedAnswer));
+    }
+
+    /**
+     * Guest endpoint - Generate AI-powered sample answer (limited)
+     * POST /api/v1/interview/generate-answer/guest
+     */
+    @PostMapping("/generate-answer/guest")
+    public ResponseEntity<ApiResponse<GeneratedAnswer>> generateAnswerGuest(
+            @RequestBody Map<String, String> request
+    ) {
+        String question = request.get("question");
+        String role = request.getOrDefault("role", "Software Developer");
+        String experienceLevel = request.getOrDefault("experienceLevel", "JUNIOR");
+
+        if (question == null || question.trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("INVALID_INPUT", "Question is required"));
+        }
+
+        GeneratedAnswer generatedAnswer = interviewPrepService.generateSampleAnswer(question, role, experienceLevel);
+
+        return ResponseEntity.ok(ApiResponse.success("Sample answer generated", generatedAnswer));
     }
 
     /**

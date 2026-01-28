@@ -418,7 +418,7 @@ public class JobService {
                 .isUrgent(job.getIsUrgent())
                 .videoIntroUrl(job.getVideoIntroUrl())
                 .viewCount(job.getViewCount())
-                .applicationCount(job.getApplicationCount())
+                .applicationCount((int) applicationRepository.countByJobId(job.getId()))
                 .skills(skills)
                 .benefits(benefits)
                 .createdAt(job.getCreatedAt())

@@ -20,43 +20,51 @@ public class NotificationService {
     
     @Async
     public void sendApplicationNotification(Application application) {
-        // Notify candidate
-        Notification candidateNotification = Notification.builder()
-                .user(application.getUser())
-                .type(Notification.NotificationType.APPLICATION)
-                .title("Đơn ứng tuyển đã được gửi")
-                .content("Bạn đã ứng tuyển thành công vị trí " + application.getJob().getTitle() + 
-                        " tại " + application.getJob().getCompany().getName())
-                .actionUrl("/applications/" + application.getId())
-                .build();
-        notificationRepository.save(candidateNotification);
-        
-        // Notify employer
-        Notification employerNotification = Notification.builder()
-                .user(application.getJob().getPostedBy())
-                .type(Notification.NotificationType.APPLICATION)
-                .title("Có ứng viên mới")
-                .content("Có ứng viên mới ứng tuyển vị trí " + application.getJob().getTitle())
-                .actionUrl("/employer/applications/" + application.getId())
-                .build();
-        notificationRepository.save(employerNotification);
-        
-        // Send emails
-        emailService.sendApplicationConfirmation(
-                application.getUser(),
-                application.getJob().getTitle(),
-                application.getJob().getCompany().getName()
-        );
-        
-        String candidateName = application.getUser().getProfile() != null ?
-                application.getUser().getProfile().getFullName() : application.getUser().getEmail();
-        emailService.sendNewApplicationNotification(
-                application.getJob().getPostedBy(),
-                candidateName,
-                application.getJob().getTitle()
-        );
-        
-        log.info("Application notifications sent for application: {}", application.getId());
+        try {
+            // Notify candidate
+            Notification candidateNotification = Notification.builder()
+                    .user(application.getUser())
+                    .type(Notification.NotificationType.APPLICATION)
+                    .title("Đơn ứng tuyển đã được gửi")
+                    .content("Bạn đã ứng tuyển thành công vị trí " + application.getJob().getTitle() + 
+                            " tại " + application.getJob().getCompany().getName())
+                    .actionUrl("/applications/" + application.getId())
+                    .build();
+            notificationRepository.save(candidateNotification);
+            
+            // Notify employer (if postedBy exists)
+            if (application.getJob().getPostedBy() != null) {
+                Notification employerNotification = Notification.builder()
+                        .user(application.getJob().getPostedBy())
+                        .type(Notification.NotificationType.APPLICATION)
+                        .title("Có ứng viên mới")
+                        .content("Có ứng viên mới ứng tuyển vị trí " + application.getJob().getTitle())
+                        .actionUrl("/employer/applications/" + application.getId())
+                        .build();
+                notificationRepository.save(employerNotification);
+                
+                // Send email to employer
+                String candidateName = application.getUser().getProfile() != null ?
+                        application.getUser().getProfile().getFullName() : application.getUser().getEmail();
+                emailService.sendNewApplicationNotification(
+                        application.getJob().getPostedBy(),
+                        candidateName,
+                        application.getJob().getTitle()
+                );
+            }
+            
+            // Send email to candidate
+            emailService.sendApplicationConfirmation(
+                    application.getUser(),
+                    application.getJob().getTitle(),
+                    application.getJob().getCompany().getName()
+            );
+            
+            log.info("Application notifications sent for application: {}", application.getId());
+        } catch (Exception e) {
+            log.error("Error sending application notification: {}", e.getMessage(), e);
+            // Don't throw - notification failure shouldn't fail the application
+        }
     }
     
     @Async

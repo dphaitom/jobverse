@@ -47,8 +47,8 @@ public class ApplicationService {
             throw new RuntimeException("You have already applied for this job");
         }
 
-        // Get job
-        Job job = jobRepository.findById(request.getJobId())
+        // Get job with company and postedBy eagerly loaded (for async notifications)
+        Job job = jobRepository.findByIdWithCompanyAndPostedBy(request.getJobId())
                 .orElseThrow(() -> new RuntimeException("Job not found"));
 
         // Get resume if provided
@@ -104,8 +104,8 @@ public class ApplicationService {
             throw new RuntimeException("You have already applied for this job");
         }
 
-        // Get job
-        Job job = jobRepository.findById(jobId)
+        // Get job with company and postedBy eagerly loaded (for async notifications)
+        Job job = jobRepository.findByIdWithCompanyAndPostedBy(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
 
         // Get user's primary resume

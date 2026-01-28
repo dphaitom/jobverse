@@ -83,7 +83,7 @@ const AICVRankingPage = () => {
       <Navbar />
       
       <main className="px-4 pt-24 pb-16">
-        <div className="max-w-7xl mx-auto">
+        <div className="mx-auto max-w-7xl">
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
@@ -97,11 +97,11 @@ const AICVRankingPage = () => {
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className="grid gap-6 lg:grid-cols-3">
             {/* Job Selection */}
             <div className="lg:col-span-1">
-              <div className="glass-card rounded-2xl p-5">
-                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <div className="p-5 glass-card rounded-2xl">
+                <h2 className="flex items-center gap-2 mb-4 text-lg font-semibold text-white">
                   <Briefcase className="w-5 h-5 text-violet-400" />
                   Chọn vị trí tuyển dụng
                 </h2>
@@ -139,15 +139,15 @@ const AICVRankingPage = () => {
 
             {/* Applications Ranking */}
             <div className="lg:col-span-2">
-              <div className="glass-card rounded-2xl p-5">
+              <div className="p-5 glass-card rounded-2xl">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
                     <ArrowUpDown className="w-5 h-5 text-violet-400" />
                     Xếp hạng ứng viên
                   </h2>
                   
                   {selectedJob && (
-                    <span className="px-3 py-1 text-sm bg-violet-500/20 text-violet-300 rounded-full">
+                    <span className="px-3 py-1 text-sm rounded-full bg-violet-500/20 text-violet-300">
                       {applications.length} ứng viên
                     </span>
                   )}
@@ -165,7 +165,7 @@ const AICVRankingPage = () => {
                     {applications.map((app, index) => (
                       <div
                         key={app.id}
-                        className="flex items-center gap-4 p-4 rounded-xl bg-gray-800/30 hover:bg-gray-800/50 transition-colors"
+                        className="flex items-center gap-4 p-4 transition-colors rounded-xl bg-gray-800/30 hover:bg-gray-800/50"
                       >
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
                           index === 0 ? 'bg-yellow-500 text-black' :
@@ -225,12 +225,12 @@ const AICVRankingPage = () => {
 
                 {/* AI Analysis Note */}
                 {selectedJob && applications.length > 0 && (
-                  <div className="mt-6 p-4 rounded-xl bg-violet-500/10 border border-violet-500/20">
+                  <div className="p-4 mt-6 border rounded-xl bg-violet-500/10 border-violet-500/20">
                     <div className="flex items-start gap-3">
                       <Sparkles className="w-5 h-5 text-violet-400 mt-0.5" />
                       <div>
                         <h4 className="font-medium text-violet-300">Phân tích AI</h4>
-                        <p className="text-sm text-gray-400 mt-1">
+                        <p className="mt-1 text-sm text-gray-400">
                           Hệ thống AI đang phân tích CV và kinh nghiệm của ứng viên để đưa ra xếp hạng phù hợp nhất với yêu cầu công việc.
                         </p>
                       </div>
